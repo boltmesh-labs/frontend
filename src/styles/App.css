@@ -1,0 +1,75 @@
+/* --- Global Variables (Light Theme / Default) --- */
+:root {
+  --bs-primary: #0d6efd;
+  --bs-body-color: #34495e;
+  --bs-body-bg: #eff4f5;
+  --app-accent: #6610f2;
+  --card-bg: #f5f5f5;
+  --border-color: #e2e8f0;
+
+  /* Mapped App Aliases */
+  --app-text: var(--bs-body-color);
+  --app-bg: var(--bs-body-bg);
+}
+
+/* --- Dark Theme Rules (Manual Toggle: [data-bs-theme="dark"] or [data-theme="dark"]) --- */
+[data-bs-theme='dark'],
+[data-theme='dark'] {
+  --bs-primary: #3d8bfd;
+  --bs-body-color: #e2e8f0;
+  --bs-body-bg: #0f172a;
+  --app-accent: #8247e5;
+  --card-bg: #1e293b;
+  --border-color: #334155;
+}
+
+/* --- System Preference Automatic Dark Mode (Optional Fallback) --- */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']):not([data-bs-theme='light']) {
+    --bs-primary: #3d8bfd;
+    --bs-body-color: #e2e8f0;
+    --bs-body-bg: #0f172a;
+    --app-accent: #8247e5;
+    --card-bg: #1e293b;
+    --border-color: #334155;
+  }
+}
+
+/* --- Base Styles --- */
+body {
+  background-color: var(--app-bg);
+  color: var(--app-text);
+  font-family:
+    'Inter',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+/* Subtle, modern display tight-tracking look for all headers */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  letter-spacing: -0.02em;
+}
+
+/* --- Layout Frame --- */
+.App {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.btn-primary {
+  background-color: var(--bs-primary);
+  border-color: var(--bs-primary);
+}

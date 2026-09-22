@@ -1,0 +1,4 @@
+# Ignored: React Router CSRF advisory. Not exploitable because this application
+# is deployed as a static client-side SPA (Vite + React) and does not utilize
+# React Server Components (RSC).
+GHSA-qwww-vcr4-c8h2

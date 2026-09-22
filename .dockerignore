@@ -1,0 +1,12 @@
+# Keep the build context small and secret-free: without this, COPY . . ships
+# hundreds of MB of node_modules plus local state and .env files into every
+# image layer and invalidates cache on every dependency change.
+node_modules
+dist
+coverage
+.git
+.env
+.env.*
+!.env.example
+*.log
+.eslintcache
