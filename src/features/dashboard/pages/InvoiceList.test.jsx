@@ -51,9 +51,12 @@ describe('InvoiceList (dashboard)', () => {
     renderPage();
 
     expect(screen.getByRole('heading', { name: /invoices & billing/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'inv1' })).toHaveAttribute('href', '/invoices/inv1');
-    expect(screen.getByText('Pro')).toBeInTheDocument();
-    expect(screen.getByText('Plan #missing')).toBeInTheDocument();
+    expect(screen.getAllByRole('link', { name: 'inv1' })[0]).toHaveAttribute(
+      'href',
+      '/invoices/inv1'
+    );
+    expect(screen.getAllByText('Pro')).toHaveLength(2);
+    expect(screen.getAllByText('Plan #missing')).toHaveLength(2);
   });
 
   it('surfaces API failures through the shared alert', () => {

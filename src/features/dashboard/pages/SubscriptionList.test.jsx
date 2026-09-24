@@ -61,8 +61,8 @@ describe('SubscriptionList (dashboard)', () => {
     renderPage();
 
     expect(screen.getByText('Total Subscriptions')).toBeInTheDocument();
-    expect(screen.getByText('Pro')).toBeInTheDocument();
-    expect(screen.getByText('Starter')).toBeInTheDocument();
+    expect(screen.getAllByText('Pro')).toHaveLength(2);
+    expect(screen.getAllByText('Starter')).toHaveLength(2);
 
     await user.click(screen.getAllByRole('button', { name: /details/i })[0]);
   });
@@ -90,6 +90,6 @@ describe('SubscriptionList (dashboard)', () => {
     });
     renderPage();
 
-    expect(screen.getByText(/no active or past subscriptions found/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/no active or past subscriptions found/i)).toHaveLength(2);
   });
 });

@@ -73,3 +73,33 @@ h6 {
   background-color: var(--bs-primary);
   border-color: var(--bs-primary);
 }
+
+.min-w-0 {
+  min-width: 0;
+}
+
+@media (max-width: 767.98px) {
+  .mobile-hidden-table {
+    display: none;
+  }
+}
+
+/* Keep two-column detail metadata readable on narrow screens. */
+@media (max-width: 575.98px) {
+  .detail-table {
+    table-layout: fixed;
+  }
+
+  .detail-table td {
+    width: 42%;
+    word-break: break-word;
+  }
+
+  .detail-table td:last-child {
+    width: 58%;
+  }
+
+  .detail-table td.text-end {
+    text-align: left !important;
+  }
+}

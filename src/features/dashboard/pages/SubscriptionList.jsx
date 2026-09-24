@@ -10,6 +10,7 @@ import { formatCurrencyAmount } from '@/utils/currencyFormatter';
 import { formatDate } from '@/utils/dateFormatter';
 import { StatusAlert } from '@/components/StatusAlert';
 import { DataTable } from '@/components/DataTable';
+import { MobileRecordCard } from '@/components/MobileRecordCard';
 import { COMPANY_NAME } from '@/utils/config';
 
 const TABLE_COLUMNS = [
@@ -57,6 +58,34 @@ const SubscriptionList = () => {
           </Button>
         </td>
       </tr>
+    ),
+    [navigate]
+  );
+
+  const renderMobileItem = useCallback(
+    (sub) => (
+      <MobileRecordCard
+        title={sub.plan?.name}
+        items={[
+          {
+            label: 'Billing cycle',
+            value: <span className="text-capitalize">{sub.plan?.billing_cycle}</span>,
+          },
+          { label: 'Price', value: formatCurrencyAmount(sub.plan?.price_usd, 'USD') },
+          { label: 'Status', value: <SubscriptionStatusBadge status={sub.status} /> },
+          { label: 'Expires on', value: formatDate(sub.expires_at) },
+        ]}
+        actions={
+          <Button
+            variant="outline-primary"
+            size="sm"
+            className="fw-bold rounded-3"
+            onClick={() => navigate(`/subscriptions/${sub.id}`)}
+          >
+            Details
+          </Button>
+        }
+      />
     ),
     [navigate]
   );
@@ -113,6 +142,7 @@ const SubscriptionList = () => {
         columns={TABLE_COLUMNS}
         data={subscriptions}
         renderRow={renderSubscriptionRow}
+        renderMobileItem={renderMobileItem}
         emptyMessage="No active or past subscriptions found."
       />
     </DashboardContainer>

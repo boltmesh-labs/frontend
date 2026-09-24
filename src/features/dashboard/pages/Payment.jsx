@@ -138,7 +138,7 @@ const Payment = () => {
               We could not load this invoice. It may no longer be pending or may belong to another
               account.
             </Alert>
-            <div className="d-flex justify-content-center gap-2">
+            <div className="d-flex flex-column flex-sm-row justify-content-center gap-2">
               <Button as={Link} to="/invoices" variant="outline-primary" className="fw-bold px-3">
                 My Invoices
               </Button>

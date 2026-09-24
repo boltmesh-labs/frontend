@@ -6,6 +6,7 @@ import { getPaginationTotals } from '@/utils/pagination';
 import { usePlanMap } from '@/hooks/usePlanMap';
 import { usePublicPlans, useUserInvoices } from '@/features/dashboard/hooks/useDashboard';
 import { DataTable } from '@/components/DataTable';
+import { MobileRecordCard } from '@/components/MobileRecordCard';
 import { DefaultPagination } from '@/components/DefaultPagination';
 import { StatusAlert } from '@/components/StatusAlert';
 import { InvoiceStatusBadge } from '@/components/InvoiceStatusBadge';
@@ -22,6 +23,23 @@ const TABLE_COLUMNS = [
   { header: 'Status' },
   { header: 'Date' },
 ];
+
+const InvoiceMobileCard = ({ inv, planMap }) => {
+  const planName = planMap.get(inv.plan_id)?.name;
+
+  return (
+    <MobileRecordCard
+      title={inv.id}
+      titleHref={`/invoices/${inv.id}`}
+      subtitle={planName || `Plan #${inv.plan_id}`}
+      items={[
+        { label: 'Payment method', value: getMethodDisplay(inv.payment_method) },
+        { label: 'Status', value: <InvoiceStatusBadge status={inv.status} /> },
+        { label: 'Date', value: formatDate(inv.created_at) },
+      ]}
+    />
+  );
+};
 
 const InvoiceRow = React.memo(({ inv, planMap }) => {
   const planName = planMap.get(inv.plan_id)?.name;
@@ -65,6 +83,11 @@ const InvoiceList = () => {
     [planMap]
   );
 
+  const renderMobileItem = useCallback(
+    (inv) => <InvoiceMobileCard inv={inv} planMap={planMap} />,
+    [planMap]
+  );
+
   return (
     <DashboardContainer>
       <DashboardHeader
@@ -79,6 +102,7 @@ const InvoiceList = () => {
         data={invoices}
         loading={isLoading}
         renderRow={renderRow}
+        renderMobileItem={renderMobileItem}
       />
 
       <DefaultPagination

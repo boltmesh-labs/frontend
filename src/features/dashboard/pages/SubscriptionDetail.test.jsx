@@ -94,8 +94,8 @@ describe('SubscriptionDetail (dashboard)', () => {
 
     expect(screen.getByRole('heading', { name: /subscription details/i })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Pro' })).toBeInTheDocument();
-    expect(screen.getByText('inv1')).toBeInTheDocument();
-    expect(screen.getByText('phone')).toBeInTheDocument();
+    expect(screen.getAllByText('inv1')).toHaveLength(2);
+    expect(screen.getAllByText('phone')).toHaveLength(2);
     expect(screen.getByText(/slots: 1 \/ 3/i)).toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: /extend plan/i }));

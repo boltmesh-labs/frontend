@@ -21,6 +21,7 @@ import { PaymentStatusBadge } from '@/components/PaymentStatusBadge';
 import { DetailShell } from '@/components/DetailShell';
 import { SectionCard } from '@/components/SectionCard';
 import { DataTable } from '@/components/DataTable';
+import { MobileRecordCard } from '@/components/MobileRecordCard';
 import { DashboardContainer } from '@/features/dashboard/components/DashboardContainer';
 import { DashboardHeader } from '../components/DashboardHeader';
 import { COMPANY_NAME } from '@/utils/config';
@@ -152,6 +153,41 @@ const InvoiceDetail = () => {
     [currency]
   );
 
+  const renderMobilePayment = useCallback(
+    (payment) => (
+      <MobileRecordCard
+        title={payment.external_tx_id || 'Payment'}
+        items={[
+          { label: 'Amount', value: formatCurrencyAmount(payment.amount, currency) },
+          { label: 'Status', value: <PaymentStatusBadge status={payment.status} /> },
+          { label: 'Date', value: formatDate(payment.created_at) },
+          ...(typeof payment.confirmations === 'number'
+            ? [{ label: 'Confirmations', value: payment.confirmations }]
+            : []),
+          ...(payment.fee > 0
+            ? [{ label: 'Fee', value: formatCurrencyAmount(payment.fee, currency) }]
+            : []),
+        ]}
+        actions={
+          payment.external_tx_id ? (
+            <Button
+              variant="outline-secondary"
+              size="sm"
+              onClick={() =>
+                copyToClipboard(payment.external_tx_id, {
+                  success: 'Transaction ID copied!',
+                })
+              }
+            >
+              Copy transaction ID
+            </Button>
+          ) : null
+        }
+      />
+    ),
+    [currency]
+  );
+
   const normalizedStatus = invoice?.status?.toLowerCase() || '';
   const isPending = normalizedStatus === INVOICE_STATUSES.pending;
   const isPaid = normalizedStatus === INVOICE_STATUSES.paid;
@@ -189,7 +225,7 @@ const InvoiceDetail = () => {
           backTo="/invoices"
           rightAction={
             (canPay || isCancellable) && (
-              <div className="d-flex gap-2">
+              <div className="d-flex flex-wrap gap-2">
                 {canPay && (
                   <Button
                     variant="primary"
@@ -237,7 +273,7 @@ const InvoiceDetail = () => {
             </div>
           </div>
 
-          <Table responsive borderless className="align-middle m-0 small">
+          <Table responsive borderless className="align-middle m-0 small detail-table">
             <tbody>
               <tr>
                 <td className="text-secondary py-2">Plan</td>
@@ -416,6 +452,7 @@ const InvoiceDetail = () => {
             columns={PAYMENT_TABLE_COLUMNS}
             data={payments}
             renderRow={renderPaymentRow}
+            renderMobileItem={renderMobilePayment}
             emptyMessage="No payment attempts found for this invoice."
           />
         </SectionCard>

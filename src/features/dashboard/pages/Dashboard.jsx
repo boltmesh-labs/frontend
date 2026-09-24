@@ -176,7 +176,7 @@ const Dashboard = () => {
       {user && (
         <>
           <Card className="border-0 p-3 bg-body-tertiary shadow-sm rounded-3 mb-3 text-start">
-            <div className="d-flex align-items-center gap-3">
+            <div className="d-flex align-items-center gap-3 min-w-0">
               <div
                 className="bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center fw-bold fs-5 flex-shrink-0"
                 style={{ width: 44, height: 44 }}
@@ -216,7 +216,7 @@ const Dashboard = () => {
               className="border-0 shadow-sm bg-body-tertiary text-start text-decoration-none"
             >
               <Card.Body className="p-3 d-flex align-items-center justify-content-between">
-                <div className="d-flex align-items-center gap-3">
+                <div className="d-flex align-items-center gap-3 min-w-0">
                   <div className="fs-4 p-2">📅</div>
                   <div>
                     <h6 className="fw-bold text-body-emphasis mb-0">Subscriptions</h6>
@@ -225,7 +225,7 @@ const Dashboard = () => {
                     </p>
                   </div>
                 </div>
-                <span className="text-body-secondary fw-bold fs-5">➔</span>
+                <span className="text-body-secondary fw-bold fs-5 flex-shrink-0">➔</span>
               </Card.Body>
             </Card>
 
@@ -238,7 +238,7 @@ const Dashboard = () => {
               }`}
             >
               <Card.Body className="p-3 d-flex align-items-center justify-content-between">
-                <div className="d-flex align-items-center gap-3">
+                <div className="d-flex align-items-center gap-3 min-w-0">
                   <div className="fs-4 p-2">📱</div>
                   <div>
                     <h6 className="fw-bold text-body-emphasis mb-0">VPN Devices</h6>
@@ -250,7 +250,7 @@ const Dashboard = () => {
                   </div>
                 </div>
                 {activeSubscription?.plan && (
-                  <span className="text-body-secondary fw-bold fs-5">➔</span>
+                  <span className="text-body-secondary fw-bold fs-5 flex-shrink-0">➔</span>
                 )}
               </Card.Body>
             </Card>
@@ -261,7 +261,7 @@ const Dashboard = () => {
               className="border-0 shadow-sm bg-body-tertiary text-start text-decoration-none"
             >
               <Card.Body className="p-3 d-flex align-items-center justify-content-between">
-                <div className="d-flex align-items-center gap-3">
+                <div className="d-flex align-items-center gap-3 min-w-0">
                   <div className="fs-4 p-2">📄</div>
                   <div>
                     <h6 className="fw-bold text-body-emphasis mb-0">Billing & Invoices</h6>
@@ -270,7 +270,7 @@ const Dashboard = () => {
                     </p>
                   </div>
                 </div>
-                <span className="text-body-secondary fw-bold fs-5">➔</span>
+                <span className="text-body-secondary fw-bold fs-5 flex-shrink-0">➔</span>
               </Card.Body>
             </Card>
 
@@ -280,7 +280,7 @@ const Dashboard = () => {
               className="border-0 shadow-sm bg-body-tertiary text-start text-decoration-none"
             >
               <Card.Body className="p-3 d-flex align-items-center justify-content-between">
-                <div className="d-flex align-items-center gap-3">
+                <div className="d-flex align-items-center gap-3 min-w-0">
                   <div className="fs-4 p-2">👤</div>
                   <div>
                     <h6 className="fw-bold text-body-emphasis mb-0">Account Settings</h6>
@@ -289,7 +289,7 @@ const Dashboard = () => {
                     </p>
                   </div>
                 </div>
-                <span className="text-body-secondary fw-bold fs-5">➔</span>
+                <span className="text-body-secondary fw-bold fs-5 flex-shrink-0">➔</span>
               </Card.Body>
             </Card>
           </div>

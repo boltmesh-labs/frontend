@@ -208,7 +208,7 @@ const Checkout = () => {
 
               <h6 className="fw-bold text-uppercase text-muted small mb-2">Order Summary</h6>
               <div className="bg-body-tertiary p-3 rounded border mb-4">
-                <div className="d-flex justify-content-between align-items-center mb-1">
+                <div className="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-1">
                   <span className="text-body fw-bold">{plan.name}</span>
                   <span className="text-body font-monospace fw-bold text-end">
                     {convertedFiatPrice !== null
@@ -249,7 +249,7 @@ const Checkout = () => {
                 Select Payment Method
               </h6>
               <Row className="g-2 mb-3">
-                <Col xs={6}>
+                <Col xs={12} sm={6}>
                   <Button
                     variant={paymentMethod === 'lightning' ? 'primary' : 'outline-secondary'}
                     className="w-100 py-3 rounded-3 d-flex flex-column align-items-center justify-content-center border"
@@ -260,7 +260,7 @@ const Checkout = () => {
                     <span className="fw-bold small">Bitcoin (Lightning)</span>
                   </Button>
                 </Col>
-                <Col xs={6}>
+                <Col xs={12} sm={6}>
                   <Button
                     variant={paymentMethod === 'monero' ? 'primary' : 'outline-secondary'}
                     className="w-100 py-3 rounded-3 d-flex flex-column align-items-center justify-content-center border"
@@ -281,12 +281,12 @@ const Checkout = () => {
                 </small>
               </div>
 
-              <div className="bg-body-tertiary p-3 rounded border mb-4 d-flex justify-content-between align-items-center">
+              <div className="bg-body-tertiary p-3 rounded border mb-4 d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2">
                 <div>
                   <span className="text-body fw-bold d-block small">Total Due</span>
                   <span className="text-muted small">Estimated Settlement</span>
                 </div>
-                <div className="text-end">
+                <div className="text-start text-sm-end">
                   <div className="text-primary fw-bold font-monospace fs-5">
                     {estimatedCryptoAmount}
                   </div>

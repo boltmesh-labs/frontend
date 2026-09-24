@@ -39,11 +39,11 @@ export const DefaultPagination = ({
   };
 
   return (
-    <div className="d-flex justify-content-between align-items-center mt-4 px-1">
-      <span className="text-muted small">
+    <div className="d-flex flex-column flex-sm-row justify-content-between align-items-center gap-3 mt-4 px-1">
+      <span className="text-muted small text-center text-sm-start">
         Showing {startCount}–{endCount} of {totalCount}
       </span>
-      <Pagination className="shadow-sm rounded-3 m-0">
+      <Pagination className="shadow-sm rounded-3 m-0 flex-wrap justify-content-center">
         <Pagination.Prev
           disabled={currentPage === 1 || loading}
           onClick={() => onPageChange(Math.max(currentPage - 1, 1))}

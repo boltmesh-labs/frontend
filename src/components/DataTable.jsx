@@ -5,11 +5,13 @@ export const DataTable = ({
   columns,
   data,
   renderRow,
+  renderMobileItem,
   loading = false,
   emptyMessage = 'No records found matching your request.',
   loadingMessage = 'Synchronizing records...',
 }) => {
   const hasData = Array.isArray(data) && data.length > 0;
+  const hasMobileRenderer = typeof renderMobileItem === 'function';
 
   return (
     <Card className="border-0 shadow-sm overflow-hidden position-relative bg-body-tertiary mb-4">
@@ -23,35 +25,60 @@ export const DataTable = ({
           <p className="text-muted small m-0">{loadingMessage}</p>
         </div>
       ) : (
-        <Table responsive hover className="align-middle mb-0 small">
-          <thead className="text-uppercase small text-secondary">
-            <tr>
-              {columns.map((col, idx) => {
-                // Stable identity per column: an explicit `key` wins, then the
-                // header text (unique within every current table config —
-                // verified), then position as a last resort. Dynamic tables
-                // that reorder or repeat headers must set `key` explicitly.
-                const columnKey = col.key ?? col.header ?? idx;
-                return (
-                  <th key={columnKey} scope="col" className={col.className || ''} style={col.style}>
-                    {col.header}
-                  </th>
-                );
-              })}
-            </tr>
-          </thead>
-          <tbody className="small">
-            {hasData ? (
-              data.map((item, index) => renderRow(item, index))
-            ) : (
+        <>
+          {hasMobileRenderer && (
+            <div className="d-md-none">
+              {hasData ? (
+                data.map((item, index) => (
+                  <div className="border-bottom" key={item.id ?? index}>
+                    {renderMobileItem(item, index)}
+                  </div>
+                ))
+              ) : (
+                <div className="text-center text-muted py-4 px-3 small">{emptyMessage}</div>
+              )}
+            </div>
+          )}
+
+          <Table
+            responsive
+            hover
+            className={`align-middle mb-0 small ${hasMobileRenderer ? 'mobile-hidden-table' : ''}`}
+          >
+            <thead className="text-uppercase small text-secondary">
               <tr>
-                <td colSpan={columns.length} className="text-center text-muted py-4 small">
-                  {emptyMessage}
-                </td>
+                {columns.map((col, idx) => {
+                  // Stable identity per column: an explicit `key` wins, then the
+                  // header text (unique within every current table config —
+                  // verified), then position as a last resort. Dynamic tables
+                  // that reorder or repeat headers must set `key` explicitly.
+                  const columnKey = col.key ?? col.header ?? idx;
+                  return (
+                    <th
+                      key={columnKey}
+                      scope="col"
+                      className={col.className || ''}
+                      style={col.style}
+                    >
+                      {col.header}
+                    </th>
+                  );
+                })}
               </tr>
-            )}
-          </tbody>
-        </Table>
+            </thead>
+            <tbody className="small">
+              {hasData ? (
+                data.map((item, index) => renderRow(item, index))
+              ) : (
+                <tr>
+                  <td colSpan={columns.length} className="text-center text-muted py-4 small">
+                    {emptyMessage}
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </Table>
+        </>
       )}
     </Card>
   );

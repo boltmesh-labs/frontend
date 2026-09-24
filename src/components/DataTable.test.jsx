@@ -36,6 +36,34 @@ describe('DataTable', () => {
     expect(screen.getByText('Beta')).toBeInTheDocument();
   });
 
+  it('renders a mobile card representation when provided', () => {
+    render(
+      <DataTable
+        columns={COLUMNS}
+        data={DATA}
+        renderRow={renderRow}
+        renderMobileItem={(item) => <div>Mobile {item.name}</div>}
+      />
+    );
+
+    expect(screen.getByText('Mobile Alpha')).toBeInTheDocument();
+    expect(screen.getByText('Mobile Beta')).toBeInTheDocument();
+  });
+
+  it('shows the mobile empty message when there is no data', () => {
+    render(
+      <DataTable
+        columns={COLUMNS}
+        data={[]}
+        renderRow={renderRow}
+        renderMobileItem={(item) => <div>Mobile {item.name}</div>}
+        emptyMessage="Nothing mobile here."
+      />
+    );
+
+    expect(screen.getAllByText('Nothing mobile here.')).toHaveLength(2);
+  });
+
   it('shows the full spinner state during initial load', () => {
     render(
       <DataTable

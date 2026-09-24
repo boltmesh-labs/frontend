@@ -92,7 +92,7 @@ describe('InvoiceDetail (dashboard)', () => {
     expect(screen.getByRole('heading', { name: /invoice details/i })).toBeInTheDocument();
     expect(screen.getByText('Pro')).toBeInTheDocument();
     expect(screen.getByText('bc1q-addr')).toBeInTheDocument();
-    expect(screen.getByText('tx-1')).toBeInTheDocument();
+    expect(screen.getAllByText('tx-1')).toHaveLength(2);
 
     await user.click(screen.getByRole('button', { name: /^pay$/i }));
     expect(await screen.findByText('Payment page')).toBeInTheDocument();

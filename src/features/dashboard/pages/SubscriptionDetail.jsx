@@ -13,6 +13,7 @@ import {
 import { DetailShell } from '@/components/DetailShell';
 import { SectionCard } from '@/components/SectionCard';
 import { DataTable } from '@/components/DataTable';
+import { MobileRecordCard } from '@/components/MobileRecordCard';
 import { DashboardContainer } from '@/features/dashboard/components/DashboardContainer';
 import { DashboardHeader } from '../components/DashboardHeader';
 import { formatCurrencyAmount } from '@/utils/currencyFormatter';
@@ -114,6 +115,37 @@ const SubscriptionDetail = () => {
     []
   );
 
+  const renderMobileInvoice = useCallback(
+    (invoice) => (
+      <MobileRecordCard
+        title={invoice.id}
+        titleHref={`/invoices/${invoice.id}`}
+        items={[
+          {
+            label: 'Amount',
+            value: formatCurrencyAmount(invoice.amount_requested, invoice.currency),
+          },
+          { label: 'Status', value: <InvoiceStatusBadge status={invoice.status} /> },
+          { label: 'Date', value: formatDate(invoice.created_at) },
+        ]}
+      />
+    ),
+    []
+  );
+
+  const renderMobileDevice = useCallback(
+    (device) => (
+      <MobileRecordCard
+        title={device.name}
+        items={[
+          { label: 'Platform', value: getPlatformLabel(device.platform) },
+          { label: 'Created', value: formatDate(device.created_at) },
+        ]}
+      />
+    ),
+    []
+  );
+
   const normalizedStatus = subscription?.status?.toLowerCase() || '';
 
   const canRenew =
@@ -151,7 +183,7 @@ const SubscriptionDetail = () => {
           subtitle="Manage plan options, billing terms, and renewal configurations."
           backTo="/subscriptions"
           rightAction={
-            <div className="d-flex gap-2">
+            <div className="d-flex flex-wrap gap-2">
               {canRenew && (
                 <Button
                   variant="outline-primary"
@@ -191,7 +223,7 @@ const SubscriptionDetail = () => {
             </div>
           </div>
 
-          <Table responsive borderless className="align-middle m-0 small">
+          <Table responsive borderless className="align-middle m-0 small detail-table">
             <tbody>
               <tr>
                 <td className="text-secondary py-2">Plan Price</td>
@@ -268,6 +300,7 @@ const SubscriptionDetail = () => {
             data={invoices}
             loading={isInvoicesLoading}
             renderRow={renderInvoiceRow}
+            renderMobileItem={renderMobileInvoice}
             emptyMessage="No associated invoices found for this subscription."
           />
         </SectionCard>
@@ -289,6 +322,7 @@ const SubscriptionDetail = () => {
               data={devices}
               loading={isDevicesLoading}
               renderRow={renderDeviceRow}
+              renderMobileItem={renderMobileDevice}
               emptyMessage="No active devices connected to this subscription."
             />
           </SectionCard>
