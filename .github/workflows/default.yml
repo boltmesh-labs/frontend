@@ -47,6 +47,17 @@ jobs:
       - name: Run End-to-End Tests
         run: npm run test:e2e
 
+      - name: Upload Playwright failure artifacts
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-artifacts
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 7
+
       - name: Build and verify production environment
         env:
           VITE_API_URL: https://api.ci.example/v1
