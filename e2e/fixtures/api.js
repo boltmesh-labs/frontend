@@ -37,6 +37,15 @@ const registerJsonRoute = async (page, config, resolveResponse) => {
 
   await page.route(getApiPathPattern(path), async (route) => {
     const request = route.request();
+
+    // Pages routinely read and write the same collection (GET /users then
+    // PATCH /users). A mock must only claim the verb it declared, otherwise the
+    // most recently registered one shadows every other handler for that path.
+    if (request.method() !== method) {
+      await route.fallback();
+      return;
+    }
+
     seenQueries.push(toQueryObject(request.url()));
 
     expect(request.method(), `Unexpected HTTP method for ${method} ${path}`).toBe(method);

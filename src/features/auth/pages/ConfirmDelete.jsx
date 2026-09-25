@@ -28,7 +28,7 @@ const ConfirmDelete = () => {
   );
 
   const { mutate: confirmDeletion } = useConfirmAccountDeletion();
-  const { setToken } = useAuth();
+  const { setAccessToken } = useAuth();
 
   useEffect(() => {
     if (!token || hasExecutedRef.current) return;
@@ -41,7 +41,7 @@ const ConfirmDelete = () => {
         // context's in-memory token before the delayed login navigation so a
         // still-mounted PublicRoute (or API client) cannot retain the old
         // authenticated session.
-        setToken(null);
+        setAccessToken(null);
         setSuccessMessage('Your account has been deleted. Redirecting to login...');
       },
       onError: (error) => {
@@ -53,7 +53,7 @@ const ConfirmDelete = () => {
         setIsLoading(false);
       },
     });
-  }, [token, confirmDeletion, setToken]);
+  }, [token, confirmDeletion, setAccessToken]);
 
   useEffect(() => {
     if (isLoading) return;

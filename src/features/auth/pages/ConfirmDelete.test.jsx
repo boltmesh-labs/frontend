@@ -11,13 +11,13 @@ vi.mock('@/features/auth/hooks/useAuthMutations', () => ({
   useConfirmAccountDeletion: vi.fn(),
 }));
 
-const renderAt = (search = '', setToken = vi.fn()) =>
+const renderAt = (search = '', setAccessToken = vi.fn()) =>
   render(
     <AuthContext.Provider
       value={{
         accessToken: 'existing-session',
         loading: false,
-        setToken,
+        setAccessToken,
       }}
     >
       <MemoryRouter initialEntries={[`/confirm-delete${search}`]}>
@@ -57,8 +57,8 @@ describe('ConfirmDelete', () => {
   });
 
   it('clears the authenticated context before returning to login after the delay', async () => {
-    const setToken = vi.fn();
-    renderAt('?token=tok-1', setToken);
+    const setAccessToken = vi.fn();
+    renderAt('?token=tok-1', setAccessToken);
 
     const opts = mutate.mock.calls[0][1];
     act(() => {
@@ -66,7 +66,7 @@ describe('ConfirmDelete', () => {
       opts.onSettled();
     });
 
-    expect(setToken).toHaveBeenCalledWith(null);
+    expect(setAccessToken).toHaveBeenCalledWith(null);
     expect(screen.getByText(/account has been deleted/i)).toBeInTheDocument();
     await act(async () => {
       await vi.advanceTimersByTimeAsync(2500);
