@@ -20,8 +20,14 @@ export const DataTable = ({
 
       {/* Full spinner state when initial data is loading */}
       {loading && !hasData ? (
-        <div className="text-center py-5">
-          <Spinner animation="border" variant="primary" className="mb-2" />
+        <div
+          role="status"
+          aria-live="polite"
+          aria-busy="true"
+          aria-label={loadingMessage}
+          className="text-center py-5"
+        >
+          <Spinner animation="border" variant="primary" className="mb-2" aria-hidden="true" />
           <p className="text-muted small m-0">{loadingMessage}</p>
         </div>
       ) : (

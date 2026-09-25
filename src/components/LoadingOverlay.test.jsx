@@ -1,4 +1,4 @@
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
 import { LoadingOverlay } from './LoadingOverlay';
@@ -17,6 +17,10 @@ describe('LoadingOverlay', () => {
 
   it('shows a spinner plus the message text', () => {
     render(<LoadingOverlay show message="Saving changes..." />);
+    expect(screen.getByRole('status', { name: 'Saving changes...' })).toHaveAttribute(
+      'aria-busy',
+      'true'
+    );
     expect(document.body.querySelector('.spinner-border')).toBeInTheDocument();
     expect(document.body.querySelector('.spinner-border')).toHaveClass('mb-2');
     expect(document.body.textContent).toContain('Saving changes...');

@@ -75,6 +75,10 @@ describe('DataTable', () => {
       />
     );
     expect(screen.getByText('Syncing records...')).toBeInTheDocument();
+    expect(screen.getByRole('status', { name: 'Syncing records...' })).toHaveAttribute(
+      'aria-busy',
+      'true'
+    );
   });
 
   it('uses explicit col.key so repeated headers never collide', () => {

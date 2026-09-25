@@ -41,8 +41,17 @@ jobs:
       - name: Run Tests
         run: npm run test
 
-      - name: Build
-        run: npm run build
+      - name: Build and verify production environment
+        env:
+          VITE_API_URL: https://api.ci.example/v1
+          VITE_APP_COMPANY_NAME: CI BoltMesh
+          VITE_APP_SUPPORT_EMAIL: ci-support@example.com
+        run: |
+          npm run build
+          grep -RqsF "$VITE_API_URL" dist
+          grep -RqsF "$VITE_APP_COMPANY_NAME" dist
+          grep -RqsF "$VITE_APP_SUPPORT_EMAIL" dist
+          ! grep -RqsF '%VITE_APP_COMPANY_NAME%' dist
 
   security:
     name: 'Security Scan'
