@@ -86,7 +86,14 @@ npm test
 npm run test:coverage
 ```
 
-End-to-end tests use Playwright and live in `e2e/`. They start the Vite development server automatically and cover public routes, protected-route redirects, the 404 page, mocked sign-in/sign-out flows, the mocked plan-to-invoice checkout flow, user and admin management flows, and a dedicated mobile Chromium project. Shared fixtures provide guest, user, and admin states, centralized API/data mocks, strict endpoint and method assertions, and uncaught page-error detection. The refresh-token request is mocked by default so these tests do not require a running API. API mocks match `/v1` by default; set `E2E_API_URL` when the test API uses a different host or base path.
+End-to-end tests use Playwright and live in `e2e/`. They start the Vite development server automatically and cover public routes, protected-route redirects, the 404 page, mocked sign-in/sign-out flows, access-token refresh and replay, the mocked plan-to-invoice checkout flow, user and admin management flows, the shared admin list controls (debounced search, filters, pagination), and a dedicated mobile Chromium project. Shared fixtures provide guest, user, and admin states, centralized API/data mocks, strict endpoint and method assertions, and uncaught page-error detection. The refresh-token request is mocked by default so these tests do not require a running API. API mocks match `/v1` by default; set `E2E_API_URL` when the test API uses a different host or base path.
+
+Two fixture rules are worth knowing before adding a spec:
+
+- Authenticated tests navigate by clicking the app's own links, not with `page.goto()`. A full page load restarts the SPA and re-runs the silent boot refresh, which bounces a signed-in session back to `/login`. `e2e/fixtures/navigation.js` wraps the common admin and dashboard routes.
+- Mock every endpoint a page loads, including the ones it only uses to decorate rows. An unmocked request that reaches a real API comes back 401, which the client reads as an expired session and turns into a logout mid-test. Overlapping mocks resolve last-registered-first, so register defaults before the ones a test cares about.
+
+`mockJson` serves one fixed response; `mockSequence` serves a per-call sequence and returns a handle exposing `calls` and `queries`, which is how the session and list specs assert what the *app* decided (one refresh, one replay, the exact query string) rather than only what the stub returned.
 
 ```bash
 npm run test:e2e:mocked

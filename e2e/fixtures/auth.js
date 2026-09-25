@@ -1,8 +1,12 @@
 import { mockJson } from './api';
 import { buildUser } from './data';
 
-export const createAccessToken = ({ id, role }) => {
-  const payload = Buffer.from(JSON.stringify({ sub: id, role })).toString('base64url');
+// Extra claims are passed straight into the payload so a test can mint a token
+// that is a *different string* while decoding to the same identity. That is
+// what makes "the replayed request carried the refreshed token" a real
+// assertion — a re-encoded identical token would pass either way.
+export const createAccessToken = ({ id, role, ...claims }) => {
+  const payload = Buffer.from(JSON.stringify({ sub: id, role, ...claims })).toString('base64url');
   return `header.${payload}.signature`;
 };
 
