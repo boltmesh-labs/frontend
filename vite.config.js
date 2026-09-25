@@ -54,6 +54,9 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     pool: 'threads',
+    // Setup clears spies and module state after every test, allowing workers
+    // to be reused safely across the many small feature test files.
+    isolate: false,
     globals: false,
     setupFiles: ['./src/test/setup.js'],
     include: ['src/**/*.test.{js,jsx}'],

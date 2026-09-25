@@ -40,4 +40,8 @@ beforeEach(() => {
 
 afterEach(() => {
   if (hasDom) cleanup();
+  // Workers are reused when isolate=false; clear spies and the module cache so
+  // mocks and imported singleton state cannot leak into the next test file.
+  vi.restoreAllMocks();
+  vi.resetModules();
 });
