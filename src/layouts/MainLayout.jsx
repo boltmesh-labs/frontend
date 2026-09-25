@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Button, Col, Container, Nav, Navbar, Row } from 'react-bootstrap';
+import { Alert, Button, Col, Container, Nav, Navbar, Row } from 'react-bootstrap';
 import { FaMoon, FaSignOutAlt, FaSun } from 'react-icons/fa';
 import { FaFacebook, FaGithub, FaShieldHalved, FaXTwitter } from 'react-icons/fa6';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
@@ -17,6 +17,7 @@ const MainLayout = () => {
   const location = useLocation();
   const hasMountedRef = useRef(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [logoutError, setLogoutError] = useState(false);
   const isAuthenticated = !!accessToken;
   const isAdmin = isAuthenticated && user?.role === USER_ROLES.admin;
 
@@ -53,11 +54,14 @@ const MainLayout = () => {
   // silently while AuthProvider's boot refresh restores the session on reload.
   const handleLogout = async () => {
     setIsLoggingOut(true);
+    setLogoutError(false);
     try {
       await logout();
+      navigate('/login', { replace: true });
+    } catch {
+      setLogoutError(true);
     } finally {
       setIsLoggingOut(false);
-      navigate('/login', { replace: true });
     }
   };
 
@@ -135,6 +139,20 @@ const MainLayout = () => {
           </Navbar.Collapse>
         </Container>
       </Navbar>
+
+      {logoutError && (
+        <Container className="pt-3">
+          <Alert
+            variant="warning"
+            role="alert"
+            className="mb-0"
+            dismissible
+            onClose={() => setLogoutError(false)}
+          >
+            We could not complete logout. Check your connection and try again.
+          </Alert>
+        </Container>
+      )}
 
       {/* Main Content Body */}
       <main id="main-content" tabIndex="-1" className="flex-grow-1 py-4">

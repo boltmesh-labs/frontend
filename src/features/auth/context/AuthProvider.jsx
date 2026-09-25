@@ -64,13 +64,8 @@ export const AuthProvider = ({ children }) => {
   }, [applyTokenState]);
 
   const logout = useCallback(async () => {
-    try {
-      await apiClient.api.post('/auth/logout');
-    } catch {
-      // Ignore network errors on logout
-    } finally {
-      updateAuthState(null);
-    }
+    await apiClient.api.post('/auth/logout');
+    updateAuthState(null);
   }, [updateAuthState]);
 
   const updateUser = useCallback((nextUser) => {

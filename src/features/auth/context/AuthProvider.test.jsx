@@ -75,9 +75,9 @@ describe('AuthProvider', () => {
     expect(getContext().user).toBeNull();
   });
 
-  it('logs out through the API and clears local state even when it fails', async () => {
+  it('clears local state after a successful logout', async () => {
     apiClient.authApi.post.mockResolvedValueOnce({ data: {} });
-    apiClient.api.post.mockRejectedValueOnce(new Error('network down'));
+    apiClient.api.post.mockResolvedValueOnce({ data: {} });
 
     const { getContext } = renderWithProvider();
     await waitFor(() => expect(getContext().loading).toBe(false));
@@ -89,6 +89,24 @@ describe('AuthProvider', () => {
     expect(apiClient.api.post).toHaveBeenCalledWith('/auth/logout');
     expect(apiClient.clearAuth).toHaveBeenCalled();
     expect(getContext().accessToken).toBeNull();
+  });
+
+  it('keeps the local session when logout fails', async () => {
+    apiClient.authApi.post.mockResolvedValueOnce({
+      data: { access_token: makeToken({ sub: 'u1', role: 'user' }) },
+    });
+    apiClient.api.post.mockRejectedValueOnce(new Error('network down'));
+
+    const { getContext } = renderWithProvider();
+    await waitFor(() => expect(getContext().loading).toBe(false));
+
+    await act(async () => {
+      await expect(getContext().logout()).rejects.toThrow('network down');
+    });
+
+    expect(apiClient.clearAuth).not.toHaveBeenCalled();
+    expect(getContext().accessToken).toBeTypeOf('string');
+    expect(getContext().user).toEqual({ id: 'u1', role: 'user' });
   });
 
   it('updateUser merges profile changes into the current identity', async () => {

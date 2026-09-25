@@ -19,11 +19,11 @@ cp .env.example .env.production
 
 Set these values before building:
 
-| Variable | Required | Description |
-| --- | --- | --- |
-| `VITE_API_URL` | Yes | API base URL, including the API version path, for example `https://api.example.com/v1` |
-| `VITE_APP_COMPANY_NAME` | Yes | Product name shown in the UI and page metadata |
-| `VITE_APP_SUPPORT_EMAIL` | Yes | Support contact address |
+| Variable                 | Required | Description                                                                            |
+| ------------------------ | -------- | -------------------------------------------------------------------------------------- |
+| `VITE_API_URL`           | Yes      | API base URL, including the API version path, for example `https://api.example.com/v1` |
+| `VITE_APP_COMPANY_NAME`  | Yes      | Product name shown in the UI and page metadata                                         |
+| `VITE_APP_SUPPORT_EMAIL` | Yes      | Support contact address                                                                |
 
 `VITE_API_URL` must be an absolute URL. Production builds reject missing, malformed, and non-HTTPS API URLs rather than silently falling back to localhost.
 
