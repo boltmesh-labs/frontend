@@ -13,12 +13,16 @@
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
+    "test:e2e:mocked": "playwright test --project=chromium --project=mobile-chromium",
+    "test:e2e:live": "playwright test --project=live-chromium",
+    "test:e2e:cross-browser": "playwright test --project=chromium --project=mobile-chromium --project=firefox --project=webkit",
+    "test:e2e:production": "playwright test --config=playwright.production.config.js",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:headed": "playwright test --headed",
-    "lint": "eslint 'src/**/*.{js,jsx}' 'e2e/**/*.{js,jsx}' vite.config.js playwright.config.js eslint.config.js",
-    "lint:fix": "eslint 'src/**/*.{js,jsx}' 'e2e/**/*.{js,jsx}' vite.config.js playwright.config.js eslint.config.js --fix",
-    "format": "prettier --write 'src/**/*.{js,jsx,json,css,md}' 'e2e/**/*.{js,jsx}' vite.config.js playwright.config.js eslint.config.js index.html package.json",
-    "format:check": "prettier --check 'src/**/*.{js,jsx,json,css,md}' 'e2e/**/*.{js,jsx}' vite.config.js playwright.config.js eslint.config.js index.html package.json"
+    "lint": "eslint 'src/**/*.{js,jsx}' 'e2e/**/*.{js,jsx}' vite.config.js 'playwright*.config.js' eslint.config.js",
+    "lint:fix": "eslint 'src/**/*.{js,jsx}' 'e2e/**/*.{js,jsx}' vite.config.js 'playwright*.config.js' eslint.config.js --fix",
+    "format": "prettier --write 'src/**/*.{js,jsx,json,css,md}' 'e2e/**/*.{js,jsx}' vite.config.js 'playwright*.config.js' eslint.config.js index.html package.json",
+    "format:check": "prettier --check 'src/**/*.{js,jsx,json,css,md}' 'e2e/**/*.{js,jsx}' vite.config.js 'playwright*.config.js' eslint.config.js index.html package.json"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.101.4",

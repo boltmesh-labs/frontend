@@ -19,19 +19,23 @@ The Vite development server runs on `http://localhost:5173` by default. Configur
 
 ## Commands
 
-| Command                   | Purpose                                 |
-| ------------------------- | --------------------------------------- |
-| `npm run dev`             | Start the Vite development server       |
-| `npm run build`           | Create the production bundle in `dist/` |
-| `npm run preview`         | Serve the production bundle locally     |
-| `npm test`                | Run the Vitest test suite               |
-| `npm run test:coverage`   | Run tests with V8 coverage              |
-| `npm run test:e2e`        | Run the Playwright browser tests        |
-| `npm run test:e2e:ui`     | Open the Playwright test UI             |
-| `npm run test:e2e:headed` | Run browser tests in headed mode        |
-| `npm run lint`            | Run ESLint                              |
-| `npm run format:check`    | Check Prettier formatting               |
-| `npm run format`          | Format source and configuration files   |
+| Command                          | Purpose                                                            |
+| -------------------------------- | ------------------------------------------------------------------ |
+| `npm run dev`                    | Start the Vite development server                                  |
+| `npm run build`                  | Create the production bundle in `dist/`                            |
+| `npm run preview`                | Serve the production bundle locally                                |
+| `npm test`                       | Run the Vitest test suite                                          |
+| `npm run test:coverage`          | Run tests with V8 coverage                                         |
+| `npm run test:e2e`               | Run all Playwright browser tests                                   |
+| `npm run test:e2e:mocked`        | Run mocked desktop/mobile E2E tests                                |
+| `npm run test:e2e:live`          | Run the opt-in real-backend E2E tests                              |
+| `npm run test:e2e:production`    | Build and smoke-test the production app                            |
+| `npm run test:e2e:cross-browser` | Run mocked tests on Chromium, Firefox, WebKit, and mobile Chromium |
+| `npm run test:e2e:ui`            | Open the Playwright test UI                                        |
+| `npm run test:e2e:headed`        | Run browser tests in headed mode                                   |
+| `npm run lint`                   | Run ESLint                                                         |
+| `npm run format:check`           | Check Prettier formatting                                          |
+| `npm run format`                 | Format source and configuration files                              |
 
 ## Environment
 
@@ -84,15 +88,19 @@ npm run test:coverage
 End-to-end tests use Playwright and live in `e2e/`. They start the Vite development server automatically and cover public routes, protected-route redirects, the 404 page, mocked sign-in/sign-out flows, the mocked plan-to-invoice checkout flow, user and admin management flows, and a dedicated mobile Chromium project. Shared fixtures provide guest, user, and admin states, centralized API/data mocks, strict endpoint and method assertions, and uncaught page-error detection. The refresh-token request is mocked by default so these tests do not require a running API. API mocks match `/v1` by default; set `E2E_API_URL` when the test API uses a different host or base path.
 
 ```bash
-npm run test:e2e
+npm run test:e2e:mocked
+npm run test:e2e:production
+npm run test:e2e:cross-browser
 npm run test:e2e:ui
 ```
 
-Install the Chromium browser before running the tests for the first time:
+The mocked suite uses the Vite development server. The production smoke command builds the app and serves it through `vite preview`. Cross-browser coverage runs on a schedule and requires Chromium, Firefox, and WebKit:
 
 ```bash
-npx playwright install --with-deps chromium
+npx playwright install --with-deps chromium firefox webkit
 ```
+
+The main CI job runs mocked tests with two workers against an explicit API URL. The live suite is kept separate so its shared backend state runs with one worker.
 
 An opt-in real-backend test is available when a seeded test account and API are available:
 
@@ -102,8 +110,9 @@ E2E_USERNAME=e2e-user \
 E2E_PASSWORD='E2ePassword123' \
 E2E_ADMIN_USERNAME=e2e-admin \
 E2E_ADMIN_PASSWORD='E2eAdminPassword123' \
+E2E_API_URL=http://127.0.0.1:8000/v1 \
 VITE_API_URL=http://127.0.0.1:8000/v1 \
-npm run test:e2e -- e2e/live-backend.spec.js
+npm run test:e2e:live
 ```
 
 The live suite verifies login, refresh-cookie session restoration, logout, and admin authorization. To enable the optional GitHub Actions job, set the repository variable `E2E_LIVE_ENABLED=true` and the secrets `E2E_USER_PASSWORD` and `E2E_ADMIN_PASSWORD`. The job starts PostgreSQL, Redis, migrates and seeds the backend, then runs the live browser tests.

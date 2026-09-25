@@ -44,8 +44,11 @@ jobs:
       - name: Install Playwright browser
         run: npx playwright install --with-deps chromium
 
-      - name: Run End-to-End Tests
-        run: npm run test:e2e
+      - name: Run mocked End-to-End Tests
+        run: npm run test:e2e:mocked
+
+      - name: Run production bundle smoke test
+        run: npm run test:e2e:production
 
       - name: Upload Playwright failure artifacts
         if: ${{ failure() }}
@@ -207,8 +210,10 @@ jobs:
           E2E_PASSWORD: ${{ secrets.E2E_USER_PASSWORD }}
           E2E_ADMIN_USERNAME: e2e-admin
           E2E_ADMIN_PASSWORD: ${{ secrets.E2E_ADMIN_PASSWORD }}
+          E2E_API_URL: http://127.0.0.1:8000/v1
           VITE_API_URL: http://127.0.0.1:8000/v1
-        run: npm run test:e2e -- e2e/live-backend.spec.js
+          PLAYWRIGHT_WORKERS: 1
+        run: npm run test:e2e:live
 
       - name: Upload live E2E failure artifacts
         if: ${{ failure() }}
