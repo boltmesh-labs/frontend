@@ -70,6 +70,157 @@ jobs:
           grep -RqsF "$VITE_APP_SUPPORT_EMAIL" dist
           ! grep -RqsF '%VITE_APP_COMPANY_NAME%' dist
 
+  live-e2e:
+    name: 'Live Backend E2E'
+    if: ${{ vars.E2E_LIVE_ENABLED == 'true' }}
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: e2e
+          POSTGRES_USER: e2e
+          POSTGRES_PASSWORD: e2e
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U e2e -d e2e"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Check out backend
+        uses: actions/checkout@v7
+        with:
+          repository: boltmesh-labs/backend
+          path: backend
+
+      - name: Set up Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Configure backend
+        run: |
+          cat > backend/.env <<'EOF'
+          APP_ENV=dev
+          APP_DEBUG=0
+          DATABASE_URL=postgresql+asyncpg://e2e:e2e@localhost:5432/e2e
+          CACHE_URL=redis://localhost:6379/0
+          SECRET_KEY=e2e-secret-key-012345678901234567890123
+          REFRESH_SECRET_KEY=e2e-refresh-key-012345678901234567890123
+          NODE_SECRET_KEY=e2e-node-key-01234567890123456789012345
+          BOOTSTRAP_SECRET_PEPPER=e2e-pepper-01234567890123456789012345
+          GOOGLE_CLIENT_ID=e2e-google-client
+          GOOGLE_CLIENT_SECRET=e2e-google-secret
+          GITHUB_CLIENT_ID=e2e-github-client
+          GITHUB_CLIENT_SECRET=e2e-github-secret
+          LIGHTNING_GATEWAY_URL=https://localhost:3010
+          LIGHTNING_API_KEY=e2e-lightning-key
+          LIGHTNING_TLS_INSECURE=true
+          MONERO_RPC_URL=http://localhost:18083/json_rpc
+          MONERO_RPC_USER=e2e
+          MONERO_RPC_PASSWORD=e2e
+          MAIL_SERVER=localhost
+          MAIL_USERNAME=e2e@example.com
+          MAIL_PASSWORD=e2e
+          MAIL_FROM=e2e@example.com
+          SUPPRESS_EMAIL=true
+          API_BASE_URL=http://127.0.0.1:8000
+          FRONTEND_URL=http://127.0.0.1:5173
+          CORS_ALLOW_ORIGINS=http://127.0.0.1:5173
+          COMPANY_NAME=BoltMesh E2E
+          GITHUB_REPO=boltmesh-labs/backend
+          GITHUB_TOKEN=e2e-token
+          TRUST_PROXY_HEADERS=0
+          COOKIE_SECURE=false
+          COOKIE_SAMESITE=lax
+          EOF
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: uv sync --frozen
+
+      - name: Validate live E2E secrets
+        env:
+          E2E_USER_PASSWORD: ${{ secrets.E2E_USER_PASSWORD }}
+          E2E_ADMIN_PASSWORD: ${{ secrets.E2E_ADMIN_PASSWORD }}
+        run: |
+          test -n "$E2E_USER_PASSWORD"
+          test -n "$E2E_ADMIN_PASSWORD"
+
+      - name: Migrate and seed backend
+        working-directory: backend
+        env:
+          E2E_USER_PASSWORD: ${{ secrets.E2E_USER_PASSWORD }}
+          E2E_ADMIN_PASSWORD: ${{ secrets.E2E_ADMIN_PASSWORD }}
+        run: |
+          uv run alembic upgrade head
+          uv run python -m scripts.seed_e2e_users
+
+      - name: Start backend
+        working-directory: backend
+        run: |
+          nohup uv run uvicorn app.main:app --host 127.0.0.1 --port 8000 > /tmp/boltmesh-backend.log 2>&1 &
+          for attempt in {1..30}; do
+            if curl --fail --silent http://127.0.0.1:8000/health >/dev/null; then
+              exit 0
+            fi
+            sleep 2
+          done
+          cat /tmp/boltmesh-backend.log
+          exit 1
+
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Run live backend E2E tests
+        env:
+          E2E_LIVE: '1'
+          E2E_USERNAME: e2e-user
+          E2E_PASSWORD: ${{ secrets.E2E_USER_PASSWORD }}
+          E2E_ADMIN_USERNAME: e2e-admin
+          E2E_ADMIN_PASSWORD: ${{ secrets.E2E_ADMIN_PASSWORD }}
+          VITE_API_URL: http://127.0.0.1:8000/v1
+        run: npm run test:e2e -- e2e/live-backend.spec.js
+
+      - name: Upload live E2E failure artifacts
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-playwright-artifacts
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 7
+
   security:
     name: 'Security Scan'
     runs-on: ubuntu-latest

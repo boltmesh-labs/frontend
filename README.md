@@ -94,10 +94,18 @@ Install the Chromium browser before running the tests for the first time:
 npx playwright install --with-deps chromium
 ```
 
-An opt-in real-backend login test is available when a seeded test account and API are available:
+An opt-in real-backend test is available when a seeded test account and API are available:
 
 ```bash
-E2E_LIVE=1 E2E_USERNAME=test-user E2E_PASSWORD=... VITE_API_URL=http://localhost:8000/v1 npm run test:e2e
+E2E_LIVE=1 \
+E2E_USERNAME=e2e-user \
+E2E_PASSWORD='E2ePassword123' \
+E2E_ADMIN_USERNAME=e2e-admin \
+E2E_ADMIN_PASSWORD='E2eAdminPassword123' \
+VITE_API_URL=http://127.0.0.1:8000/v1 \
+npm run test:e2e -- e2e/live-backend.spec.js
 ```
+
+The live suite verifies login, refresh-cookie session restoration, logout, and admin authorization. To enable the optional GitHub Actions job, set the repository variable `E2E_LIVE_ENABLED=true` and the secrets `E2E_USER_PASSWORD` and `E2E_ADMIN_PASSWORD`. The job starts PostgreSQL, Redis, migrates and seeds the backend, then runs the live browser tests.
 
 See [DEPLOYMENT.md](DEPLOYMENT.md) for production builds, SPA routing, caching, security headers, smoke tests, and rollback guidance.
