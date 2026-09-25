@@ -1,4 +1,4 @@
-import { test, expect } from './fixtures/test';
+import { test, expect } from './fixtures/live';
 
 const liveApiUrl = (process.env.E2E_API_URL || '').replace(/\/$/, '');
 const liveFrontendUrl = new URL(process.env.E2E_BASE_URL || 'http://127.0.0.1:5173');

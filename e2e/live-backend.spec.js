@@ -1,4 +1,4 @@
-import { test, expect } from './fixtures/test';
+import { test, expect } from './fixtures/live';
 
 const liveEnabled =
   process.env.E2E_LIVE === '1' &&
@@ -245,10 +245,16 @@ test('a real backend revokes the refresh session on logout', async ({ page, play
   await page.getByRole('button', { name: 'Logout' }).click();
   await expect(page).toHaveURL(/\/login$/);
 
-  const requestContext = await playwright.request.newContext({ baseURL: liveApiUrl });
+  // APIRequestContext has no addCookies; cookies are seeded through storageState.
+  // The revoked cookie is handed to a throwaway context so its only job is to
+  // prove the backend no longer accepts it. The URL is absolute because a
+  // baseURL plus a leading-slash path would drop liveApiUrl's /v1 prefix and
+  // hit a route that does not exist.
+  const requestContext = await playwright.request.newContext({
+    storageState: { cookies: [refreshCookie], origins: [] },
+  });
   try {
-    await requestContext.addCookies([refreshCookie]);
-    const response = await requestContext.post('/auth/refresh-token', {
+    const response = await requestContext.post(`${liveApiUrl}/auth/refresh-token`, {
       headers: { Origin: liveFrontendOrigin },
     });
     expect(response.status()).toBe(401);
