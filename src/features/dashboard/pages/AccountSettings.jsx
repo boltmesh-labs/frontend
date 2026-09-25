@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Alert, Card, Col, Form, Nav, Row, Tab } from 'react-bootstrap';
 import { PageLoader } from '@/components/PageLoader';
+import { StatusAlert } from '@/components/StatusAlert';
 import { AsyncButton } from '@/components/AsyncButton';
 import { toast } from 'react-toastify';
 import { usePageTitle } from '@/hooks/usePageTitle';
@@ -324,7 +325,7 @@ const AccountSettings = () => {
     `Update your profile, change your password, and manage security settings.`
   );
 
-  const { data: user, isLoading, isError } = useDashboardProfile();
+  const { data: user, isLoading, isError, error, refetch } = useDashboardProfile();
 
   useEffect(() => {
     if (isError) toast.error('Failed to load profile settings. Please refresh.');
@@ -334,6 +335,21 @@ const AccountSettings = () => {
     return (
       <DashboardContainer>
         <PageLoader fullscreen={false} className="py-5" />
+      </DashboardContainer>
+    );
+  }
+
+  if (isError) {
+    return (
+      <DashboardContainer>
+        <DashboardHeader
+          title="Account Settings"
+          subtitle="Manage your profile details, password, and security settings."
+        />
+        <StatusAlert
+          message={error || 'Failed to load profile settings. Please try again.'}
+          onRetry={refetch}
+        />
       </DashboardContainer>
     );
   }

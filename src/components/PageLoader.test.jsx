@@ -3,9 +3,12 @@ import { describe, expect, it } from 'vitest';
 import { PageLoader } from './PageLoader';
 
 describe('PageLoader', () => {
-  it('renders a spinner by default', () => {
+  it('renders a busy status with a spinner by default', () => {
     render(<PageLoader />);
-    expect(document.querySelector('.spinner-border')).toBeInTheDocument();
+
+    const status = screen.getByRole('status', { name: 'Loading' });
+    expect(status).toHaveAttribute('aria-busy', 'true');
+    expect(status.querySelector('.spinner-border')).toBeInTheDocument();
   });
 
   it('renders an optional message', () => {

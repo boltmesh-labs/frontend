@@ -157,11 +157,14 @@ const VpnRegionList = () => {
         title="VPN Region Management"
         description="Configure regions and their operational status."
       >
-        <Link to="/admin/vpn-regions/new">
-          <Button variant="primary" className="fw-bold px-4 shadow-sm">
-            ➕ Create New Region
-          </Button>
-        </Link>
+        <Button
+          as={Link}
+          to="/admin/vpn-regions/new"
+          variant="primary"
+          className="fw-bold px-4 shadow-sm"
+        >
+          ➕ Create New Region
+        </Button>
       </PageHeader>
 
       {confirmDialog}

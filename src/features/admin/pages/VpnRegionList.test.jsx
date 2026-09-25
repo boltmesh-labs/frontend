@@ -60,6 +60,10 @@ describe('VpnRegionList (admin)', () => {
     const user = userEvent.setup();
     renderPage();
 
+    const createLink = screen.getByText('➕ Create New Region').closest('a');
+    expect(createLink).toHaveAttribute('href', '/admin/vpn-regions/new');
+    expect(createLink.querySelector('button')).not.toBeInTheDocument();
+
     // The switch routes through the shared confirmation dialog first.
     await user.click(screen.getByLabelText('Toggle active status for Frankfurt'));
     expect(

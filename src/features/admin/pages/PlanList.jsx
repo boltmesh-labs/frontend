@@ -161,11 +161,14 @@ const PlanList = () => {
         title="Subscription Plans"
         description="Provision billing profiles and manage tier availability."
       >
-        <Link to="/admin/plans/new">
-          <Button variant="primary" className="fw-bold shadow-sm rounded-3">
-            ➕ Create New Plan
-          </Button>
-        </Link>
+        <Button
+          as={Link}
+          to="/admin/plans/new"
+          variant="primary"
+          className="fw-bold shadow-sm rounded-3"
+        >
+          ➕ Create New Plan
+        </Button>
       </PageHeader>
 
       {isError && (

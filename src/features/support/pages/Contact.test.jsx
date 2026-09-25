@@ -33,6 +33,10 @@ describe('Contact', () => {
     );
 
     expect(screen.getByRole('heading', { name: 'Contact Support' })).toBeInTheDocument();
+    expect(screen.getByLabelText('Name')).toBeInTheDocument();
+    expect(screen.getByLabelText('Email')).toBeInTheDocument();
+    expect(screen.getByLabelText('Subject')).toBeInTheDocument();
+    expect(screen.getByLabelText('Message')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /send message/i })).toBeInTheDocument();
   });
 

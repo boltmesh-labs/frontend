@@ -5,4 +5,4 @@
 // subscriptions, which the computed field intentionally excludes.
 export const resolveActivePlan = (profile, subscriptions) =>
   profile?.active_subscription?.plan ||
-  subscriptions?.find?.((s) => ['active', 'trialing'].includes(s.status))?.plan;
+  subscriptions?.find?.((s) => ['active', 'trialing'].includes(s.status?.toLowerCase()))?.plan;

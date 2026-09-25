@@ -3,6 +3,7 @@ import { Alert, Card, Container, Spinner } from 'react-bootstrap';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import { useConfirmAccountDeletion } from '@/features/auth/hooks/useAuthMutations';
+import { useAuth } from '@/features/auth/context/AuthContext';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { COMPANY_NAME } from '@/utils/config';
 import { getApiError } from '@/utils/errorHandler';
@@ -27,6 +28,7 @@ const ConfirmDelete = () => {
   );
 
   const { mutate: confirmDeletion } = useConfirmAccountDeletion();
+  const { setToken } = useAuth();
 
   useEffect(() => {
     if (!token || hasExecutedRef.current) return;
@@ -35,6 +37,11 @@ const ConfirmDelete = () => {
 
     confirmDeletion(token, {
       onSuccess: () => {
+        // The deletion endpoint invalidates the session server-side. Clear the
+        // context's in-memory token before the delayed login navigation so a
+        // still-mounted PublicRoute (or API client) cannot retain the old
+        // authenticated session.
+        setToken(null);
         setSuccessMessage('Your account has been deleted. Redirecting to login...');
       },
       onError: (error) => {
@@ -46,7 +53,7 @@ const ConfirmDelete = () => {
         setIsLoading(false);
       },
     });
-  }, [token, confirmDeletion]);
+  }, [token, confirmDeletion, setToken]);
 
   useEffect(() => {
     if (isLoading) return;

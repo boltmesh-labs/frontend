@@ -18,6 +18,16 @@ import { dashboardKeys } from '../api/queryKeys';
 import { COMPANY_NAME } from '@/utils/config';
 import { TERMINAL_INVOICE_STATUSES } from '@/constants/statuses';
 
+const SUPPORTED_WALLET_SCHEMES = new Set(['lightning:', 'bitcoin:', 'monero:']);
+
+const isSupportedWalletUri = (uri) => {
+  try {
+    return SUPPORTED_WALLET_SCHEMES.has(new URL(uri).protocol);
+  } catch {
+    return false;
+  }
+};
+
 const Payment = () => {
   const { invoiceId } = useParams();
   const navigate = useNavigate();
@@ -36,6 +46,7 @@ const Payment = () => {
   const plan = invoice?.plan || fetchedPlan;
   const rawAddress = invoice?.crypto_address || '';
   const paymentUri = invoice?.payment_uri || '';
+  const canOpenWallet = isSupportedWalletUri(paymentUri);
   const paymentMethod = invoice?.payment_method;
   const currencyCode = invoice?.currency;
   const requested = invoice?.amount_requested;
@@ -220,11 +231,15 @@ const Payment = () => {
               </div>
 
               <div className="mb-3">
-                <label className="text-body-secondary small fw-bold mb-1 d-block">
+                <label
+                  htmlFor="payment-destination"
+                  className="text-body-secondary small fw-bold mb-1 d-block"
+                >
                   {displayLabel}
                 </label>
                 <div className="input-group">
                   <input
+                    id="payment-destination"
                     type="text"
                     readOnly
                     className="form-control font-monospace border-end-0 text-truncate"
@@ -242,11 +257,17 @@ const Payment = () => {
 
               <Button
                 variant="outline-primary"
-                href={paymentUri}
+                href={canOpenWallet ? paymentUri : undefined}
+                disabled={!canOpenWallet}
                 className="w-100 fw-medium mb-4 py-2"
               >
                 Open in Native Wallet
               </Button>
+              {!canOpenWallet && (
+                <Alert variant="warning" className="small py-2">
+                  Wallet link unavailable. Copy the payment destination and open it in your wallet.
+                </Alert>
+              )}
 
               <Alert
                 variant={status.variant}
@@ -259,7 +280,8 @@ const Payment = () => {
               {status.variant === 'warning' && shortfall > 0 && (
                 <Button
                   variant="warning"
-                  href={paymentUri}
+                  href={canOpenWallet ? paymentUri : undefined}
+                  disabled={!canOpenWallet}
                   className="w-100 mb-3 fw-bold py-2 shadow-sm"
                 >
                   Pay Remaining Balance

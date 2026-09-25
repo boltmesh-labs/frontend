@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import { DefaultPagination } from './DefaultPagination';
@@ -62,6 +62,38 @@ describe('DefaultPagination', () => {
     );
     expect(screen.getByText('‹').closest('li')).toHaveClass('disabled');
     expect(screen.getByText('›').closest('li')).not.toHaveClass('disabled');
+  });
+
+  it('clamps an out-of-range page after results shrink', async () => {
+    const onPageChange = vi.fn();
+
+    render(
+      <DefaultPagination
+        currentPage={4}
+        totalPages={2}
+        totalCount={15}
+        pageSize={10}
+        onPageChange={onPageChange}
+      />
+    );
+
+    await waitFor(() => expect(onPageChange).toHaveBeenCalledWith(2));
+  });
+
+  it('returns to page one when the result set becomes empty', async () => {
+    const onPageChange = vi.fn();
+
+    render(
+      <DefaultPagination
+        currentPage={3}
+        totalPages={0}
+        totalCount={0}
+        pageSize={10}
+        onPageChange={onPageChange}
+      />
+    );
+
+    await waitFor(() => expect(onPageChange).toHaveBeenCalledWith(1));
   });
 
   it('disables controls while loading', () => {

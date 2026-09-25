@@ -29,7 +29,7 @@ describe('TableFiltersBar', () => {
       />
     );
 
-    await user.type(screen.getByPlaceholderText(/search/i), 'a');
+    await user.type(screen.getByRole('searchbox', { name: 'Search table' }), 'a');
     expect(onSearchChange).toHaveBeenCalledWith('a');
 
     await user.selectOptions(screen.getByLabelText('Filter by status'), 'active');

@@ -30,10 +30,14 @@ FROM base AS build
 ENV NODE_ENV=production
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-# VITE_* values can be supplied with --build-arg
+# VITE_* build arguments must also be environment variables for Vite to inline
+# them into the production bundle at build time.
 ARG VITE_API_URL
 ARG VITE_APP_COMPANY_NAME
 ARG VITE_APP_SUPPORT_EMAIL
+ENV VITE_API_URL=$VITE_API_URL
+ENV VITE_APP_COMPANY_NAME=$VITE_APP_COMPANY_NAME
+ENV VITE_APP_SUPPORT_EMAIL=$VITE_APP_SUPPORT_EMAIL
 RUN npm run build
 
 # ---------- prod (default): nginx serves the static bundle ----------

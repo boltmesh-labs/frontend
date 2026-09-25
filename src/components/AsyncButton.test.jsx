@@ -5,7 +5,9 @@ import { AsyncButton } from './AsyncButton';
 describe('AsyncButton', () => {
   it('renders children when not loading', () => {
     render(<AsyncButton>Save</AsyncButton>);
-    expect(screen.getByRole('button', { name: 'Save' })).toBeInTheDocument();
+    const button = screen.getByRole('button', { name: 'Save' });
+    expect(button).toBeInTheDocument();
+    expect(button).toHaveAttribute('aria-busy', 'false');
     expect(screen.queryByRole('status')).not.toBeInTheDocument();
   });
 
@@ -13,6 +15,7 @@ describe('AsyncButton', () => {
     render(<AsyncButton loading>Save</AsyncButton>);
     const button = screen.getByRole('button', { name: 'Save' });
     expect(button).toBeDisabled();
+    expect(button).toHaveAttribute('aria-busy', 'true');
     expect(button.querySelector('.spinner-border')).toBeInTheDocument();
   });
 

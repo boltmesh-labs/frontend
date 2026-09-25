@@ -9,7 +9,9 @@ import {
   useFxRate,
   usePlanDetail,
   useSupportedCurrencies,
+  useUserSubscriptions,
 } from '@/features/dashboard/hooks/useDashboard';
+import { resolveActivePlan } from '@/features/dashboard/utils/activePlan';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { formatCurrencyAmount } from '@/utils/currencyFormatter';
 import { getApiError } from '@/utils/errorHandler';
@@ -30,6 +32,17 @@ const Checkout = () => {
   const { data: plan, isLoading: isPlanLoading, isError: isPlanError } = usePlanDetail(planId);
 
   const { data: user, isLoading: isUserLoading } = useDashboardProfile();
+  const { data: subscriptionData } = useUserSubscriptions();
+  const subscriptions = subscriptionData ?? [];
+  const activeSubscription =
+    user?.active_subscription ??
+    subscriptions.find((subscription) =>
+      ['active', 'trialing'].includes(subscription?.status?.toLowerCase())
+    );
+
+  // Prefer the profile's backend-computed active subscription, while falling
+  // back to the list query so trialing subscriptions are not hidden at checkout.
+  const activePlan = resolveActivePlan(user, subscriptions);
 
   // Supported fiat pricing currencies are served by the backend so operators can
   // widen or narrow the list without touching the frontend.
@@ -152,8 +165,8 @@ const Checkout = () => {
     );
   }
 
-  const activePlan = user?.plan;
   const isSamePlan = activePlan?.id === plan.id;
+  const activeSubscriptionExpiresAt = activeSubscription?.expires_at;
 
   return (
     <Container className="py-5">
@@ -196,11 +209,10 @@ const Checkout = () => {
                     <span>
                       You currently have the <strong>{activePlan.name}</strong> plan. Switching to{' '}
                       <strong>{plan.name}</strong> will replace your active plan. Any remaining time
-                      (expiring{' '}
-                      {user.subscription_expires
-                        ? new Date(user.subscription_expires).toLocaleDateString()
-                        : ''}
-                      ) will be prorated into bonus credit toward your new plan.
+                      {activeSubscriptionExpiresAt
+                        ? ` (expiring ${new Date(activeSubscriptionExpiresAt).toLocaleDateString()})`
+                        : ''}{' '}
+                      will be prorated into bonus credit toward your new plan.
                     </span>
                   )}
                 </Alert>

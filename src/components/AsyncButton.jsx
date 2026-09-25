@@ -6,8 +6,8 @@ import { Button, Spinner } from 'react-bootstrap';
  * `isPending`.
  */
 export const AsyncButton = ({ loading = false, loadingLabel, children, disabled, ...rest }) => (
-  <Button {...rest} disabled={disabled || loading}>
-    {loading && <Spinner animation="border" size="sm" className="me-2" />}
+  <Button {...rest} disabled={disabled || loading} aria-busy={loading}>
+    {loading && <Spinner animation="border" size="sm" className="me-2" aria-hidden="true" />}
     {loading ? (loadingLabel ?? children) : children}
   </Button>
 );

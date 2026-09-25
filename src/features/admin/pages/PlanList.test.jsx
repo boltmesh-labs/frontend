@@ -80,6 +80,10 @@ describe('PlanList (admin)', () => {
     expect(screen.getByText('2 features')).toBeInTheDocument();
     expect(screen.getAllByText('Active').length).toBeGreaterThan(0);
 
+    const createLink = screen.getByText('➕ Create New Plan').closest('a');
+    expect(createLink).toHaveAttribute('href', '/admin/plans/new');
+    expect(createLink.querySelector('button')).not.toBeInTheDocument();
+
     // Toggling routes through the confirmation dialog.
     await user.click(screen.getByRole('button', { name: 'Disable' }));
     expect(await screen.findByText('Disable Subscription Plan')).toBeInTheDocument();

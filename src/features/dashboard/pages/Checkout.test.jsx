@@ -52,6 +52,7 @@ describe('Checkout', () => {
     apiClient.api.get.mockImplementation(async (url, config) => {
       if (url === '/plans/plan-1') return { data: plan };
       if (url === '/users') return { data: { plan: null } };
+      if (url === '/subscriptions') return { data: [] };
       if (url === '/crypto/currencies') return { data: { currencies: ['usd', 'eur', 'gbp'] } };
       if (url.startsWith('/crypto/prices')) {
         return { data: { fiat_currency: 'USD', bitcoin: 100000, monero: 200 } };
@@ -73,6 +74,40 @@ describe('Checkout', () => {
 
     expect(await screen.findByText('Standard')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /generate bitcoin invoice/i })).toBeInTheDocument();
+  });
+
+  it('includes a trialing subscription and uses its expiration in checkout messaging', async () => {
+    const defaultGet = apiClient.api.get.getMockImplementation();
+    const trialPlan = { id: 'trial-plan', name: 'Trial', price_usd: 5, duration_in_days: 7 };
+    apiClient.api.get.mockImplementation(async (url, config) => {
+      if (url === '/users') {
+        return {
+          data: {
+            subscription_expires: '2000-01-01T00:00:00Z',
+          },
+        };
+      }
+      if (url === '/subscriptions') {
+        return {
+          data: [
+            {
+              id: 'trial-subscription',
+              status: 'trialing',
+              plan: trialPlan,
+              expires_at: '2030-06-15T00:00:00Z',
+            },
+          ],
+        };
+      }
+      return defaultGet(url, config);
+    });
+
+    renderCheckout();
+
+    expect(await screen.findByText(/Trial/)).toBeInTheDocument();
+    const subscriptionMessage = screen.getByText(/expiring/i);
+    expect(subscriptionMessage).toHaveTextContent('expiring 6/15/2030');
+    expect(subscriptionMessage).not.toHaveTextContent('1/1/2000');
   });
 
   it('navigates to /payment/:invoiceId after the invoice is created', async () => {

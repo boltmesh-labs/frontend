@@ -97,8 +97,11 @@ const Contact = () => {
 
           <Form onSubmit={handleSubmit} noValidate>
             <Form.Group className="mb-3">
-              <Form.Label className="fw-bold small">Name</Form.Label>
+              <Form.Label htmlFor="contact-name" className="fw-bold small">
+                Name
+              </Form.Label>
               <Form.Control
+                id="contact-name"
                 type="text"
                 name="name"
                 placeholder="Your Name"
@@ -110,8 +113,11 @@ const Contact = () => {
             </Form.Group>
 
             <Form.Group className="mb-3">
-              <Form.Label className="fw-bold small">Email</Form.Label>
+              <Form.Label htmlFor="contact-email" className="fw-bold small">
+                Email
+              </Form.Label>
               <Form.Control
+                id="contact-email"
                 type="email"
                 name="email"
                 placeholder="you@example.com"
@@ -123,8 +129,11 @@ const Contact = () => {
             </Form.Group>
 
             <Form.Group className="mb-3">
-              <Form.Label className="fw-bold small">Subject</Form.Label>
+              <Form.Label htmlFor="contact-subject" className="fw-bold small">
+                Subject
+              </Form.Label>
               <Form.Control
+                id="contact-subject"
                 type="text"
                 name="subject"
                 placeholder="General Inquiry"
@@ -135,8 +144,11 @@ const Contact = () => {
             </Form.Group>
 
             <Form.Group className="mb-4">
-              <Form.Label className="fw-bold small">Message</Form.Label>
+              <Form.Label htmlFor="contact-message" className="fw-bold small">
+                Message
+              </Form.Label>
               <Form.Control
+                id="contact-message"
                 as="textarea"
                 rows={4}
                 name="message"

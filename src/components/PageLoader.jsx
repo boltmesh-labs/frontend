@@ -7,6 +7,10 @@ import { Spinner } from 'react-bootstrap';
  */
 export const PageLoader = ({ message, fullscreen = true, className = '' }) => (
   <div
+    role="status"
+    aria-live="polite"
+    aria-busy="true"
+    aria-label={message || 'Loading'}
     className={`d-flex justify-content-center align-items-center ${
       fullscreen ? 'min-vh-100 bg-body' : ''
     }${className ? ` ${className}` : ''}`}

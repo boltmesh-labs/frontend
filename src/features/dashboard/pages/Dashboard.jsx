@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Badge, Button, Card, Col, Row } from 'react-bootstrap';
 import { PageLoader } from '@/components/PageLoader';
+import { StatusAlert } from '@/components/StatusAlert';
 import { AsyncButton } from '@/components/AsyncButton';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -130,7 +131,7 @@ const Dashboard = () => {
     `Manage your ${COMPANY_NAME} subscription, devices, and active VPN configuration.`
   );
 
-  const { data: user, isLoading, isError } = useDashboardProfile();
+  const { data: user, isLoading, isError, error, refetch } = useDashboardProfile();
   const [resendLoading, setResendLoading] = useState(false);
 
   useEffect(() => {
@@ -162,6 +163,21 @@ const Dashboard = () => {
     return (
       <DashboardContainer>
         <PageLoader fullscreen={false} className="py-5" />
+      </DashboardContainer>
+    );
+  }
+
+  if (isError) {
+    return (
+      <DashboardContainer>
+        <div className="text-center mb-4 border-bottom pb-3">
+          <h2 className="fw-bold text-body-emphasis mb-1">Account Dashboard</h2>
+          <p className="text-body-secondary small mb-0">Manage your VPN profile and settings.</p>
+        </div>
+        <StatusAlert
+          message={error || 'Unable to load profile. Please try again.'}
+          onRetry={refetch}
+        />
       </DashboardContainer>
     );
   }

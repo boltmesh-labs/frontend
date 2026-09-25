@@ -206,16 +206,22 @@ const VpnServerList = () => {
         title="VPN Server Management"
         description="Monitor topology configurations, server access profiles, regions, and cryptographic credentials."
       >
-        <Link to="/admin/vpn-servers/audit" className="me-2">
-          <Button variant="outline-secondary" className="fw-bold px-3 shadow-sm">
-            📋 Audit Logs
-          </Button>
-        </Link>
-        <Link to="/admin/vpn-servers/new">
-          <Button variant="primary" className="fw-bold px-4 shadow-sm">
-            ➕ Create New Server
-          </Button>
-        </Link>
+        <Button
+          as={Link}
+          to="/admin/vpn-servers/audit"
+          variant="outline-secondary"
+          className="me-2 fw-bold px-3 shadow-sm"
+        >
+          📋 Audit Logs
+        </Button>
+        <Button
+          as={Link}
+          to="/admin/vpn-servers/new"
+          variant="primary"
+          className="fw-bold px-4 shadow-sm"
+        >
+          ➕ Create New Server
+        </Button>
       </PageHeader>
 
       {isError && (

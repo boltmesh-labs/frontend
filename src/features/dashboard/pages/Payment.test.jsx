@@ -60,9 +60,27 @@ describe('Payment', () => {
 
     renderPayment('inv-1');
 
-    expect(await screen.findByDisplayValue('bc1q-test-address')).toBeInTheDocument();
+    const paymentAddress = await screen.findByLabelText(/lightning Address/i);
+    expect(paymentAddress).toHaveValue('bc1q-test-address');
     expect(screen.getByText('Standard')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /check status/i })).toBeInTheDocument();
+  });
+
+  it('does not make an unsupported payment URI clickable', async () => {
+    const unsafeInvoice = { ...invoice, payment_uri: 'javascript:alert(1)' };
+    apiClient.api.get.mockImplementation(async (url) => {
+      if (url === '/invoices/inv-1') return { data: unsafeInvoice };
+      if (url === '/plans/plan-1') return { data: unsafeInvoice.plan };
+      if (url === '/invoices/inv-1/status') {
+        return { data: { status: 'pending', amount_requested: 0.0001, amount_paid: 0 } };
+      }
+      return { data: {} };
+    });
+
+    renderPayment('inv-1');
+
+    expect(await screen.findByText(/wallet link unavailable/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /open in native wallet/i })).toBeDisabled();
   });
 
   it('renders a not-found state instead of redirecting when the invoice cannot be loaded', async () => {

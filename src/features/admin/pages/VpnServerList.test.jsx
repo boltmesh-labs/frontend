@@ -72,6 +72,13 @@ describe('VpnServerList (admin)', () => {
     expect(screen.getByText('198.51.100.1')).toBeInTheDocument();
     expect(screen.getByText('node-1.us-east-1.vpn.example.com')).toBeInTheDocument();
 
+    const auditLink = screen.getByText('📋 Audit Logs').closest('a');
+    const createLink = screen.getByText('➕ Create New Server').closest('a');
+    expect(auditLink).toHaveAttribute('href', '/admin/vpn-servers/audit');
+    expect(createLink).toHaveAttribute('href', '/admin/vpn-servers/new');
+    expect(auditLink.querySelector('button')).not.toBeInTheDocument();
+    expect(createLink.querySelector('button')).not.toBeInTheDocument();
+
     // The provisioning row cannot be switched.
     expect(screen.getByLabelText('Toggle active status for edge-02')).toBeDisabled();
 

@@ -80,6 +80,22 @@ describe('AccountSettings', () => {
     apiClient.api.get.mockResolvedValue({ data: profileUser });
   });
 
+  it('shows an explicit profile error with a retry action', async () => {
+    apiClient.api.get.mockRejectedValue({
+      response: { data: { detail: 'Profile is temporarily unavailable.' } },
+    });
+    const user = userEvent.setup();
+
+    renderAccountSettings();
+
+    const errorAlert = await screen.findByRole('alert');
+    expect(errorAlert).toHaveTextContent('Profile is temporarily unavailable.');
+    expect(screen.queryByText('Personal Profile')).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Retry' }));
+    await waitFor(() => expect(apiClient.api.get).toHaveBeenCalledTimes(2));
+  });
+
   describe('Profile Settings confirm dialog', () => {
     it('asks for confirmation before saving and sends the API call only after confirming', async () => {
       apiClient.api.patch.mockResolvedValue({ data: { ...profileUser } });

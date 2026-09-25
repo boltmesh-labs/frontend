@@ -31,6 +31,7 @@ export const TableFiltersBar = ({
         <Col md={searchColWidth}>
           <Form.Control
             type="search"
+            aria-label="Search table"
             placeholder={searchPlaceholder}
             value={searchInput}
             onChange={(e) => onSearchChange(e.target.value)}

@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Pagination } from 'react-bootstrap';
 
 export const DefaultPagination = ({
@@ -8,7 +9,13 @@ export const DefaultPagination = ({
   onPageChange,
   loading = false,
 }) => {
-  if (totalPages <= 1) return null;
+  // A refetch can reduce the result set while the user is on a later page.
+  // Clamp instead of leaving an empty, unrecoverable table with no controls.
+  useEffect(() => {
+    if (currentPage > Math.max(totalPages, 1)) onPageChange(Math.max(totalPages, 1));
+  }, [currentPage, totalPages, onPageChange]);
+
+  if (totalPages <= 1 && currentPage === 1) return null;
 
   const startCount = totalCount === 0 ? 0 : (currentPage - 1) * pageSize + 1;
   const endCount = Math.min(currentPage * pageSize, totalCount);

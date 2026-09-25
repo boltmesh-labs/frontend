@@ -50,6 +50,10 @@ const MainLayout = () => {
 
   return (
     <div className="d-flex flex-column min-vh-100 bg-body-tertiary">
+      <a href="#main-content" className="visually-hidden-focusable btn btn-primary">
+        Skip to content
+      </a>
+
       {/* Header / Navbar */}
       <Navbar bg="dark" variant="dark" expand="lg" className="shadow-sm py-2">
         <Container>
@@ -118,7 +122,7 @@ const MainLayout = () => {
       </Navbar>
 
       {/* Main Content Body */}
-      <main className="flex-grow-1 py-4">
+      <main id="main-content" tabIndex="-1" className="flex-grow-1 py-4">
         <Container>
           <Outlet />
         </Container>

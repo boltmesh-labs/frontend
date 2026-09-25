@@ -35,6 +35,25 @@ describe('Dashboard', () => {
     expect(screen.queryByText(/account dashboard/i)).not.toBeInTheDocument();
   });
 
+  it('shows an explicit profile error with a retry action', async () => {
+    const refetch = vi.fn();
+    vi.mocked(useDashboardProfile).mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isError: true,
+      error: { response: { data: { detail: 'Profile is temporarily unavailable.' } } },
+      refetch,
+    });
+    const user = userEvent.setup();
+    renderPage();
+
+    const errorAlert = await screen.findByRole('alert');
+    expect(errorAlert).toHaveTextContent('Profile is temporarily unavailable.');
+    expect(screen.queryByText('amy')).not.toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Retry' }));
+    expect(refetch).toHaveBeenCalledTimes(1);
+  });
+
   it('greets the verified user with their active plan', () => {
     vi.mocked(useDashboardProfile).mockReturnValue({
       data: {

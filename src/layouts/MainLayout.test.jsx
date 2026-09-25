@@ -31,6 +31,11 @@ describe('MainLayout', () => {
     await renderLayout();
 
     expect(screen.getByRole('link', { name: 'BoltMesh VPN' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Skip to content' })).toHaveAttribute(
+      'href',
+      '#main-content'
+    );
+    expect(screen.getByRole('main')).toHaveAttribute('id', 'main-content');
     expect(screen.getByRole('button', { name: 'Login' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /logout/i })).not.toBeInTheDocument();
     expect(document.documentElement.getAttribute('data-bs-theme')).toBe('light');
