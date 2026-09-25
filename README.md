@@ -81,7 +81,7 @@ npm test
 npm run test:coverage
 ```
 
-End-to-end tests use Playwright and live in `e2e/`. They start the Vite development server automatically and currently cover public routes, protected-route redirects, and the 404 page. The refresh-token request is mocked so these tests do not require a running API.
+End-to-end tests use Playwright and live in `e2e/`. They start the Vite development server automatically and currently cover public routes, protected-route redirects, the 404 page, and mocked sign-in/sign-out flows. The refresh-token request is mocked so these tests do not require a running API.
 
 ```bash
 npm run test:e2e
