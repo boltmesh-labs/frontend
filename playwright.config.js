@@ -1,6 +1,8 @@
 import { defineConfig, devices } from '@playwright/test';
 
 const e2eApiUrl = process.env.E2E_API_URL || process.env.VITE_API_URL || 'http://127.0.0.1:8000/v1';
+const e2eBaseUrl = process.env.E2E_BASE_URL || 'http://127.0.0.1:5173';
+const usesExternalFrontend = Boolean(process.env.E2E_BASE_URL);
 const configuredWorkers = Number.parseInt(process.env.PLAYWRIGHT_WORKERS || '', 10);
 
 export default defineConfig({
@@ -16,7 +18,7 @@ export default defineConfig({
   },
 
   use: {
-    baseURL: 'http://127.0.0.1:5173',
+    baseURL: e2eBaseUrl,
     actionTimeout: 10_000,
     navigationTimeout: 15_000,
     trace: 'on-first-retry',
@@ -51,14 +53,16 @@ export default defineConfig({
     },
   ],
 
-  webServer: {
-    command: 'npm run dev -- --host 127.0.0.1',
-    url: 'http://127.0.0.1:5173',
-    reuseExistingServer: !process.env.CI,
-    timeout: 120_000,
-    env: {
-      E2E_API_URL: e2eApiUrl,
-      VITE_API_URL: e2eApiUrl,
-    },
-  },
+  webServer: usesExternalFrontend
+    ? undefined
+    : {
+        command: 'npm run dev -- --host 127.0.0.1',
+        url: 'http://127.0.0.1:5173',
+        reuseExistingServer: !process.env.CI,
+        timeout: 120_000,
+        env: {
+          E2E_API_URL: e2eApiUrl,
+          VITE_API_URL: e2eApiUrl,
+        },
+      },
 });

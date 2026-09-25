@@ -54,6 +54,7 @@ jspm_packages/
 .env.test.local
 .env.production.local
 .env.local
+.env.e2e
 
 # Distribution / packaging
 .Python

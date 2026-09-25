@@ -94,7 +94,7 @@ npm run test:e2e:cross-browser
 npm run test:e2e:ui
 ```
 
-The mocked suite uses the Vite development server. The production smoke command builds the app and serves it through `vite preview`. Cross-browser coverage runs on a schedule and requires Chromium, Firefox, and WebKit:
+The mocked suite uses the Vite development server. The live command automatically loads `.env.e2e` when it exists. To run the live suite against an already-running frontend, set `E2E_BASE_URL`; Playwright will then use that URL and will not start another frontend server. The production smoke command builds the app and serves it through `vite preview`. Cross-browser coverage runs on a schedule and requires Chromium, Firefox, and WebKit:
 
 ```bash
 npx playwright install --with-deps chromium firefox webkit
@@ -110,8 +110,9 @@ E2E_USERNAME=e2e-user \
 E2E_PASSWORD='E2ePassword123' \
 E2E_ADMIN_USERNAME=e2e-admin \
 E2E_ADMIN_PASSWORD='E2eAdminPassword123' \
-E2E_API_URL=http://127.0.0.1:8000/v1 \
-VITE_API_URL=http://127.0.0.1:8000/v1 \
+E2E_BASE_URL=https://boltmesh.mooo.com \
+E2E_API_URL=https://api.boltmesh.mooo.com/v1 \
+VITE_API_URL=https://api.boltmesh.mooo.com/v1 \
 npm run test:e2e:live
 ```
 
