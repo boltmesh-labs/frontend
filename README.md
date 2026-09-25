@@ -19,16 +19,19 @@ The Vite development server runs on `http://localhost:5173` by default. Configur
 
 ## Commands
 
-| Command                 | Purpose                                 |
-| ----------------------- | --------------------------------------- |
-| `npm run dev`           | Start the Vite development server       |
-| `npm run build`         | Create the production bundle in `dist/` |
-| `npm run preview`       | Serve the production bundle locally     |
-| `npm test`              | Run the Vitest test suite               |
-| `npm run test:coverage` | Run tests with V8 coverage              |
-| `npm run lint`          | Run ESLint                              |
-| `npm run format:check`  | Check Prettier formatting               |
-| `npm run format`        | Format source and configuration files   |
+| Command                   | Purpose                                 |
+| ------------------------- | --------------------------------------- |
+| `npm run dev`             | Start the Vite development server       |
+| `npm run build`           | Create the production bundle in `dist/` |
+| `npm run preview`         | Serve the production bundle locally     |
+| `npm test`                | Run the Vitest test suite               |
+| `npm run test:coverage`   | Run tests with V8 coverage              |
+| `npm run test:e2e`        | Run the Playwright browser tests        |
+| `npm run test:e2e:ui`     | Open the Playwright test UI             |
+| `npm run test:e2e:headed` | Run browser tests in headed mode        |
+| `npm run lint`            | Run ESLint                              |
+| `npm run format:check`    | Check Prettier formatting               |
+| `npm run format`          | Format source and configuration files   |
 
 ## Environment
 
@@ -76,6 +79,19 @@ Tests are colocated with source files and run with Vitest and Testing Library. T
 ```bash
 npm test
 npm run test:coverage
+```
+
+End-to-end tests use Playwright and live in `e2e/`. They start the Vite development server automatically and currently cover public routes, protected-route redirects, and the 404 page. The refresh-token request is mocked so these tests do not require a running API.
+
+```bash
+npm run test:e2e
+npm run test:e2e:ui
+```
+
+Install the Chromium browser before running the tests for the first time:
+
+```bash
+npx playwright install --with-deps chromium
 ```
 
 See [DEPLOYMENT.md](DEPLOYMENT.md) for production builds, SPA routing, caching, security headers, smoke tests, and rollback guidance.
