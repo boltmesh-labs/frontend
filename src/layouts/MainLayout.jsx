@@ -1,25 +1,38 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Button, Col, Container, Nav, Navbar, Row } from 'react-bootstrap';
 import { FaMoon, FaSignOutAlt, FaSun } from 'react-icons/fa';
 import { FaFacebook, FaGithub, FaShieldHalved, FaXTwitter } from 'react-icons/fa6';
-import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 
 import { useAuth } from '@/features/auth/context/AuthContext';
 import { COMPANY_NAME } from '@/utils/config';
 import { USER_ROLES } from '@/constants/roles';
 
 const CURRENT_YEAR = new Date().getFullYear();
+const isTheme = (value) => value === 'light' || value === 'dark';
 
 const MainLayout = () => {
   const { accessToken, logout, user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const hasMountedRef = useRef(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const isAuthenticated = !!accessToken;
   const isAdmin = isAuthenticated && user?.role === USER_ROLES.admin;
 
+  useEffect(() => {
+    if (!hasMountedRef.current) {
+      hasMountedRef.current = true;
+      return;
+    }
+
+    window.scrollTo(0, 0);
+    document.getElementById('main-content')?.focus({ preventScroll: true });
+  }, [location.pathname]);
+
   const [theme, setTheme] = useState(() => {
     const savedTheme = localStorage.getItem('theme');
-    if (savedTheme) return savedTheme;
+    if (isTheme(savedTheme)) return savedTheme;
     return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   });
 
@@ -65,6 +78,7 @@ const MainLayout = () => {
           <Navbar.Collapse id="navbar-nav">
             <Nav className="ms-auto align-items-lg-center gap-2">
               <Button
+                type="button"
                 variant="outline-secondary"
                 size="sm"
                 onClick={toggleTheme}
@@ -96,6 +110,7 @@ const MainLayout = () => {
                   )}
 
                   <Button
+                    type="button"
                     variant="outline-light"
                     size="sm"
                     onClick={handleLogout}

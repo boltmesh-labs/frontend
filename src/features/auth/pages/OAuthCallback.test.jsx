@@ -97,6 +97,13 @@ describe('OAuthCallback', () => {
     expect(setAccessTokenMock).not.toHaveBeenCalled();
   });
 
+  it('shows a safe fallback for a malformed OAuth error parameter', async () => {
+    renderCallback('/auth/callback?error=%E0%A4%A');
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('OAuth sign-in failed.');
+    expect(setAccessTokenMock).not.toHaveBeenCalled();
+  });
+
   it('navigates back to login from the error state', async () => {
     const user = userEvent.setup();
 

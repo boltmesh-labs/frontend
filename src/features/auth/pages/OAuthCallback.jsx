@@ -7,6 +7,17 @@ import { AuthContainer } from '@/features/auth/components/AuthContainer';
 import { useAuth } from '@/features/auth/context/AuthContext';
 import { OAUTH_REDIRECT_FROM_KEY, sanitizeRedirectPath } from '@/utils/config';
 
+const getOAuthErrorMessage = (value) => {
+  if (!value) return 'OAuth sign-in failed.';
+
+  try {
+    const decoded = decodeURIComponent(value);
+    return decoded.length > 300 ? 'OAuth sign-in failed.' : decoded;
+  } catch {
+    return 'OAuth sign-in failed.';
+  }
+};
+
 const OAuthCallback = () => {
   const [searchParams] = useSearchParams();
   const [error, setError] = useState('');
@@ -30,7 +41,7 @@ const OAuthCallback = () => {
       const errDetail = searchParams.get('error');
 
       if (errDetail) {
-        setError(decodeURIComponent(errDetail));
+        setError(getOAuthErrorMessage(errDetail));
         return;
       }
 

@@ -1,7 +1,32 @@
 // Exported so callers that leave the SPA entirely (e.g. Login's OAuth provider
 // redirect) reuse the exact same base URL as axios instead of reaching into
 // apiClient.authApi.defaults.baseURL.
-export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/v1';
+const DEFAULT_API_BASE_URL = 'http://localhost:8000/v1';
+const configuredApiBaseUrl = import.meta.env.VITE_API_URL?.trim();
+
+const getApiBaseUrl = () => {
+  if (!configuredApiBaseUrl) {
+    if (import.meta.env.PROD) {
+      throw new Error('VITE_API_URL must be configured for production builds.');
+    }
+    return DEFAULT_API_BASE_URL;
+  }
+
+  let parsedUrl;
+  try {
+    parsedUrl = new URL(configuredApiBaseUrl);
+  } catch {
+    throw new Error('VITE_API_URL must be a valid absolute URL.');
+  }
+
+  if (import.meta.env.PROD && parsedUrl.protocol !== 'https:') {
+    throw new Error('VITE_API_URL must use HTTPS in production.');
+  }
+
+  return configuredApiBaseUrl.replace(/\/$/, '');
+};
+
+export const API_BASE_URL = getApiBaseUrl();
 export const COMPANY_NAME = import.meta.env.VITE_APP_COMPANY_NAME || 'BoltMesh VPN';
 export const SUPPORT_EMAIL = import.meta.env.VITE_APP_SUPPORT_EMAIL || 'support@example.com';
 

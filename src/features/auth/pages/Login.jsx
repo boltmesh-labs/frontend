@@ -165,6 +165,7 @@ const Login = () => {
 
       <div className="d-flex gap-2 mb-3">
         <Button
+          type="button"
           variant="outline-secondary"
           className="w-100 d-flex align-items-center justify-content-center gap-2"
           onClick={() => handleSocialLogin('google')}
@@ -173,6 +174,7 @@ const Login = () => {
           <FcGoogle size={18} /> Google
         </Button>
         <Button
+          type="button"
           variant="outline-secondary"
           className="w-100 d-flex align-items-center justify-content-center gap-2"
           onClick={() => handleSocialLogin('github')}

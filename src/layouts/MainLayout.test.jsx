@@ -57,6 +57,14 @@ describe('MainLayout', () => {
     expect(document.documentElement.getAttribute('data-bs-theme')).toBe('dark');
   });
 
+  it('ignores an invalid saved theme', async () => {
+    localStorage.setItem('theme', 'sepia');
+    await renderLayout();
+
+    expect(document.documentElement.getAttribute('data-bs-theme')).toBe('light');
+    expect(localStorage.getItem('theme')).toBe('light');
+  });
+
   it('shows dashboard navigation for signed-in users and admins only get the panel link', async () => {
     await renderLayout({ accessToken: 'tok', user: { role: 'user' }, logout: vi.fn() });
 

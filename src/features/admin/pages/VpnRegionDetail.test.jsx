@@ -37,6 +37,7 @@ const renderAt = (id) =>
   render(
     <MemoryRouter initialEntries={[`/admin/vpn-regions/${id}`]}>
       <Routes>
+        <Route path="/admin/vpn-regions" element={<div>Region list</div>} />
         <Route path="/admin/vpn-regions/:id" element={<VpnRegionDetail />} />
         <Route path="/admin" element={<div>Back home</div>} />
       </Routes>
