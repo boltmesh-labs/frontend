@@ -4,7 +4,15 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { apiClient } from '@/api/client';
 import { toast } from 'react-toastify';
-import { useToggleUserStatus, useUpdateUser, useUserDetail, useUsers } from './useUsers';
+import {
+  useToggleUserStatus,
+  useUpdateUser,
+  useUserDetail,
+  useUserDevices,
+  useUserInvoices,
+  useUsers,
+  useUserSubscriptions,
+} from './useUsers';
 
 vi.mock('@/api/client', () => ({
   apiClient: { api: { get: vi.fn(), post: vi.fn(), patch: vi.fn(), delete: vi.fn() } },
@@ -38,6 +46,31 @@ describe('useUsers resource hooks', () => {
     expect(real.result.current.isEnabled).toBe(true);
     await waitFor(() => expect(real.result.current.isSuccess).toBe(true));
     expect(apiClient.api.get).toHaveBeenCalledWith('/admin/users/u1/profile');
+  });
+
+  it('fetches the related resources for a user', async () => {
+    const devices = renderHook(() => useUserDevices('u1'), { wrapper });
+    const subscriptions = renderHook(() => useUserSubscriptions('u1'), { wrapper });
+    const invoices = renderHook(() => useUserInvoices('u1'), { wrapper });
+
+    await waitFor(() => expect(devices.result.current.isSuccess).toBe(true));
+    await waitFor(() => expect(subscriptions.result.current.isSuccess).toBe(true));
+    await waitFor(() => expect(invoices.result.current.isSuccess).toBe(true));
+
+    expect(apiClient.api.get).toHaveBeenCalledWith('/admin/vpn-devices/by-user/u1');
+    expect(apiClient.api.get).toHaveBeenCalledWith('/admin/subscriptions/by-user/u1');
+    expect(apiClient.api.get).toHaveBeenCalledWith('/admin/invoices/by-user/u1');
+  });
+
+  it('disables related user queries without a user id', () => {
+    const devices = renderHook(() => useUserDevices(), { wrapper });
+    const subscriptions = renderHook(() => useUserSubscriptions(), { wrapper });
+    const invoices = renderHook(() => useUserInvoices(), { wrapper });
+
+    expect(devices.result.current.isEnabled).toBe(false);
+    expect(subscriptions.result.current.isEnabled).toBe(false);
+    expect(invoices.result.current.isEnabled).toBe(false);
+    expect(apiClient.api.get).not.toHaveBeenCalled();
   });
 
   it('toggles status via the dedicated status endpoint', async () => {

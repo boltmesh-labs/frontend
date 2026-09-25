@@ -4,7 +4,13 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { apiClient } from '@/api/client';
 import { toast } from 'react-toastify';
-import { useCancelSubscription, useSubscriptionDetail, useSubscriptions } from './useSubscriptions';
+import {
+  useCancelSubscription,
+  useSubscriptionDetail,
+  useSubscriptionDevices,
+  useSubscriptionInvoices,
+  useSubscriptions,
+} from './useSubscriptions';
 
 vi.mock('@/api/client', () => ({
   apiClient: { api: { get: vi.fn(), post: vi.fn(), patch: vi.fn(), delete: vi.fn() } },
@@ -34,6 +40,26 @@ describe('useSubscriptions resource hooks', () => {
       params: { subscription_status: 'active' },
     });
     expect(apiClient.api.get).toHaveBeenNthCalledWith(2, '/admin/subscriptions/s1');
+  });
+
+  it('fetches devices and invoices for a subscription', async () => {
+    const devices = renderHook(() => useSubscriptionDevices('s1'), { wrapper });
+    const invoices = renderHook(() => useSubscriptionInvoices('s1'), { wrapper });
+
+    await waitFor(() => expect(devices.result.current.isSuccess).toBe(true));
+    await waitFor(() => expect(invoices.result.current.isSuccess).toBe(true));
+
+    expect(apiClient.api.get).toHaveBeenCalledWith('/admin/vpn-devices/by-subscription/s1');
+    expect(apiClient.api.get).toHaveBeenCalledWith('/admin/invoices/by-subscription/s1');
+  });
+
+  it('disables related subscription queries without a subscription id', () => {
+    const devices = renderHook(() => useSubscriptionDevices(), { wrapper });
+    const invoices = renderHook(() => useSubscriptionInvoices(), { wrapper });
+
+    expect(devices.result.current.isEnabled).toBe(false);
+    expect(invoices.result.current.isEnabled).toBe(false);
+    expect(apiClient.api.get).not.toHaveBeenCalled();
   });
 
   it('cancels a subscription and toasts the outcome', async () => {
