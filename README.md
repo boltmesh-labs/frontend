@@ -81,7 +81,7 @@ npm test
 npm run test:coverage
 ```
 
-End-to-end tests use Playwright and live in `e2e/`. They start the Vite development server automatically and currently cover public routes, protected-route redirects, the 404 page, mocked sign-in/sign-out flows, and the mocked plan-to-invoice checkout flow. The refresh-token request is mocked so these tests do not require a running API.
+End-to-end tests use Playwright and live in `e2e/`. They start the Vite development server automatically and cover public routes, protected-route redirects, the 404 page, mocked sign-in/sign-out flows, the mocked plan-to-invoice checkout flow, user and admin management flows, and a dedicated mobile Chromium project. The refresh-token request is mocked by default so these tests do not require a running API.
 
 ```bash
 npm run test:e2e
@@ -92,6 +92,12 @@ Install the Chromium browser before running the tests for the first time:
 
 ```bash
 npx playwright install --with-deps chromium
+```
+
+An opt-in real-backend login test is available when a seeded test account and API are available:
+
+```bash
+E2E_LIVE=1 E2E_USERNAME=test-user E2E_PASSWORD=... VITE_API_URL=http://localhost:8000/v1 npm run test:e2e
 ```
 
 See [DEPLOYMENT.md](DEPLOYMENT.md) for production builds, SPA routing, caching, security headers, smoke tests, and rollback guidance.

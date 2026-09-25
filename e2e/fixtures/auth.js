@@ -3,8 +3,8 @@ export const createAccessToken = ({ id, role }) => {
   return `header.${payload}.signature`;
 };
 
-export const mockAuthApi = async (page) => {
-  const accessToken = createAccessToken({ id: 'user-1', role: 'user' });
+export const mockAuthApi = async (page, { role = 'user' } = {}) => {
+  const accessToken = createAccessToken({ id: 'user-1', role });
 
   await page.route('**/auth/refresh-token', async (route) => {
     await route.fulfill({
