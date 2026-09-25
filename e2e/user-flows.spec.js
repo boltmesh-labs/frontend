@@ -1,59 +1,29 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures/test';
+import { mockJson } from './fixtures/api';
+import { buildInvoice, buildPlan, buildSubscription } from './fixtures/data';
 
-import { mockAuthApi, signIn } from './fixtures/auth';
-
-const plan = {
-  id: 'plan-1',
-  name: 'Starter Plan',
-  billing_cycle: 'monthly',
-  price_usd: 9.99,
-};
-
-const subscription = {
-  id: 'subscription-1',
-  status: 'active',
-  expires_at: '2099-01-01T00:00:00Z',
+const plan = buildPlan();
+const subscription = buildSubscription({ plan });
+const invoice = buildInvoice({
   plan,
-};
-
-const invoice = {
-  id: 'invoice-1',
-  plan_id: plan.id,
   payment_method: 'lightning',
   status: 'paid',
   created_at: '2026-01-01T00:00:00Z',
-};
+});
 
 const mockUserContentApi = async (page) => {
-  await page.route('**/subscriptions', async (route) => {
-    await route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify([subscription]),
-    });
+  await mockJson(page, { path: '/subscriptions', body: [subscription] });
+  await mockJson(page, {
+    path: '/invoices',
+    body: { data: [invoice], total_count: 1 },
   });
-
-  await page.route('**/invoices*', async (route) => {
-    await route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify({ data: [invoice], total_count: 1 }),
-    });
-  });
-
-  await page.route('**/plans', async (route) => {
-    await route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify([plan]),
-    });
-  });
+  await mockJson(page, { path: '/plans', body: [plan] });
 };
 
-test('a user can review subscriptions, invoices, and account settings', async ({ page }) => {
-  await mockAuthApi(page);
+test('a user can review subscriptions, invoices, and account settings', async ({
+  userPage: page,
+}) => {
   await mockUserContentApi(page);
-  await signIn(page);
 
   await page
     .locator('#main-content')

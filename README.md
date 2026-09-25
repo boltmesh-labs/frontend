@@ -81,7 +81,7 @@ npm test
 npm run test:coverage
 ```
 
-End-to-end tests use Playwright and live in `e2e/`. They start the Vite development server automatically and cover public routes, protected-route redirects, the 404 page, mocked sign-in/sign-out flows, the mocked plan-to-invoice checkout flow, user and admin management flows, and a dedicated mobile Chromium project. The refresh-token request is mocked by default so these tests do not require a running API.
+End-to-end tests use Playwright and live in `e2e/`. They start the Vite development server automatically and cover public routes, protected-route redirects, the 404 page, mocked sign-in/sign-out flows, the mocked plan-to-invoice checkout flow, user and admin management flows, and a dedicated mobile Chromium project. Shared fixtures provide guest, user, and admin states, centralized API/data mocks, strict endpoint and method assertions, and uncaught page-error detection. The refresh-token request is mocked by default so these tests do not require a running API. API mocks match `/v1` by default; set `E2E_API_URL` when the test API uses a different host or base path.
 
 ```bash
 npm run test:e2e

@@ -1,14 +1,6 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures/test';
 
-test('mobile navigation can be opened from the login page', async ({ page }) => {
-  await page.route('**/auth/refresh-token', async (route) => {
-    await route.fulfill({
-      status: 401,
-      contentType: 'application/json',
-      body: JSON.stringify({ detail: 'No active session' }),
-    });
-  });
-
+test('mobile navigation can be opened from the login page', async ({ guestPage: page }) => {
   await page.goto('/login');
 
   const toggle = page.getByRole('button', { name: 'Toggle navigation' });
