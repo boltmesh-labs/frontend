@@ -28,7 +28,8 @@ The Vite development server runs on `http://localhost:5173` by default. Configur
 | `npm run test:coverage`          | Run tests with V8 coverage                                         |
 | `npm run test:e2e`               | Run all Playwright browser tests                                   |
 | `npm run test:e2e:mocked`        | Run mocked desktop/mobile E2E tests                                |
-| `npm run test:e2e:live`          | Run the opt-in real-backend E2E tests                              |
+| `npm run test:e2e:live`          | Run the opt-in read-only real-backend E2E tests                    |
+| `npm run test:e2e:live:write`    | Run the guarded real-backend write tests                           |
 | `npm run test:e2e:production`    | Build and smoke-test the production app                            |
 | `npm run test:e2e:cross-browser` | Run mocked tests on Chromium, Firefox, WebKit, and mobile Chromium |
 | `npm run test:e2e:ui`            | Open the Playwright test UI                                        |
@@ -116,5 +117,22 @@ npm run test:e2e:live
 ```
 
 The live suite verifies invalid-credential handling, login, refresh-cookie session restoration and logout revocation, backend-enforced admin authorization, authenticated user and admin list/detail pages, real 404 error states, deployed metadata, and browser credential-storage/cookie security. Detail coverage dynamically uses the first available record of each type and records a coverage annotation when the backend has none. It is run manually rather than in GitHub Actions because it requires seeded users and a compatible real backend.
+
+The write suite is a separate command because it creates and deletes real data. It is skipped unless both
+`E2E_ALLOW_WRITES=1` and a safe `E2E_WRITE_ENVIRONMENT` are set. `local` only accepts localhost API
+hosts; `staging` is required for remote environments and rejects the known production hosts. The suite
+exercises disposable subscription-plan and VPN-region lifecycles and restores the seeded user's original
+profile in cleanup paths.
+
+```bash
+E2E_ALLOW_WRITES=1 \
+E2E_WRITE_ENVIRONMENT=local \
+E2E_BASE_URL=http://127.0.0.1:5173 \
+E2E_API_URL=http://127.0.0.1:8000/v1 \
+npm run test:e2e:live:write
+```
+
+Never point the write suite at production. Backend strict endpoints share a small per-minute request
+budget, so the suite reserves that budget instead of throttling its own cleanup operations.
 
 See [DEPLOYMENT.md](DEPLOYMENT.md) for production builds, SPA routing, caching, security headers, smoke tests, and rollback guidance.

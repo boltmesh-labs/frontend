@@ -33,7 +33,12 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
-      testIgnore: ['**/mobile.spec.js', '**/live-backend.spec.js', '**/production-smoke.spec.js'],
+      testIgnore: [
+        '**/mobile.spec.js',
+        '**/live-backend.spec.js',
+        '**/live-writes.spec.js',
+        '**/production-smoke.spec.js',
+      ],
       use: { ...devices['Desktop Chrome'] },
     },
     {
@@ -43,12 +48,22 @@ export default defineConfig({
     },
     {
       name: 'firefox',
-      testIgnore: ['**/mobile.spec.js', '**/live-backend.spec.js', '**/production-smoke.spec.js'],
+      testIgnore: [
+        '**/mobile.spec.js',
+        '**/live-backend.spec.js',
+        '**/live-writes.spec.js',
+        '**/production-smoke.spec.js',
+      ],
       use: { ...devices['Desktop Firefox'] },
     },
     {
       name: 'webkit',
-      testIgnore: ['**/mobile.spec.js', '**/live-backend.spec.js', '**/production-smoke.spec.js'],
+      testIgnore: [
+        '**/mobile.spec.js',
+        '**/live-backend.spec.js',
+        '**/live-writes.spec.js',
+        '**/production-smoke.spec.js',
+      ],
       use: { ...devices['Desktop Safari'] },
     },
     {
