@@ -40,9 +40,14 @@ export const OAUTH_REDIRECT_FROM_KEY = 'oauth_redirect_from';
 /**
  * Guards redirect targets against open-redirect vectors. Only same-app
  * absolute paths ("/dashboard") are allowed; protocol-relative URLs
- * ("//evil.com"), scheme-bearing strings, and non-strings fall back.
+ * ("//evil.com"), scheme-bearing strings, backslashes that browsers may
+ * normalize as slashes, control characters, and non-strings fall back.
  */
 export const sanitizeRedirectPath = (path, fallback = '/dashboard') => {
   if (typeof path !== 'string') return fallback;
-  return path.startsWith('/') && !path.startsWith('//') ? path : fallback;
+  const hasUnsafeCharacters = [...path].some((character) => {
+    const code = character.charCodeAt(0);
+    return character === '\\' || code < 32 || code === 127;
+  });
+  return path.startsWith('/') && !path.startsWith('//') && !hasUnsafeCharacters ? path : fallback;
 };

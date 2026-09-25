@@ -19,6 +19,12 @@ describe('sanitizeRedirectPath', () => {
     expect(sanitizeRedirectPath('invoices')).toBe('/dashboard');
   });
 
+  it('rejects browser-normalized and control-character variants', () => {
+    expect(sanitizeRedirectPath('/\\evil.com')).toBe('/dashboard');
+    expect(sanitizeRedirectPath('/dashboard\nLocation: https://evil.com')).toBe('/dashboard');
+    expect(sanitizeRedirectPath('/dashboard\u0000')).toBe('/dashboard');
+  });
+
   it('falls back for non-string input', () => {
     expect(sanitizeRedirectPath(null)).toBe('/dashboard');
     expect(sanitizeRedirectPath(undefined)).toBe('/dashboard');
