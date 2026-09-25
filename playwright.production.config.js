@@ -1,9 +1,14 @@
 import { defineConfig, devices } from '@playwright/test';
+import { loadEnv } from 'vite';
 
 import baseConfig from './playwright.config.js';
 
 const e2eApiUrl =
   process.env.E2E_API_URL || process.env.VITE_API_URL || 'https://api.e2e.invalid/v1';
+const e2eCompanyName =
+  process.env.VITE_APP_COMPANY_NAME ||
+  loadEnv(process.env.NODE_ENV || 'production', process.cwd(), 'VITE_').VITE_APP_COMPANY_NAME ||
+  'BoltMesh VPN';
 
 export default defineConfig({
   ...baseConfig,
@@ -26,6 +31,7 @@ export default defineConfig({
     env: {
       E2E_API_URL: e2eApiUrl,
       VITE_API_URL: e2eApiUrl,
+      VITE_APP_COMPANY_NAME: e2eCompanyName,
     },
   },
 });

@@ -115,6 +115,6 @@ E2E_API_URL=https://api.boltmesh.mooo.com/v1 \
 npm run test:e2e:live
 ```
 
-The live suite verifies invalid-credential handling, login, refresh-cookie session restoration, logout, regular-user authorization, the authenticated user pages, admin authorization, and every admin management list. It is run manually rather than in GitHub Actions because it requires seeded users and a compatible real backend.
+The live suite verifies invalid-credential handling, login, refresh-cookie session restoration and logout revocation, backend-enforced admin authorization, authenticated user and admin list/detail pages, real 404 error states, deployed metadata, and browser credential-storage/cookie security. Detail coverage dynamically uses the first available record of each type and records a coverage annotation when the backend has none. It is run manually rather than in GitHub Actions because it requires seeded users and a compatible real backend.
 
 See [DEPLOYMENT.md](DEPLOYMENT.md) for production builds, SPA routing, caching, security headers, smoke tests, and rollback guidance.
