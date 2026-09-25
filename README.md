@@ -100,7 +100,7 @@ The mocked suite uses the Vite development server. The live command automaticall
 npx playwright install --with-deps chromium firefox webkit
 ```
 
-The main CI job runs mocked tests with two workers against an explicit API URL. The live suite is kept separate so its shared backend state runs with one worker.
+The main CI job runs mocked tests with two workers against an explicit API URL. The live suite is opt-in and runs separately with one worker when a seeded backend is available.
 
 An opt-in real-backend test is available when a seeded test account and API are available:
 
@@ -116,6 +116,6 @@ VITE_API_URL=https://api.boltmesh.mooo.com/v1 \
 npm run test:e2e:live
 ```
 
-The live suite verifies login, refresh-cookie session restoration, logout, and admin authorization. To enable the optional GitHub Actions job, set the repository variable `E2E_LIVE_ENABLED=true` and the secrets `E2E_USER_PASSWORD` and `E2E_ADMIN_PASSWORD`. The job starts PostgreSQL, Redis, migrates and seeds the backend, then runs the live browser tests.
+The live suite verifies invalid-credential handling, login, refresh-cookie session restoration, logout, regular-user authorization, the authenticated user pages, admin authorization, and every admin management list. It is run manually rather than in GitHub Actions because it requires seeded users and a compatible real backend.
 
 See [DEPLOYMENT.md](DEPLOYMENT.md) for production builds, SPA routing, caching, security headers, smoke tests, and rollback guidance.
