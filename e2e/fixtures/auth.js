@@ -26,7 +26,26 @@ export const mockAuthApi = async (page, { role = 'user' } = {}) => {
   });
   await mockJson(page, {
     path: '/users',
-    body: buildUser(),
+    body: buildUser({ role }),
+  });
+  await mockJson(page, {
+    method: 'POST',
+    path: '/auth/logout',
+    body: {},
+  });
+};
+
+export const mockRestoredAuthApi = async (page, { role = 'user' } = {}) => {
+  const accessToken = createAccessToken({ id: 'user-1', role });
+
+  await mockJson(page, {
+    method: 'POST',
+    path: '/auth/refresh-token',
+    body: { access_token: accessToken },
+  });
+  await mockJson(page, {
+    path: '/users',
+    body: buildUser({ role }),
   });
   await mockJson(page, {
     method: 'POST',

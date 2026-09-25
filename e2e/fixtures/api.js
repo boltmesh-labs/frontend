@@ -21,7 +21,7 @@ const serializeBody = (body) => (typeof body === 'string' ? body : JSON.stringif
 
 export const mockJson = async (
   page,
-  { method = 'GET', path, query, requestBody, status = 200, body = {} }
+  { method = 'GET', path, query, requestBody, status = 200, body = {}, delayMs = 0 }
 ) => {
   await page.route(getApiPathPattern(path), async (route) => {
     const request = route.request();
@@ -37,6 +37,10 @@ export const mockJson = async (
       expect(request.postDataJSON(), `Unexpected request body for ${method} ${path}`).toMatchObject(
         requestBody
       );
+    }
+
+    if (delayMs > 0) {
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
     }
 
     await route.fulfill({
