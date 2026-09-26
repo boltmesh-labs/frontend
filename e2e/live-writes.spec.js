@@ -1,11 +1,21 @@
-import { test, expect } from './fixtures/live';
+import { test, expect, throttleLogin } from './fixtures/live';
 
 const liveApiUrl = (process.env.E2E_API_URL || '').replace(/\/$/, '');
 const liveFrontendUrl = new URL(process.env.E2E_BASE_URL || 'http://127.0.0.1:5173');
 const apiHostname = liveApiUrl ? new URL(liveApiUrl).hostname : '';
 const frontendHostname = liveFrontendUrl.hostname;
 const localHosts = new Set(['localhost', '127.0.0.1', '::1']);
-const blockedWriteHosts = new Set(['boltmesh.mooo.com', 'api.boltmesh.mooo.com']);
+// Hosts that must never receive writes, whatever E2E_WRITE_ENVIRONMENT claims.
+// Empty because boltmesh.mooo.com / api.boltmesh.mooo.com are the *staging*
+// deployment. Add production hostnames here as they appear: the
+// E2E_WRITE_ENVIRONMENT value is a claim about the environment, and this set is
+// the independent check that the URLs actually point somewhere safe.
+const blockedWriteHosts = new Set(
+  (process.env.E2E_BLOCKED_WRITE_HOSTS || '')
+    .split(',')
+    .map((host) => host.trim())
+    .filter(Boolean)
+);
 const writeEnvironment = process.env.E2E_WRITE_ENVIRONMENT || '';
 const writeTargetIsSafe =
   (writeEnvironment === 'local' &&
@@ -38,6 +48,7 @@ const reserveStrictRequests = async (count) => {
 };
 
 const signInAndCaptureToken = async (page, username, password) => {
+  await throttleLogin();
   const pageResponse = await page.goto('/login');
   expect(pageResponse?.status(), 'The configured live frontend is unavailable').toBeLessThan(500);
 

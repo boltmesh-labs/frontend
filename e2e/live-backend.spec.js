@@ -1,4 +1,4 @@
-import { test, expect } from './fixtures/live';
+import { test, expect, throttleLogin } from './fixtures/live';
 
 const liveEnabled =
   process.env.E2E_LIVE === '1' &&
@@ -11,11 +11,31 @@ const liveApiAssertionsEnabled = liveEnabled && Boolean(liveApiUrl);
 const liveFrontendOrigin = new URL(process.env.E2E_BASE_URL || 'http://127.0.0.1:5173').origin;
 
 const signIn = async (page, username, password) => {
+  await throttleLogin();
   const response = await page.goto('/login');
   expect(response?.status(), 'The configured live frontend is unavailable').toBeLessThan(500);
   await page.locator('#username').fill(username);
   await page.locator('#password').fill(password);
+
+  // The login mutation is async. Clicking and moving on races it: a caller
+  // that navigates while the request is still in flight is bounced back to
+  // /login by ProtectedRoute, which sees no access token yet. Wait for the
+  // request itself, then for the app to react to it.
+  const loginResponse = page.waitForResponse(
+    (response) =>
+      response.request().method() === 'POST' &&
+      new URL(response.url()).pathname.endsWith('/auth/login')
+  );
   await page.locator('#main-content').getByRole('button', { name: 'Login', exact: true }).click();
+  await loginResponse;
+
+  // Either outcome is a settled login: the dashboard for valid credentials, an
+  // inline alert for invalid ones. Callers assert which one they expect.
+  await expect(page.locator('#main-content')).toBeVisible();
+  await Promise.race([
+    page.waitForURL(/\/dashboard$/),
+    page.getByRole('alert').waitFor({ state: 'visible' }),
+  ]);
 };
 
 const navigateWithinApp = async (page, path) => {
