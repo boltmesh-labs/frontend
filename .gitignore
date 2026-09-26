@@ -93,3 +93,6 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 cover/
+
+# Kilo agent worktrees (nested checkouts, not part of this project)
+.kilo/

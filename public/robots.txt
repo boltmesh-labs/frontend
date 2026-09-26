@@ -1,3 +1,5 @@
-# https://www.robotstxt.org/robotstxt.html
+# Staging deployment: keep crawlers out of the login and admin routes.
+# This host is reachable on the public internet. Restore
+# "User-agent: *\nDisallow:" before a production launch.
 User-agent: *
-Disallow:
+Disallow: /

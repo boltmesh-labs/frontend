@@ -41,6 +41,27 @@ npm run build
 
 The deployable output is `dist/`.
 
+## Container image
+
+`Dockerfile` has three stages. `prod` is the default and is what any public deployment should run: it compiles the bundle and serves it from nginx using `deploy/nginx.conf`, which already sets the SPA fallback, the cache policy and the security headers below.
+
+```bash
+podman build --target prod \
+  --build-arg VITE_API_URL=https://api.example.com/v1 \
+  --build-arg VITE_APP_COMPANY_NAME="Example" \
+  --build-arg VITE_APP_SUPPORT_EMAIL=support@example.org \
+  -t frontend:prod .
+```
+
+The `VITE_*` build arguments are required. `src/utils/config.js` throws at runtime, not at build time, when `VITE_API_URL` is missing or non-HTTPS, so a build that omits them produces an image that fails only once a visitor loads it. Confirm what was baked in before deploying:
+
+```bash
+podman run --rm --entrypoint grep frontend:prod \
+  -rl 'api\.example\.com' /usr/share/nginx/html/assets
+```
+
+The `dev` stage is the Vite dev server with the source tree mounted. It is for local development only — see the `dev` compose profile in [infra/DEPLOYMENT.md](../infra/DEPLOYMENT.md).
+
 ## Web server configuration
 
 Serve `dist/` as the document root and configure all unknown non-asset paths to return `index.html`. This is required for direct navigation to routes such as:
