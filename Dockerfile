@@ -3,7 +3,7 @@
 # ---------- base: shared toolchain ----------
 # Pinned major tag (never a bare floating tag like `alpine`) so image pulls are
 # reproducible across machines while still receiving patch updates.
-FROM docker.io/library/node:22-alpine AS base
+FROM docker.io/library/node:25-alpine AS base
 WORKDIR /app
 
 # ---------- deps: install exactly what package-lock.json pins ----------
