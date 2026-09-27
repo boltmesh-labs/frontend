@@ -45,7 +45,12 @@ RUN npm run build
 # ---------- prod (default): nginx serves the static bundle ----------
 # The SPA calls the API directly via VITE_API_URL, so no API proxy is needed
 # here; point CORS at wherever this image is hosted.
-FROM docker.io/library/nginx:1.29-alpine AS prod
+#
+# Pinned to the nginx stable line (even majors), same rationale as the node
+# base above. 1.29 was a mainline release and is now superseded upstream: the
+# tag still pulls, but no further patches are published for it, so it would sit
+# frozen with no security updates. Stable is 1.30; 1.31 is mainline.
+FROM docker.io/library/nginx:1.30-alpine AS prod
 COPY deploy/nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /app/dist /usr/share/nginx/html
 EXPOSE 80

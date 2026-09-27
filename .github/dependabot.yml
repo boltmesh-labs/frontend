@@ -34,8 +34,8 @@ updates:
           - "minor"
           - "patch"
 
-  # The Dockerfile pins its base image by tag; `docker` is the ecosystem that
-  # tracks that, and it is the only thing that will move it.
+  # The Dockerfile pins its base images by tag; `docker` is the ecosystem that
+  # tracks those, and it is the only thing that will move them.
   #
   # `node` is ignored on the odd-numbered release lines because Dependabot has no
   # notion of Node's LTS schedule and steps majors one at a time, so it always
@@ -47,6 +47,19 @@ updates:
   # MAINTENANCE: drop a line here once that release gains LTS backing, or when
   # the Dockerfile moves off 24 to a newer LTS line. 26 is expected to become LTS
   # in October 2026; at that point drop `~> 26` and bump the Dockerfile to 26.
+  #
+  # `nginx` is ignored on the mainline line for the same reason, and with the
+  # same even/odd split: nginx alternates stable (even) and mainline (odd), and
+  # the Dockerfile tracks stable. Left on a mainline line it is not merely
+  # "outdated" — upstream stops publishing patches for it, so the tag keeps
+  # pulling while frozen with no security updates. The Dockerfile tracks 1.30;
+  # 1.31 is mainline. 1.29 was mainline and is the line this repo just left, so
+  # it is deliberately not ignored here: Dependabot only proposes upgrades, and
+  # a stale ignore for an abandoned line could never fire anyway.
+  #
+  # MAINTENANCE: add `~> 33` when nginx 33 ships, and move the Dockerfile to
+  # the next stable line (32) when 30 is retired upstream. Note that stable
+  # always trails mainline by one, so mainline 1.33 means stable 1.32 exists.
   - package-ecosystem: "docker"
     directory: "/"
     schedule:
@@ -62,6 +75,9 @@ updates:
         versions:
           - "~> 25"
           - "~> 26"
+      - dependency-name: "library/nginx"
+        versions:
+          - "~> 31"
     groups:
       docker-minor-patch:
         patterns:
