@@ -43,7 +43,7 @@ RUN npm run build
 # ---------- prod (default): nginx serves the static bundle ----------
 # The SPA calls the API directly via VITE_API_URL, so no API proxy is needed
 # here; point CORS at wherever this image is hosted.
-FROM docker.io/library/nginx:1.27-alpine AS prod
+FROM docker.io/library/nginx:1.29-alpine AS prod
 COPY deploy/nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /app/dist /usr/share/nginx/html
 EXPOSE 80
