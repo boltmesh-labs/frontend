@@ -5,7 +5,7 @@
 # reproducible across machines while still receiving patch updates.
 # 24 is the Active LTS line ("Krypton"). The odd-numbered lines are Current
 # releases with no LTS backing, so they are skipped deliberately.
-FROM docker.io/library/node:24-alpine AS base
+FROM docker.io/library/node:25-alpine AS base
 WORKDIR /app
 
 # ---------- deps: install exactly what package-lock.json pins ----------
