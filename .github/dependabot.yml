@@ -1,0 +1,70 @@
+# Automated dependency updates (Dependabot).
+#
+# One entry per ecosystem the repository builds: the npm app (`npm`), its
+# container image (`docker`) and the workflows' own actions
+# (`github-actions`). Minor and patch bumps within an ecosystem are grouped
+# into a single PR; majors stay ungrouped so a breaking bump is reviewable on
+# its own.
+#
+# The `npm` entry reads `package-lock.json`, so the minor/patch group stays
+# within the semver ranges `package.json` already declares and does not widen
+# them. A major PR is the signal to bump those ranges by hand.
+#
+# Every Dependabot PR opens against `main` and therefore runs the `validate`
+# job in `.github/workflows/default.yml`. Note that this repo has no
+# `dependency-review` job, so these PRs do not depend on the dependency
+# graph being enabled.
+version: 2
+updates:
+  - package-ecosystem: 'npm'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
+    open-pull-requests-limit: 10
+    cooldown:
+      default-days: 7
+    labels:
+      - 'dependencies'
+      - 'npm'
+    groups:
+      npm-minor-patch:
+        patterns:
+          - '*'
+        update-types:
+          - 'minor'
+          - 'patch'
+
+  # The Dockerfile pins its base image by tag; `docker` is the ecosystem that
+  # tracks that, and it is the only thing that will move it.
+  - package-ecosystem: 'docker'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
+    open-pull-requests-limit: 5
+    cooldown:
+      default-days: 7
+    labels:
+      - 'dependencies'
+      - 'docker'
+    groups:
+      docker-minor-patch:
+        patterns:
+          - '*'
+        update-types:
+          - 'minor'
+          - 'patch'
+
+  - package-ecosystem: 'github-actions'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
+    open-pull-requests-limit: 5
+    cooldown:
+      default-days: 7
+    labels:
+      - 'dependencies'
+      - 'ci'
+    groups:
+      actions:
+        patterns:
+          - '*'
