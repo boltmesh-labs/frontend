@@ -13,7 +13,7 @@ vi.mock("@/features/auth/hooks/useAuthMutations", () => ({
 
 const renderAt = (search = "", setAccessToken = vi.fn()) =>
   render(
-    <AuthContext.Provider
+    <AuthContext
       value={{
         accessToken: "existing-session",
         loading: false,
@@ -33,7 +33,7 @@ const renderAt = (search = "", setAccessToken = vi.fn()) =>
           <Route path="/login" element={<div>Login page</div>} />
         </Routes>
       </MemoryRouter>
-    </AuthContext.Provider>,
+    </AuthContext>,
   );
 
 describe("ConfirmDelete", () => {

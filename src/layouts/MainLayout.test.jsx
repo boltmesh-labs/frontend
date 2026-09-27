@@ -17,7 +17,7 @@ const NextPageLink = () => {
 
 const renderLayout = async (authValue = { accessToken: null, user: null }) => {
   const view = render(
-    <AuthContext.Provider value={authValue}>
+    <AuthContext value={authValue}>
       <MemoryRouter initialEntries={["/"]}>
         <Routes>
           <Route path="/" element={<MainLayout />}>
@@ -27,7 +27,7 @@ const renderLayout = async (authValue = { accessToken: null, user: null }) => {
           <Route path="/login" element={<div>Login page</div>} />
         </Routes>
       </MemoryRouter>
-    </AuthContext.Provider>,
+    </AuthContext>,
   );
   const user = userEvent.setup();
   return { view, user };

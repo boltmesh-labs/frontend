@@ -7,7 +7,7 @@ import PublicRoute from "./PublicRoute";
 
 const renderGuard = (authValue, guardProps = {}) =>
   render(
-    <AuthContext.Provider value={authValue}>
+    <AuthContext value={authValue}>
       <MemoryRouter initialEntries={["/login"]}>
         <Routes>
           <Route
@@ -21,7 +21,7 @@ const renderGuard = (authValue, guardProps = {}) =>
           <Route path="/dashboard" element={<div>Dashboard page</div>} />
         </Routes>
       </MemoryRouter>
-    </AuthContext.Provider>,
+    </AuthContext>,
   );
 
 describe("PublicRoute", () => {

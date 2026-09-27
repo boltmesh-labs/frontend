@@ -7,7 +7,7 @@ import ProtectedRoute from "./ProtectedRoute";
 
 const renderGuard = (authValue, requiredRole) =>
   render(
-    <AuthContext.Provider value={authValue}>
+    <AuthContext value={authValue}>
       <MemoryRouter initialEntries={["/secret"]}>
         <Routes>
           <Route
@@ -22,7 +22,7 @@ const renderGuard = (authValue, requiredRole) =>
           <Route path="/unauthorized" element={<div>Unauthorized page</div>} />
         </Routes>
       </MemoryRouter>
-    </AuthContext.Provider>,
+    </AuthContext>,
   );
 
 const readyUser = (role = "user") => ({

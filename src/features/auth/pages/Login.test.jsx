@@ -17,7 +17,7 @@ const renderLogin = (
   state = undefined,
 ) =>
   render(
-    <AuthContext.Provider value={authValue}>
+    <AuthContext value={authValue}>
       <MemoryRouter initialEntries={[{ pathname: "/login", state }]}>
         <Routes>
           <Route path="/login" element={<Login />} />
@@ -25,7 +25,7 @@ const renderLogin = (
           <Route path="/devices" element={<div>Devices page</div>} />
         </Routes>
       </MemoryRouter>
-    </AuthContext.Provider>,
+    </AuthContext>,
   );
 
 let mutate;
