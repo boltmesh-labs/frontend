@@ -3,7 +3,9 @@
 # ---------- base: shared toolchain ----------
 # Pinned major tag (never a bare floating tag like `alpine`) so image pulls are
 # reproducible across machines while still receiving patch updates.
-FROM docker.io/library/node:22-alpine AS base
+# 24 is the Active LTS line ("Krypton"). The odd-numbered lines are Current
+# releases with no LTS backing, so they are skipped deliberately.
+FROM docker.io/library/node:24-alpine AS base
 WORKDIR /app
 
 # ---------- deps: install exactly what package-lock.json pins ----------
