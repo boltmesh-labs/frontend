@@ -6,7 +6,7 @@ React/Vite frontend for the BoltMesh VPN dashboard and administration portal.
 
 Requirements:
 
-- Node.js `>=22`
+- Node.js `>=24`
 - npm
 
 ```bash

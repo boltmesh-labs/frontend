@@ -4,7 +4,7 @@ This document describes how to build and deploy the BoltMesh React/Vite frontend
 
 ## Prerequisites
 
-- Node.js `>=22`
+- Node.js `>=24`
 - npm
 - A configured BoltMesh API and OAuth callback URLs
 - A static host/CDN with SPA fallback support
