@@ -35,14 +35,14 @@ Non-vulnerability security questions may be raised as public GitHub issues with 
 
 ## Automated Security Controls
 
-CI runs on every push and pull request targeting `main`/`develop` through the workflows under `.github/workflows/`:
+CI runs on every push to `main`/`develop` and every pull request targeting `main`/`develop`, through the single workflow `.github/workflows/default.yml`:
 
-- **Trivy filesystem scanning** (`security.yml`): fails the build on CRITICAL findings and ignores advisories without available fixes. Results are uploaded to the GitHub Security tab as SARIF (even when the scan fails). Trivy also evaluates third-party dependencies from lockfiles (`uv.lock`, `go.sum`, `package-lock.json`). Suppressions are reviewed individually in `.trivyignore`, and each entry documents its rationale (e.g., an upstream version constraint in `fastapi-mail`).
-- **Checkov static analysis of Terraform** (`infra.yml`): fails the pipeline on findings, with documented skips.
+- **Trivy filesystem scanning** (the `security` job): scans the working tree (`scan-type: fs`), skips advisories that have no fix available, and fails the build on any CRITICAL finding. It also evaluates third-party dependencies from `package-lock.json`. `.trivyignore` holds a single entry, `GHSA-qwww-vcr4-c8h2` (a React Router CSRF advisory), whose rationale is recorded inline: the application ships as a static client-side SPA and uses no React Server Components, so the advisory is not reachable. The job prints a table — it does not upload SARIF.
+- **Lint, format, tests and bundle verification** (the `validate` job): `npm run lint` (ESLint) and `npm run format:check` (Prettier), then `npm run test` (Vitest), mocked Playwright end-to-end tests on Chromium and mobile Chromium, a production-bundle smoke test, and finally `npm run build` followed by `grep` assertions over `dist/` proving the `VITE_*` values were inlined and that no `%VITE_*%` placeholder survived. Playwright reports and test results are uploaded as artifacts on failure only.
 - **Pre-commit hooks** (`.pre-commit-config.yaml`, run locally before every commit): ESLint, Prettier, markdownlint, `actionlint` on the GitHub Actions workflows, `gitleaks` for committed secrets, and the standard hygiene guards (trailing whitespace, end-of-file, YAML syntax, large added files, merge/case conflicts, mixed line endings, missing shebangs).
-- **Test coverage gates**: pytest enforces a minimum of 80% backend coverage (`fail_under = 80`); frontend Vitest runs with coverage in CI.
-- **Release integrity**: the Go node agent is built by `make all` (vet + test + cross-compile) into `bin/` with SHA-256 checksums; CI verifies `sha256sum -c checksums.txt` before publishing artifacts to GitHub Releases.
-- **CI secret hygiene**: workflows declare explicit least-privilege `permissions:` blocks, and cloud credentials are supplied only through GitHub Actions secrets — never committed to the repository.
+- **Coverage**: Vitest v8 thresholds of 80% lines and branches are configured for `src/api/**`, `src/hooks/**`, `src/utils/**` and globally, but CI runs `npm run test` without coverage, so they only apply to a local `npm run test:coverage`.
+- **CI secret hygiene**: the workflow declares a least-privilege `permissions:` block (`contents: read`, `pull-requests: write`, `security-events: write`, `id-token: write`). The ECR build-and-push job is commented out pending the deployment pipeline, so no AWS credentials are referenced from CI at all.
+- **Terraform/IaC scanning** (Checkov) runs in the `infra` repository, not here.
 
 Note: automated dependency-update automation (e.g., Dependabot) is **not yet configured** in this repository. Updates land through normal review, gated by the Trivy scan above.
 
