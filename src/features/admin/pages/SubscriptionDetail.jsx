@@ -1,35 +1,38 @@
-import { useCallback, useMemo } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import { Container, Button, Spinner, Row, Col } from 'react-bootstrap';
-import { useConfirm } from '@/hooks/useConfirm';
-import { usePageTitle } from '@/hooks/usePageTitle';
+import { useCallback, useMemo } from "react";
+import { useParams, useNavigate, Link } from "react-router-dom";
+import { Container, Button, Spinner, Row, Col } from "react-bootstrap";
+import { useConfirm } from "@/hooks/useConfirm";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import {
   useSubscriptionDetail,
   useSubscriptionDevices,
   useSubscriptionInvoices,
   useCancelSubscription,
-} from '@/features/admin/hooks/useSubscriptions';
-import { useUserDetail } from '@/features/admin/hooks/useUsers';
-import { DetailShell } from '@/components/DetailShell';
-import { SectionCard } from '@/components/SectionCard';
-import { DataTable } from '@/components/DataTable';
-import { DetailHeader } from '../components/DetailHeader';
-import { DetailSummary } from '../components/DetailSummary';
-import { formatCurrencyAmount } from '@/utils/currencyFormatter';
-import { getMethodDisplay } from '@/utils/methodDisplay';
-import { formatDate } from '@/utils/dateFormatter';
-import { SubscriptionStatusBadge } from '@/components/SubscriptionStatusBadge';
-import { InvoiceStatusBadge } from '@/components/InvoiceStatusBadge';
-import { VpnDeviceStateBadge } from '@/components/VpnDeviceStateBadge';
-import { AccountOwnerCard } from '../components/DetailAccount';
-import { SUBSCRIPTION_INVOICE_COLUMNS, VPN_DEVICE_COLUMNS } from '@/constants/tableColumns';
+} from "@/features/admin/hooks/useSubscriptions";
+import { useUserDetail } from "@/features/admin/hooks/useUsers";
+import { DetailShell } from "@/components/DetailShell";
+import { SectionCard } from "@/components/SectionCard";
+import { DataTable } from "@/components/DataTable";
+import { DetailHeader } from "../components/DetailHeader";
+import { DetailSummary } from "../components/DetailSummary";
+import { formatCurrencyAmount } from "@/utils/currencyFormatter";
+import { getMethodDisplay } from "@/utils/methodDisplay";
+import { formatDate } from "@/utils/dateFormatter";
+import { SubscriptionStatusBadge } from "@/components/SubscriptionStatusBadge";
+import { InvoiceStatusBadge } from "@/components/InvoiceStatusBadge";
+import { VpnDeviceStateBadge } from "@/components/VpnDeviceStateBadge";
+import { AccountOwnerCard } from "../components/DetailAccount";
+import {
+  SUBSCRIPTION_INVOICE_COLUMNS,
+  VPN_DEVICE_COLUMNS,
+} from "@/constants/tableColumns";
 
-import { SUBSCRIPTION_STATUSES } from '@/constants/statuses';
+import { SUBSCRIPTION_STATUSES } from "@/constants/statuses";
 
 // Everything except `canceled` can still be cancelled by an admin (mirrors the
 // backend's cancellation guard).
 const CANCELLABLE_STATUSES = Object.values(SUBSCRIPTION_STATUSES).filter(
-  (status) => status !== SUBSCRIPTION_STATUSES.canceled
+  (status) => status !== SUBSCRIPTION_STATUSES.canceled,
 );
 
 const SubscriptionDetail = () => {
@@ -37,13 +40,22 @@ const SubscriptionDetail = () => {
   const navigate = useNavigate();
   const { confirm, confirmDialog } = useConfirm();
 
-  const { data: subscription, isLoading, isError, error, refetch } = useSubscriptionDetail(id);
+  const {
+    data: subscription,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useSubscriptionDetail(id);
 
-  const { data: devices = [], isLoading: isDevicesLoading } = useSubscriptionDevices(id);
-  const { data: invoices = [], isLoading: isInvoicesLoading } = useSubscriptionInvoices(id);
+  const { data: devices = [], isLoading: isDevicesLoading } =
+    useSubscriptionDevices(id);
+  const { data: invoices = [], isLoading: isInvoicesLoading } =
+    useSubscriptionInvoices(id);
   const { data: user } = useUserDetail(subscription?.user_id);
 
-  const { mutate: cancelSubscription, isPending: isCancelling } = useCancelSubscription();
+  const { mutate: cancelSubscription, isPending: isCancelling } =
+    useCancelSubscription();
 
   usePageTitle(`Subscription ${id}`);
 
@@ -53,10 +65,10 @@ const SubscriptionDetail = () => {
 
   const handleCancelSubscription = async () => {
     const isConfirmed = await confirm({
-      title: 'Cancel Subscription',
-      message: 'Are you sure you want to cancel this subscription immediately?',
-      confirmText: 'Cancel',
-      confirmVariant: 'danger',
+      title: "Cancel Subscription",
+      message: "Are you sure you want to cancel this subscription immediately?",
+      confirmText: "Cancel",
+      confirmVariant: "danger",
     });
 
     if (!isConfirmed) return;
@@ -74,10 +86,10 @@ const SubscriptionDetail = () => {
 
     return [
       {
-        label: 'Plan',
+        label: "Plan",
         value: (
           <div className="d-inline-flex align-items-center gap-2">
-            <span>{subscription.plan?.name || 'Unnamed Plan'}</span>
+            <span>{subscription.plan?.name || "Unnamed Plan"}</span>
             {subscription.plan_id ? (
               <Link
                 to={`/admin/plans/${subscription.plan_id}`}
@@ -87,39 +99,41 @@ const SubscriptionDetail = () => {
                 #{subscription.plan_id}
               </Link>
             ) : (
-              <span className="badge bg-secondary-subtle text-muted fw-normal">N/A</span>
+              <span className="badge bg-secondary-subtle text-muted fw-normal">
+                N/A
+              </span>
             )}
           </div>
         ),
       },
       {
-        label: 'Start Date',
+        label: "Start Date",
         value: formatDate(subscription.started_at),
-        className: 'small font-monospace',
+        className: "small font-monospace",
       },
       {
-        label: 'Expiration Date',
+        label: "Expiration Date",
         value: formatDate(subscription.expires_at),
-        className: 'small font-monospace fw-bold',
+        className: "small font-monospace fw-bold",
       },
       ...(subscription.canceled_at
         ? [
             {
-              label: 'Canceled On',
+              label: "Canceled On",
               value: formatDate(subscription.canceled_at),
-              className: 'small font-monospace fw-bold text-danger',
+              className: "small font-monospace fw-bold text-danger",
             },
           ]
         : []),
       {
-        label: 'Created',
+        label: "Created",
         value: formatDate(subscription.created_at),
-        className: 'small font-monospace text-muted',
+        className: "small font-monospace text-muted",
       },
       {
-        label: 'Last Updated',
+        label: "Last Updated",
         value: formatDate(subscription.updated_at || subscription.created_at),
-        className: 'small font-monospace text-muted',
+        className: "small font-monospace text-muted",
       },
     ];
   }, [subscription]);
@@ -141,10 +155,12 @@ const SubscriptionDetail = () => {
         <td>
           <VpnDeviceStateBadge isActive={device.is_active} />
         </td>
-        <td className="small font-monospace">{formatDate(device.created_at)}</td>
+        <td className="small font-monospace">
+          {formatDate(device.created_at)}
+        </td>
       </tr>
     ),
-    []
+    [],
   );
 
   const renderInvoiceRow = useCallback(
@@ -162,22 +178,26 @@ const SubscriptionDetail = () => {
         <td className="text-uppercase small text-muted text-nowrap">
           {getMethodDisplay(inv.payment_method)}
         </td>
-        <td>{formatCurrencyAmount(inv.amount_paid ?? 0, inv.currency || 'USD')}</td>
+        <td>
+          {formatCurrencyAmount(inv.amount_paid ?? 0, inv.currency || "USD")}
+        </td>
         <td>
           <InvoiceStatusBadge status={inv.status} />
         </td>
         <td className="small font-monospace">{formatDate(inv.created_at)}</td>
       </tr>
     ),
-    []
+    [],
   );
 
-  const isCancellable = CANCELLABLE_STATUSES.includes(subscription?.status?.toLowerCase() || '');
+  const isCancellable = CANCELLABLE_STATUSES.includes(
+    subscription?.status?.toLowerCase() || "",
+  );
 
   const userContext = user || {
-    username: `User ${subscription?.user_id || 'N/A'}`,
-    email: 'N/A',
-    role: 'user',
+    username: `User ${subscription?.user_id || "N/A"}`,
+    email: "N/A",
+    role: "user",
   };
 
   const headerActions = isCancellable ? (
@@ -190,10 +210,11 @@ const SubscriptionDetail = () => {
     >
       {isCancelling ? (
         <>
-          <Spinner size="sm" animation="border" className="me-2" /> Cancelling...
+          <Spinner size="sm" animation="border" className="me-2" />{" "}
+          Cancelling...
         </>
       ) : (
-        'Cancel Subscription'
+        "Cancel Subscription"
       )}
     </Button>
   ) : null;
@@ -211,7 +232,11 @@ const SubscriptionDetail = () => {
       <Container className="py-4 position-relative min-vh-50">
         {confirmDialog}
 
-        <DetailHeader title="Subscription" id={subscription?.id} actions={headerActions} />
+        <DetailHeader
+          title="Subscription"
+          id={subscription?.id}
+          actions={headerActions}
+        />
 
         <Row className="g-4 mb-4">
           <Col lg={8}>

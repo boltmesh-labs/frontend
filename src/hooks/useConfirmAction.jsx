@@ -1,7 +1,7 @@
-import { useCallback, useState } from 'react';
-import { toast } from 'react-toastify';
-import { useConfirm } from '@/hooks/useConfirm';
-import { handleApiError } from '@/utils/errorHandler';
+import { useCallback, useState } from "react";
+import { toast } from "react-toastify";
+import { useConfirm } from "@/hooks/useConfirm";
+import { handleApiError } from "@/utils/errorHandler";
 
 /**
  * Runs a destructive/confirmation-wrapped action: prompts with a confirm
@@ -22,15 +22,22 @@ export const useConfirmAction = (config = {}) => {
     async (key, opts = {}) => {
       const title = opts.title ?? opts.confirmation?.title ?? config.title;
       const isConfirmed = await confirm({
-        title: title || 'Confirm Action',
-        message: opts.message ?? opts.confirmation?.message ?? config.message ?? 'Are you sure?',
+        title: title || "Confirm Action",
+        message:
+          opts.message ??
+          opts.confirmation?.message ??
+          config.message ??
+          "Are you sure?",
         confirmText:
-          opts.confirmText ?? opts.confirmation?.confirmText ?? config.confirmText ?? 'Confirm',
+          opts.confirmText ??
+          opts.confirmation?.confirmText ??
+          config.confirmText ??
+          "Confirm",
         confirmVariant:
           opts.confirmVariant ??
           opts.confirmation?.confirmVariant ??
           config.confirmVariant ??
-          'danger',
+          "danger",
       });
       if (!isConfirmed) return;
 
@@ -38,7 +45,7 @@ export const useConfirmAction = (config = {}) => {
       try {
         const result = await opts.run();
         const message =
-          typeof opts.successMessage === 'function'
+          typeof opts.successMessage === "function"
             ? opts.successMessage(result)
             : (opts.successMessage ?? config.successMessage);
         if (message) toast.success(message);
@@ -51,7 +58,7 @@ export const useConfirmAction = (config = {}) => {
         setBusy(null);
       }
     },
-    [confirm, config]
+    [confirm, config],
   );
 
   return { runConfirmed, busy, confirmDialog };

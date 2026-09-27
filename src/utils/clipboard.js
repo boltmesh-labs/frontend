@@ -1,4 +1,4 @@
-import { toast } from 'react-toastify';
+import { toast } from "react-toastify";
 
 /**
  * Copy text to the system clipboard with a fallback for non-secure contexts
@@ -11,15 +11,15 @@ export const copyTextToClipboard = async (text) => {
     if (navigator.clipboard && window.isSecureContext) {
       await navigator.clipboard.writeText(text);
     } else {
-      const textArea = document.createElement('textarea');
+      const textArea = document.createElement("textarea");
       textArea.value = text;
-      textArea.style.position = 'fixed';
-      textArea.style.left = '-999999px';
-      textArea.style.opacity = '0';
+      textArea.style.position = "fixed";
+      textArea.style.left = "-999999px";
+      textArea.style.opacity = "0";
       document.body.appendChild(textArea);
       textArea.focus();
       textArea.select();
-      document.execCommand('copy');
+      document.execCommand("copy");
       document.body.removeChild(textArea);
     }
     return true;
@@ -39,7 +39,10 @@ export const copyTextToClipboard = async (text) => {
  */
 export const copyToClipboard = async (
   text,
-  { success = 'Copied to clipboard!', error = 'Failed to copy text string' } = {}
+  {
+    success = "Copied to clipboard!",
+    error = "Failed to copy text string",
+  } = {},
 ) => {
   if (!text) return false;
 

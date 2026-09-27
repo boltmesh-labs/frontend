@@ -1,11 +1,11 @@
-import { Button } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
+import { Button } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
 
 export const DashboardHeader = ({
   title,
   subtitle,
-  backTo = '/dashboard',
-  backLabel = '← Back',
+  backTo = "/dashboard",
+  backLabel = "← Back",
   rightAction,
 }) => {
   const navigate = useNavigate();
@@ -14,7 +14,9 @@ export const DashboardHeader = ({
     <div className="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3 mb-4 border-bottom pb-3">
       <div className="text-start min-w-0">
         <h2 className="fw-bold text-body mb-1 text-break">{title}</h2>
-        {subtitle && <p className="text-muted small mb-0 text-break">{subtitle}</p>}
+        {subtitle && (
+          <p className="text-muted small mb-0 text-break">{subtitle}</p>
+        )}
       </div>
 
       <div className="d-flex flex-wrap align-items-center gap-2">

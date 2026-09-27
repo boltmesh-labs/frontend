@@ -1,28 +1,28 @@
-import { render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { render, screen } from "@testing-library/react";
+import { describe, expect, it } from "vitest";
 
-import { DashboardContainer } from './DashboardContainer';
+import { DashboardContainer } from "./DashboardContainer";
 
-describe('DashboardContainer', () => {
-  it('renders children inside the dashboard card', () => {
+describe("DashboardContainer", () => {
+  it("renders children inside the dashboard card", () => {
     render(
       <DashboardContainer>
         <div>Dashboard content</div>
-      </DashboardContainer>
+      </DashboardContainer>,
     );
 
-    expect(screen.getByText('Dashboard content')).toBeInTheDocument();
+    expect(screen.getByText("Dashboard content")).toBeInTheDocument();
   });
 
-  it('renders multiple children', () => {
+  it("renders multiple children", () => {
     render(
       <DashboardContainer>
         <h1>Title</h1>
         <p>Body copy</p>
-      </DashboardContainer>
+      </DashboardContainer>,
     );
 
-    expect(screen.getByRole('heading', { name: 'Title' })).toBeInTheDocument();
-    expect(screen.getByText('Body copy')).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Title" })).toBeInTheDocument();
+    expect(screen.getByText("Body copy")).toBeInTheDocument();
   });
 });

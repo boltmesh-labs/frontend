@@ -1,9 +1,9 @@
-import { adminKeys } from '../api/queryKeys';
-import { createAdminResource } from './createAdminResource';
+import { adminKeys } from "../api/queryKeys";
+import { createAdminResource } from "./createAdminResource";
 
 // Payments are read-only for admins: list + detail, no mutations.
 const resource = createAdminResource({
-  resourcePath: '/admin/payments',
+  resourcePath: "/admin/payments",
   listKey: adminKeys.payments,
   detailKey: adminKeys.paymentDetail,
 });

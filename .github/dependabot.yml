@@ -16,55 +16,55 @@
 # graph being enabled.
 version: 2
 updates:
-  - package-ecosystem: 'npm'
-    directory: '/'
+  - package-ecosystem: "npm"
+    directory: "/"
     schedule:
-      interval: 'weekly'
+      interval: "weekly"
     open-pull-requests-limit: 10
     cooldown:
       default-days: 7
     labels:
-      - 'dependencies'
-      - 'npm'
+      - "dependencies"
+      - "npm"
     groups:
       npm-minor-patch:
         patterns:
-          - '*'
+          - "*"
         update-types:
-          - 'minor'
-          - 'patch'
+          - "minor"
+          - "patch"
 
   # The Dockerfile pins its base image by tag; `docker` is the ecosystem that
   # tracks that, and it is the only thing that will move it.
-  - package-ecosystem: 'docker'
-    directory: '/'
+  - package-ecosystem: "docker"
+    directory: "/"
     schedule:
-      interval: 'weekly'
+      interval: "weekly"
     open-pull-requests-limit: 5
     cooldown:
       default-days: 7
     labels:
-      - 'dependencies'
-      - 'docker'
+      - "dependencies"
+      - "docker"
     groups:
       docker-minor-patch:
         patterns:
-          - '*'
+          - "*"
         update-types:
-          - 'minor'
-          - 'patch'
+          - "minor"
+          - "patch"
 
-  - package-ecosystem: 'github-actions'
-    directory: '/'
+  - package-ecosystem: "github-actions"
+    directory: "/"
     schedule:
-      interval: 'weekly'
+      interval: "weekly"
     open-pull-requests-limit: 5
     cooldown:
       default-days: 7
     labels:
-      - 'dependencies'
-      - 'ci'
+      - "dependencies"
+      - "ci"
     groups:
       actions:
         patterns:
-          - '*'
+          - "*"

@@ -1,16 +1,16 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { apiClient } from '@/api/client';
-import { extractList } from '@/utils/apiResponse';
-import { TERMINAL_INVOICE_STATUSES } from '@/constants/statuses';
-import { dashboardKeys } from '../api/queryKeys';
-import { getApiError } from '@/utils/errorHandler';
-import { toast } from 'react-toastify';
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { apiClient } from "@/api/client";
+import { extractList } from "@/utils/apiResponse";
+import { TERMINAL_INVOICE_STATUSES } from "@/constants/statuses";
+import { dashboardKeys } from "../api/queryKeys";
+import { getApiError } from "@/utils/errorHandler";
+import { toast } from "react-toastify";
 
 export const useDashboardProfile = () => {
   return useQuery({
     queryKey: dashboardKeys.profile(),
     queryFn: async () => {
-      const { data } = await apiClient.api.get('/users');
+      const { data } = await apiClient.api.get("/users");
       return data;
     },
     // Plan/subscription state can change server-side at any time (payment
@@ -24,7 +24,7 @@ export const useUserSubscriptions = () => {
   return useQuery({
     queryKey: dashboardKeys.subscriptions(),
     queryFn: async () => {
-      const { data } = await apiClient.api.get('/subscriptions');
+      const { data } = await apiClient.api.get("/subscriptions");
       return extractList(data);
     },
     placeholderData: (prev) => prev,
@@ -41,7 +41,7 @@ export const useUserSubscriptionDetail = (id) => {
       const { data } = await apiClient.api.get(`/subscriptions/${id}`);
       return data;
     },
-    enabled: Boolean(id) && id !== 'new',
+    enabled: Boolean(id) && id !== "new",
   });
 };
 
@@ -62,7 +62,7 @@ export const useUserInvoices = (params = {}) => {
     queryKey: dashboardKeys.invoices(params),
     queryFn: async () => {
       // GET /v1/invoices supports skip/limit pagination only.
-      const { data } = await apiClient.api.get('/invoices', { params });
+      const { data } = await apiClient.api.get("/invoices", { params });
       return data;
     },
     placeholderData: (prev) => prev,
@@ -86,7 +86,7 @@ export const useUserInvoiceDetail = (id) => {
 export const useCreateInvoice = () => {
   return useMutation({
     mutationFn: async (invoiceData) => {
-      const { data } = await apiClient.api.post('/invoices', invoiceData);
+      const { data } = await apiClient.api.post("/invoices", invoiceData);
       return data;
     },
     // No cache side effects here: Checkout navigates to /payment on success
@@ -98,7 +98,9 @@ export const useUserInvoicesBySubscription = (subscriptionId) => {
   return useQuery({
     queryKey: dashboardKeys.invoicesBySubscription(subscriptionId),
     queryFn: async () => {
-      const { data } = await apiClient.api.get(`/invoices/by-subscription/${subscriptionId}`);
+      const { data } = await apiClient.api.get(
+        `/invoices/by-subscription/${subscriptionId}`,
+      );
       return extractList(data);
     },
     enabled: Boolean(subscriptionId),
@@ -110,7 +112,7 @@ export const useUserDevices = () => {
   return useQuery({
     queryKey: dashboardKeys.devices(),
     queryFn: async () => {
-      const { data } = await apiClient.api.get('/vpn-devices');
+      const { data } = await apiClient.api.get("/vpn-devices");
       return extractList(data);
     },
     placeholderData: (prev) => prev,
@@ -121,7 +123,9 @@ export const useUserDevicesBySubscription = (subscriptionId) => {
   return useQuery({
     queryKey: dashboardKeys.devicesBySubscription(subscriptionId),
     queryFn: async () => {
-      const { data } = await apiClient.api.get(`/vpn-devices/by-subscription/${subscriptionId}`);
+      const { data } = await apiClient.api.get(
+        `/vpn-devices/by-subscription/${subscriptionId}`,
+      );
       return extractList(data);
     },
     enabled: Boolean(subscriptionId),
@@ -133,26 +137,30 @@ export const useResendActivation = () => {
   return useMutation({
     mutationFn: async () => {
       // This endpoint identifies the recipient from the authenticated user.
-      const { data } = await apiClient.api.post('/auth/resend-activation');
+      const { data } = await apiClient.api.post("/auth/resend-activation");
       return data;
     },
     onSuccess: () => {
-      toast.success('Verification email sent.');
+      toast.success("Verification email sent.");
     },
-    onError: (err) => toast.error(getApiError(err, 'Failed to send email')),
+    onError: (err) => toast.error(getApiError(err, "Failed to send email")),
   });
 };
 
 export const useChangePassword = () => {
   return useMutation({
     mutationFn: async (passwordData) => {
-      const { data } = await apiClient.api.put('/users/change-password', passwordData);
+      const { data } = await apiClient.api.put(
+        "/users/change-password",
+        passwordData,
+      );
       return data;
     },
     onSuccess: () => {
-      toast.success('Password updated successfully.');
+      toast.success("Password updated successfully.");
     },
-    onError: (err) => toast.error(getApiError(err, 'Failed to update password')),
+    onError: (err) =>
+      toast.error(getApiError(err, "Failed to update password")),
   });
 };
 
@@ -161,14 +169,14 @@ export const useUpdateProfile = () => {
 
   return useMutation({
     mutationFn: async (profileData) => {
-      const { data } = await apiClient.api.patch('/users', profileData);
+      const { data } = await apiClient.api.patch("/users", profileData);
       return data;
     },
     onSuccess: () => {
-      toast.success('Profile updated successfully.');
+      toast.success("Profile updated successfully.");
       queryClient.invalidateQueries({ queryKey: dashboardKeys.profile() });
     },
-    onError: (err) => toast.error(getApiError(err, 'Failed to update profile')),
+    onError: (err) => toast.error(getApiError(err, "Failed to update profile")),
   });
 };
 
@@ -181,11 +189,15 @@ export const useCancelUserSubscription = () => {
       return id;
     },
     onSuccess: (_, id) => {
-      toast.success('Subscription cancelled.');
-      queryClient.invalidateQueries({ queryKey: dashboardKeys.subscriptions() });
-      queryClient.invalidateQueries({ queryKey: dashboardKeys.subscriptionDetail(id) });
+      toast.success("Subscription cancelled.");
+      queryClient.invalidateQueries({
+        queryKey: dashboardKeys.subscriptions(),
+      });
+      queryClient.invalidateQueries({
+        queryKey: dashboardKeys.subscriptionDetail(id),
+      });
     },
-    onError: (err) => toast.error(getApiError(err, 'Cancellation failed')),
+    onError: (err) => toast.error(getApiError(err, "Cancellation failed")),
   });
 };
 
@@ -214,7 +226,7 @@ export const useSupportedCurrencies = ({ enabled = true } = {}) => {
       // GET /v1/crypto/currencies -> { currencies: ['usd', ...] } carrying
       // lowercase ISO 4217 codes from SUPPORTED_FIAT_CURRENCIES. Static config,
       // so the global staleTime applies — no refetch-on-mount needed.
-      const { data } = await apiClient.api.get('/crypto/currencies');
+      const { data } = await apiClient.api.get("/crypto/currencies");
       return data;
     },
     enabled,
@@ -226,17 +238,20 @@ export const usePublicPlans = () => {
     queryKey: dashboardKeys.plans(),
     queryFn: async () => {
       // Public endpoint; shape normalized to a bare array for consumers.
-      const { data } = await apiClient.api.get('/plans');
+      const { data } = await apiClient.api.get("/plans");
       return extractList(data);
     },
   });
 };
 
-export const useCryptoPrices = (fiatCurrency = 'USD', { enabled = true } = {}) => {
+export const useCryptoPrices = (
+  fiatCurrency = "USD",
+  { enabled = true } = {},
+) => {
   return useQuery({
     queryKey: dashboardKeys.cryptoPrices(fiatCurrency),
     queryFn: async () => {
-      const { data } = await apiClient.api.get('/crypto/prices', {
+      const { data } = await apiClient.api.get("/crypto/prices", {
         params: { fiat_currency: fiatCurrency },
       });
       return data;
@@ -246,13 +261,13 @@ export const useCryptoPrices = (fiatCurrency = 'USD', { enabled = true } = {}) =
   });
 };
 
-export const useFxRate = (fiatCurrency = 'USD', { enabled = true } = {}) => {
+export const useFxRate = (fiatCurrency = "USD", { enabled = true } = {}) => {
   return useQuery({
     queryKey: dashboardKeys.fxRate(fiatCurrency),
     queryFn: async () => {
       // GET /v1/crypto/fx-rate -> { fiat_currency, rate_to_usd } where
       // rate_to_usd is the USD cost of one unit of fiat_currency.
-      const { data } = await apiClient.api.get('/crypto/fx-rate', {
+      const { data } = await apiClient.api.get("/crypto/fx-rate", {
         params: { fiat_currency: fiatCurrency },
       });
       return data;
@@ -278,7 +293,9 @@ export const useInvoiceStatus = (invoiceId, { enabled = true } = {}) => {
     // via provider webhook -> backend); afterwards stop hitting the endpoint.
     refetchInterval: (query) => {
       const status = query.state.data?.status?.toLowerCase();
-      return TERMINAL_INVOICE_STATUSES.includes(status) ? false : INVOICE_STATUS_POLL_MS;
+      return TERMINAL_INVOICE_STATUSES.includes(status)
+        ? false
+        : INVOICE_STATUS_POLL_MS;
     },
     enabled: enabled && Boolean(invoiceId),
   });
@@ -296,8 +313,12 @@ export const useCancelInvoice = () => {
     // this hook refreshes the cached invoice and its polled status key, which
     // refetches any active query without a manual refetch() at the call site.
     onSuccess: (_, id) => {
-      queryClient.invalidateQueries({ queryKey: dashboardKeys.invoiceDetail(id) });
-      queryClient.invalidateQueries({ queryKey: dashboardKeys.invoiceStatus(id) });
+      queryClient.invalidateQueries({
+        queryKey: dashboardKeys.invoiceDetail(id),
+      });
+      queryClient.invalidateQueries({
+        queryKey: dashboardKeys.invoiceStatus(id),
+      });
     },
   });
 };
@@ -305,7 +326,7 @@ export const useCancelInvoice = () => {
 export const useRequestAccountDeletion = () => {
   return useMutation({
     mutationFn: async () => {
-      const { data } = await apiClient.api.post('/users/delete-request');
+      const { data } = await apiClient.api.post("/users/delete-request");
       return data;
     },
     // Feedback is owned by AccountSettings (inline confirmation panel), so no

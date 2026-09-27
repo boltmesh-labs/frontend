@@ -1,35 +1,44 @@
-import { useState } from 'react';
-import { Button, Card, Col, Container, Form, InputGroup, Row, Spinner } from 'react-bootstrap';
-import { useNavigate, useParams } from 'react-router-dom';
-import { toast } from 'react-toastify';
-import { usePageTitle } from '@/hooks/usePageTitle';
-import { useConfirm } from '@/hooks/useConfirm';
-import { useForm } from '@/hooks/useForm';
+import { useState } from "react";
+import {
+  Button,
+  Card,
+  Col,
+  Container,
+  Form,
+  InputGroup,
+  Row,
+  Spinner,
+} from "react-bootstrap";
+import { useNavigate, useParams } from "react-router-dom";
+import { toast } from "react-toastify";
+import { usePageTitle } from "@/hooks/usePageTitle";
+import { useConfirm } from "@/hooks/useConfirm";
+import { useForm } from "@/hooks/useForm";
 import {
   usePlanDetail,
   useCreatePlan,
   useUpdatePlan,
   useDeletePlan,
-} from '@/features/admin/hooks/usePlans';
-import { formatDate } from '@/utils/dateFormatter';
+} from "@/features/admin/hooks/usePlans";
+import { formatDate } from "@/utils/dateFormatter";
 
-import { DetailShell } from '@/components/DetailShell';
-import { LoadingOverlay } from '@/components/LoadingOverlay';
-import { DetailHeader } from '../components/DetailHeader';
+import { DetailShell } from "@/components/DetailShell";
+import { LoadingOverlay } from "@/components/LoadingOverlay";
+import { DetailHeader } from "../components/DetailHeader";
 
 const DEFAULT_FORM_DATA = {
-  id: '',
-  name: '',
-  tier: 'standard',
+  id: "",
+  name: "",
+  tier: "standard",
   price_usd: 0.0,
-  billing_cycle: 'monthly',
+  billing_cycle: "monthly",
   duration_in_days: 30,
   max_devices: 5,
   speed_limit_mbps: 0,
   dedicated_ip: false,
-  description: '',
-  features: '',
-  savings: '',
+  description: "",
+  features: "",
+  savings: "",
   popular: false,
   enabled: true,
   created_at: null,
@@ -40,22 +49,22 @@ const formatPlanToForm = (plan) => {
   if (!plan) return DEFAULT_FORM_DATA;
 
   const formattedFeatures = Array.isArray(plan.features)
-    ? plan.features.join('\n')
-    : plan.features || '';
+    ? plan.features.join("\n")
+    : plan.features || "";
 
   return {
-    id: plan.id || '',
-    name: plan.name || '',
-    tier: plan.tier || 'standard',
+    id: plan.id || "",
+    name: plan.name || "",
+    tier: plan.tier || "standard",
     price_usd: Number(plan.price_usd) || 0.0,
-    billing_cycle: plan.billing_cycle || 'monthly',
+    billing_cycle: plan.billing_cycle || "monthly",
     duration_in_days: parseInt(plan.duration_in_days, 10) || 30,
     max_devices: parseInt(plan.max_devices, 10) || 5,
     speed_limit_mbps: parseInt(plan.speed_limit_mbps, 10) || 0,
     dedicated_ip: Boolean(plan.dedicated_ip),
-    description: plan.description || '',
+    description: plan.description || "",
     features: formattedFeatures,
-    savings: plan.savings ?? '',
+    savings: plan.savings ?? "",
     popular: Boolean(plan.popular),
     enabled: plan.enabled ?? true,
     created_at: plan.created_at || null,
@@ -68,8 +77,8 @@ const PlanDetail = () => {
   const navigate = useNavigate();
   const { confirm, confirmDialog } = useConfirm();
 
-  const isNew = id === 'new';
-  const pageTitle = isNew ? 'Create Plan' : `Edit Plan #${id}`;
+  const isNew = id === "new";
+  const pageTitle = isNew ? "Create Plan" : `Edit Plan #${id}`;
   usePageTitle(pageTitle);
 
   const {
@@ -81,7 +90,9 @@ const PlanDetail = () => {
 
   // Initial state derived cleanly on mount
   const [initialFormData] = useState(() => {
-    return isNew || !targetPlan ? DEFAULT_FORM_DATA : formatPlanToForm(targetPlan);
+    return isNew || !targetPlan
+      ? DEFAULT_FORM_DATA
+      : formatPlanToForm(targetPlan);
   });
   const { values: formData, setValue, setValues } = useForm(initialFormData);
 
@@ -93,11 +104,13 @@ const PlanDetail = () => {
   // plan's values because syncing only ran on the very first loading → loaded
   // transition. Background refetches keep the same source id, so they never
   // clobber in-progress edits.
-  const formSource = isNew ? 'new' : targetPlan ? id : null;
+  const formSource = isNew ? "new" : targetPlan ? id : null;
   const [syncedSource, setSyncedSource] = useState(formSource);
   if (formSource !== null && formSource !== syncedSource) {
     setSyncedSource(formSource);
-    setValues(formSource === 'new' ? DEFAULT_FORM_DATA : formatPlanToForm(targetPlan));
+    setValues(
+      formSource === "new" ? DEFAULT_FORM_DATA : formatPlanToForm(targetPlan),
+    );
   }
 
   const createMutation = useCreatePlan();
@@ -118,10 +131,10 @@ const PlanDetail = () => {
 
     // Checkboxes become booleans and number inputs stay numeric so
     // submit-time validation and payloads stay consistent.
-    if (type === 'checkbox') {
+    if (type === "checkbox") {
       setValue(name, checked);
-    } else if (type === 'number') {
-      setValue(name, value === '' ? '' : Number(value));
+    } else if (type === "number") {
+      setValue(name, value === "" ? "" : Number(value));
     } else {
       setValue(name, value);
     }
@@ -129,17 +142,17 @@ const PlanDetail = () => {
 
   const handleDelete = async () => {
     const isConfirmed = await confirm({
-      title: 'Delete Subscription Plan',
+      title: "Delete Subscription Plan",
       message: `Are you sure you want to delete "${formData.name}"? This action cannot be undone.`,
-      confirmText: 'Delete Plan',
-      confirmVariant: 'danger',
+      confirmText: "Delete Plan",
+      confirmVariant: "danger",
     });
 
     if (!isConfirmed) return;
 
     try {
       await deleteMutation.mutateAsync(id);
-      navigate('/admin/plans');
+      navigate("/admin/plans");
     } catch {
       // Feedback is owned by useDeletePlan (toasts); the rejection is
       // contained here so the page does not double-toast.
@@ -151,33 +164,39 @@ const PlanDetail = () => {
 
     const parsedPrice = parseFloat(formData.price_usd);
     if (isNaN(parsedPrice) || parsedPrice < 0) {
-      toast.error('Price must be a valid non-negative number.');
+      toast.error("Price must be a valid non-negative number.");
       return;
     }
 
     if (!formData.name.trim()) {
-      toast.error('Plan name is required.');
+      toast.error("Plan name is required.");
       return;
     }
 
     if (!formData.description.trim()) {
-      toast.error('Plan description is required.');
+      toast.error("Plan description is required.");
       return;
     }
 
     const featuresList = formData.features
-      .split('\n')
+      .split("\n")
       .map((line) => line.trim())
       .filter((line) => line.length > 0);
 
     const basePayload = {
       name: formData.name.trim(),
-      tier: formData.tier.trim() || 'standard',
+      tier: formData.tier.trim() || "standard",
       price_usd: parsedPrice,
-      billing_cycle: formData.billing_cycle.trim() || 'monthly',
-      duration_in_days: Math.max(1, parseInt(formData.duration_in_days, 10) || 30),
+      billing_cycle: formData.billing_cycle.trim() || "monthly",
+      duration_in_days: Math.max(
+        1,
+        parseInt(formData.duration_in_days, 10) || 30,
+      ),
       max_devices: Math.max(1, parseInt(formData.max_devices, 10) || 1),
-      speed_limit_mbps: Math.min(1000, Math.max(0, parseInt(formData.speed_limit_mbps, 10) || 0)),
+      speed_limit_mbps: Math.min(
+        1000,
+        Math.max(0, parseInt(formData.speed_limit_mbps, 10) || 0),
+      ),
       dedicated_ip: formData.dedicated_ip,
       description: formData.description.trim(),
       features: featuresList,
@@ -190,18 +209,20 @@ const PlanDetail = () => {
       if (isNew) {
         const cleanId = formData.id.trim();
         if (!cleanId) {
-          toast.error('Plan identifier (ID) is required for new plans.');
+          toast.error("Plan identifier (ID) is required for new plans.");
           return;
         }
         if (!/^[a-z0-9-]+$/.test(cleanId)) {
-          toast.error('Plan ID must contain only lowercase letters, numbers, and hyphens.');
+          toast.error(
+            "Plan ID must contain only lowercase letters, numbers, and hyphens.",
+          );
           return;
         }
         await createMutation.mutateAsync({ id: cleanId, ...basePayload });
       } else {
         await updateMutation.mutateAsync({ id, ...basePayload });
       }
-      navigate('/admin/plans');
+      navigate("/admin/plans");
     } catch {
       // Feedback is owned by useCreatePlan/useUpdatePlan (toasts); the
       // rejection is contained here so the page does not double-toast.
@@ -219,11 +240,15 @@ const PlanDetail = () => {
       backLabel="Return to Plans"
       backVariant="outline-danger"
     >
-      <Container className="py-5" style={{ maxWidth: '850px' }}>
+      <Container className="py-5" style={{ maxWidth: "850px" }}>
         {confirmDialog}
         <DetailHeader
-          title={isNew ? 'Create Subscription Plan' : formData.name || 'Subscription Plan'}
-          id={isNew ? formData.id || 'NEW_PLAN' : id}
+          title={
+            isNew
+              ? "Create Subscription Plan"
+              : formData.name || "Subscription Plan"
+          }
+          id={isNew ? formData.id || "NEW_PLAN" : id}
           idPrefix="Plan ID:"
         />
 
@@ -232,10 +257,10 @@ const PlanDetail = () => {
             show={isSubmitting || deleteMutation.isPending}
             message={
               isSubmitting
-                ? 'Saving plan configuration...'
+                ? "Saving plan configuration..."
                 : deleteMutation.isPending
-                  ? 'Deleting plan...'
-                  : ''
+                  ? "Deleting plan..."
+                  : ""
             }
           />
 
@@ -245,7 +270,8 @@ const PlanDetail = () => {
                 <Col md={12}>
                   <Form.Group controlId="planId">
                     <Form.Label className="text-secondary fw-semibold small">
-                      Plan Identifier (ID) <span className="text-danger">*</span>
+                      Plan Identifier (ID){" "}
+                      <span className="text-danger">*</span>
                     </Form.Label>
                     <Form.Control
                       type="text"
@@ -256,7 +282,8 @@ const PlanDetail = () => {
                       required
                     />
                     <Form.Text className="text-muted">
-                      Unique slug/identifier for backend indexing. Cannot be changed after creation.
+                      Unique slug/identifier for backend indexing. Cannot be
+                      changed after creation.
                     </Form.Text>
                   </Form.Group>
                 </Col>
@@ -264,7 +291,9 @@ const PlanDetail = () => {
 
               <Col md={8}>
                 <Form.Group controlId="planName">
-                  <Form.Label className="text-secondary fw-semibold small">Plan Name</Form.Label>
+                  <Form.Label className="text-secondary fw-semibold small">
+                    Plan Name
+                  </Form.Label>
                   <Form.Control
                     type="text"
                     name="name"
@@ -296,7 +325,9 @@ const PlanDetail = () => {
 
               <Col md={4}>
                 <Form.Group controlId="planPrice">
-                  <Form.Label className="text-secondary fw-semibold small">Price (USD)</Form.Label>
+                  <Form.Label className="text-secondary fw-semibold small">
+                    Price (USD)
+                  </Form.Label>
                   <InputGroup>
                     <InputGroup.Text>$</InputGroup.Text>
                     <Form.Control
@@ -330,7 +361,9 @@ const PlanDetail = () => {
 
               <Col md={4}>
                 <Form.Group controlId="planSavings">
-                  <Form.Label className="text-secondary fw-semibold small">Savings</Form.Label>
+                  <Form.Label className="text-secondary fw-semibold small">
+                    Savings
+                  </Form.Label>
                   <Form.Control
                     type="number"
                     min="0"
@@ -361,7 +394,9 @@ const PlanDetail = () => {
 
               <Col md={4}>
                 <Form.Group controlId="planDevices">
-                  <Form.Label className="text-secondary fw-semibold small">Max Devices</Form.Label>
+                  <Form.Label className="text-secondary fw-semibold small">
+                    Max Devices
+                  </Form.Label>
                   <Form.Control
                     type="number"
                     min="1"
@@ -388,7 +423,9 @@ const PlanDetail = () => {
                     onChange={handleInputChange}
                     placeholder="0 = Unlimited"
                   />
-                  <Form.Text className="text-muted">Set 0 for unthrottled bandwidth.</Form.Text>
+                  <Form.Text className="text-muted">
+                    Set 0 for unthrottled bandwidth.
+                  </Form.Text>
                 </Form.Group>
               </Col>
 
@@ -416,13 +453,17 @@ const PlanDetail = () => {
                   name="dedicated_ip"
                   checked={formData.dedicated_ip}
                   onChange={handleInputChange}
-                  label={<span className="fw-semibold small">Dedicated IP</span>}
+                  label={
+                    <span className="fw-semibold small">Dedicated IP</span>
+                  }
                 />
               </Col>
 
               <Col md={12}>
                 <Form.Group controlId="planDescription">
-                  <Form.Label className="text-secondary fw-semibold small">Description</Form.Label>
+                  <Form.Label className="text-secondary fw-semibold small">
+                    Description
+                  </Form.Label>
                   <Form.Control
                     as="textarea"
                     rows={2}
@@ -454,11 +495,15 @@ const PlanDetail = () => {
                 <Col md={12} className="pt-3 border-top mt-3">
                   <Row className="g-2 text-muted small font-monospace">
                     <Col sm={6}>
-                      <span className="fw-semibold text-secondary">Created:</span>{' '}
+                      <span className="fw-semibold text-secondary">
+                        Created:
+                      </span>{" "}
                       {formatDate(formData.created_at)}
                     </Col>
                     <Col sm={6} className="text-sm-end">
-                      <span className="fw-semibold text-secondary">Last Updated:</span>{' '}
+                      <span className="fw-semibold text-secondary">
+                        Last Updated:
+                      </span>{" "}
                       {formatDate(formData.updated_at || formData.created_at)}
                     </Col>
                   </Row>
@@ -477,7 +522,7 @@ const PlanDetail = () => {
                       onClick={handleDelete}
                       disabled={isSubmitting || deleteMutation.isPending}
                     >
-                      {deleteMutation.isPending ? 'Deleting...' : 'Delete Plan'}
+                      {deleteMutation.isPending ? "Deleting..." : "Delete Plan"}
                     </Button>
                   )}
                 </div>
@@ -498,12 +543,17 @@ const PlanDetail = () => {
                   >
                     {isSubmitting ? (
                       <>
-                        <Spinner size="sm" animation="border" className="me-2" /> Saving...
+                        <Spinner
+                          size="sm"
+                          animation="border"
+                          className="me-2"
+                        />{" "}
+                        Saving...
                       </>
                     ) : isNew ? (
-                      'Create Plan'
+                      "Create Plan"
                     ) : (
-                      'Save Settings'
+                      "Save Settings"
                     )}
                   </Button>
                 </div>

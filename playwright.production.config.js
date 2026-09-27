@@ -1,31 +1,34 @@
-import { defineConfig, devices } from '@playwright/test';
-import { loadEnv } from 'vite';
+import { defineConfig, devices } from "@playwright/test";
+import { loadEnv } from "vite";
 
-import baseConfig from './playwright.config.js';
+import baseConfig from "./playwright.config.js";
 
 const e2eApiUrl =
-  process.env.E2E_API_URL || process.env.VITE_API_URL || 'https://api.e2e.invalid/v1';
+  process.env.E2E_API_URL ||
+  process.env.VITE_API_URL ||
+  "https://api.e2e.invalid/v1";
 const e2eCompanyName =
   process.env.VITE_APP_COMPANY_NAME ||
-  loadEnv(process.env.NODE_ENV || 'production', process.cwd(), 'VITE_').VITE_APP_COMPANY_NAME ||
-  'BoltMesh VPN';
+  loadEnv(process.env.NODE_ENV || "production", process.cwd(), "VITE_")
+    .VITE_APP_COMPANY_NAME ||
+  "BoltMesh VPN";
 
 export default defineConfig({
   ...baseConfig,
-  testMatch: '**/production-smoke.spec.js',
+  testMatch: "**/production-smoke.spec.js",
   projects: [
     {
-      name: 'production-chromium',
-      use: { ...devices['Desktop Chrome'] },
+      name: "production-chromium",
+      use: { ...devices["Desktop Chrome"] },
     },
   ],
   use: {
     ...baseConfig.use,
-    baseURL: 'http://127.0.0.1:4173',
+    baseURL: "http://127.0.0.1:4173",
   },
   webServer: {
-    command: 'npm run build && npm run preview -- --host 127.0.0.1 --port 4173',
-    url: 'http://127.0.0.1:4173',
+    command: "npm run build && npm run preview -- --host 127.0.0.1 --port 4173",
+    url: "http://127.0.0.1:4173",
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
     env: {

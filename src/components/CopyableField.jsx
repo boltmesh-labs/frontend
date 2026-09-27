@@ -1,7 +1,7 @@
-import { useCallback } from 'react';
-import { Button } from 'react-bootstrap';
-import { copyToClipboard } from '@/utils/clipboard';
-import { useCopied } from '@/hooks/useCopied';
+import { useCallback } from "react";
+import { Button } from "react-bootstrap";
+import { copyToClipboard } from "@/utils/clipboard";
+import { useCopied } from "@/hooks/useCopied";
 
 /**
  * Reusable field for displaying monospaced copyable text (keys, addresses, URIs, tokens).
@@ -10,7 +10,7 @@ export const CopyableField = ({
   label,
   value,
   toastLabel = label,
-  className = '',
+  className = "",
   sensitive = false,
   truncate = false,
   title,
@@ -31,9 +31,11 @@ export const CopyableField = ({
 
   if (!value) return null;
 
-  const displayValue = sensitive ? '••••••••••••••••••••••••••••••••••••••••••••' : value;
+  const displayValue = sensitive
+    ? "••••••••••••••••••••••••••••••••••••••••••••"
+    : value;
 
-  const overflowClass = truncate ? 'text-truncate' : 'text-break';
+  const overflowClass = truncate ? "text-truncate" : "text-break";
 
   return (
     <div className={className}>
@@ -50,7 +52,7 @@ export const CopyableField = ({
           {displayValue}
         </span>
         <Button
-          variant={copied ? 'outline-success' : 'outline-primary'}
+          variant={copied ? "outline-success" : "outline-primary"}
           size="sm"
           className="fw-bold rounded-3 flex-shrink-0 px-3 h-100 d-flex align-items-center justify-content-center"
           onClick={handleCopy}

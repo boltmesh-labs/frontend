@@ -1,5 +1,5 @@
-import { useMutation } from '@tanstack/react-query';
-import { apiClient } from '@/api/client';
+import { useMutation } from "@tanstack/react-query";
+import { apiClient } from "@/api/client";
 
 /**
  * Sends the public support-contact form. It goes through `apiClient.api` so
@@ -14,9 +14,11 @@ export const useSendContactMessage = () => {
     mutationFn: async ({ formData, signal }) => {
       const payload = {
         ...formData,
-        subject: formData.subject.trim() || 'General Support Inquiry',
+        subject: formData.subject.trim() || "General Support Inquiry",
       };
-      const { data } = await apiClient.api.post('/support/contact', payload, { signal });
+      const { data } = await apiClient.api.post("/support/contact", payload, {
+        signal,
+      });
       return data;
     },
   });

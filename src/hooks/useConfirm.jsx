@@ -1,13 +1,13 @@
-import { useState, useCallback, useRef } from 'react';
-import { ConfirmModal } from '@/components/ConfirmModal';
+import { useState, useCallback, useRef } from "react";
+import { ConfirmModal } from "@/components/ConfirmModal";
 
 export const useConfirm = () => {
   const [modalState, setModalState] = useState({
     isOpen: false,
-    title: '',
-    message: '',
-    confirmVariant: 'danger',
-    confirmText: 'Confirm',
+    title: "",
+    message: "",
+    confirmVariant: "danger",
+    confirmText: "Confirm",
   });
 
   const resolverRef = useRef(null);
@@ -17,10 +17,10 @@ export const useConfirm = () => {
       resolverRef.current = resolve;
       setModalState({
         isOpen: true,
-        title: options.title || 'Confirm Action',
-        message: options.message || 'Are you sure?',
-        confirmVariant: options.confirmVariant || 'danger',
-        confirmText: options.confirmText || 'Confirm',
+        title: options.title || "Confirm Action",
+        message: options.message || "Are you sure?",
+        confirmVariant: options.confirmVariant || "danger",
+        confirmText: options.confirmText || "Confirm",
       });
     });
   }, []);

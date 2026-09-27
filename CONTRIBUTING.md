@@ -14,31 +14,31 @@ This project and everyone participating in it is governed by our Code of Conduct
 
 Before creating bug reports, please check the issue list as you might find out that you don't need to create one. When you are creating a bug report, please include as many details as possible:
 
-* **Use a clear and descriptive title**
-* **Describe the exact steps which reproduce the problem**
-* **Provide specific examples to demonstrate the steps**
-* **Describe the behavior you observed after following the steps**
-* **Explain which behavior you expected to see instead and why**
-* **Include screenshots/logs if possible**
-* **Include your environment details** (OS, Node version, etc.)
+- **Use a clear and descriptive title**
+- **Describe the exact steps which reproduce the problem**
+- **Provide specific examples to demonstrate the steps**
+- **Describe the behavior you observed after following the steps**
+- **Explain which behavior you expected to see instead and why**
+- **Include screenshots/logs if possible**
+- **Include your environment details** (OS, Node version, etc.)
 
 ### Suggesting Enhancements
 
 Enhancement suggestions are tracked as GitHub issues. When creating an enhancement suggestion, please include:
 
-* **Use a clear and descriptive title**
-* **Provide a step-by-step description of the suggested enhancement**
-* **Provide specific examples to demonstrate the steps**
-* **Describe the current behavior and expected behavior**
-* **Explain why this enhancement would be useful**
+- **Use a clear and descriptive title**
+- **Provide a step-by-step description of the suggested enhancement**
+- **Provide specific examples to demonstrate the steps**
+- **Describe the current behavior and expected behavior**
+- **Explain why this enhancement would be useful**
 
 ### Pull Requests
 
-* Fill in the required template
-* Follow the project's style guides (ESLint/Prettier for JavaScript)
-* Include appropriate test cases
-* Update documentation as needed (README.md, DEPLOYMENT.md)
-* End all files with a newline
+- Fill in the required template
+- Follow the project's style guides (ESLint/Prettier for JavaScript)
+- Include appropriate test cases
+- Update documentation as needed (README.md, DEPLOYMENT.md)
+- End all files with a newline
 
 ## Style Guides
 
@@ -53,10 +53,10 @@ npm run format
 
 ### Git Commit Messages
 
-* Use the present tense ("Add feature" not "Added feature")
-* Use the imperative mood ("Move cursor to..." not "Moves cursor to...")
-* Limit the first line to 72 characters or less
-* Reference issues and pull requests liberally after the first line
+- Use the present tense ("Add feature" not "Added feature")
+- Use the imperative mood ("Move cursor to..." not "Moves cursor to...")
+- Limit the first line to 72 characters or less
+- Reference issues and pull requests liberally after the first line
 
 Example:
 
@@ -79,9 +79,9 @@ npm test
 
 ### Writing Tests
 
-* Write tests for all new features
-* Aim for >80% code coverage
-* Use descriptive test names
+- Write tests for all new features
+- Aim for >80% code coverage
+- Use descriptive test names
 
 ### Test Locations
 
@@ -95,21 +95,21 @@ src/components/
 
 ## Documentation
 
-* Update README.md if you change functionality
-* Update DEPLOYMENT.md if you change deployment procedures
+- Update README.md if you change functionality
+- Update DEPLOYMENT.md if you change deployment procedures
 
 ## Issue and Pull Request Labels
 
 This section lists the labels we use to help track and manage issues and pull requests.
 
-* `bug` - Something isn't working
-* `enhancement` - New feature or request
-* `documentation` - Improvements or additions to documentation
-* `good first issue` - Good for newcomers
-* `help wanted` - Extra attention is needed
-* `question` - Further information is requested
-* `security` - Security-related issue
-* `performance` - Performance improvement
+- `bug` - Something isn't working
+- `enhancement` - New feature or request
+- `documentation` - Improvements or additions to documentation
+- `good first issue` - Good for newcomers
+- `help wanted` - Extra attention is needed
+- `question` - Further information is requested
+- `security` - Security-related issue
+- `performance` - Performance improvement
 
 ## Additional Notes
 
@@ -122,15 +122,15 @@ This section lists the labels we use to help track and manage issues and pull re
 
 ### Community
 
-* Use discussions for feature ideas
-* Join our Discord community (link TBD)
-* Follow us on Twitter for updates
+- Use discussions for feature ideas
+- Join our Discord community (link TBD)
+- Follow us on Twitter for updates
 
 ## Questions?
 
 Feel free to contact the maintainers:
 
-* 📧 Email: `9992383+regularnmae@users.noreply.github.com`
-* 💬 GitHub Discussions: [Link]
+- 📧 Email: `9992383+regularnmae@users.noreply.github.com`
+- 💬 GitHub Discussions: [Link]
 
 Thank you for contributing! 🎉

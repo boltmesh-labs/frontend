@@ -1,17 +1,22 @@
-import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { describe, expect, it, vi } from 'vitest';
-import { DefaultPagination } from './DefaultPagination';
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { describe, expect, it, vi } from "vitest";
+import { DefaultPagination } from "./DefaultPagination";
 
-describe('DefaultPagination', () => {
-  it('renders nothing when there is a single page', () => {
+describe("DefaultPagination", () => {
+  it("renders nothing when there is a single page", () => {
     const { container } = render(
-      <DefaultPagination currentPage={1} totalPages={1} totalCount={5} onPageChange={vi.fn()} />
+      <DefaultPagination
+        currentPage={1}
+        totalPages={1}
+        totalCount={5}
+        onPageChange={vi.fn()}
+      />,
     );
     expect(container.childElementCount).toBe(0);
   });
 
-  it('shows the record range and pagination controls', () => {
+  it("shows the record range and pagination controls", () => {
     render(
       <DefaultPagination
         currentPage={2}
@@ -19,14 +24,14 @@ describe('DefaultPagination', () => {
         totalCount={42}
         pageSize={10}
         onPageChange={vi.fn()}
-      />
+      />,
     );
-    expect(screen.getByText('Showing 11–20 of 42')).toBeInTheDocument();
-    expect(screen.getByText('‹')).toBeInTheDocument();
-    expect(screen.getByText('›')).toBeInTheDocument();
+    expect(screen.getByText("Showing 11–20 of 42")).toBeInTheDocument();
+    expect(screen.getByText("‹")).toBeInTheDocument();
+    expect(screen.getByText("›")).toBeInTheDocument();
   });
 
-  it('calls onPageChange with the requested page', async () => {
+  it("calls onPageChange with the requested page", async () => {
     const user = userEvent.setup();
     const onPageChange = vi.fn();
 
@@ -37,20 +42,20 @@ describe('DefaultPagination', () => {
         totalCount={25}
         pageSize={10}
         onPageChange={onPageChange}
-      />
+      />,
     );
 
-    await user.click(screen.getByText('3'));
+    await user.click(screen.getByText("3"));
     expect(onPageChange).toHaveBeenCalledWith(3);
 
-    await user.click(screen.getByText('›'));
+    await user.click(screen.getByText("›"));
     expect(onPageChange).toHaveBeenCalledWith(3);
 
-    await user.click(screen.getByText('‹'));
+    await user.click(screen.getByText("‹"));
     expect(onPageChange).toHaveBeenCalledWith(1);
   });
 
-  it('disables the previous control on the first page', () => {
+  it("disables the previous control on the first page", () => {
     render(
       <DefaultPagination
         currentPage={1}
@@ -58,13 +63,13 @@ describe('DefaultPagination', () => {
         totalCount={30}
         pageSize={10}
         onPageChange={vi.fn()}
-      />
+      />,
     );
-    expect(screen.getByText('‹').closest('li')).toHaveClass('disabled');
-    expect(screen.getByText('›').closest('li')).not.toHaveClass('disabled');
+    expect(screen.getByText("‹").closest("li")).toHaveClass("disabled");
+    expect(screen.getByText("›").closest("li")).not.toHaveClass("disabled");
   });
 
-  it('clamps an out-of-range page after results shrink', async () => {
+  it("clamps an out-of-range page after results shrink", async () => {
     const onPageChange = vi.fn();
 
     render(
@@ -74,13 +79,13 @@ describe('DefaultPagination', () => {
         totalCount={15}
         pageSize={10}
         onPageChange={onPageChange}
-      />
+      />,
     );
 
     await waitFor(() => expect(onPageChange).toHaveBeenCalledWith(2));
   });
 
-  it('returns to page one when the result set becomes empty', async () => {
+  it("returns to page one when the result set becomes empty", async () => {
     const onPageChange = vi.fn();
 
     render(
@@ -90,13 +95,13 @@ describe('DefaultPagination', () => {
         totalCount={0}
         pageSize={10}
         onPageChange={onPageChange}
-      />
+      />,
     );
 
     await waitFor(() => expect(onPageChange).toHaveBeenCalledWith(1));
   });
 
-  it('disables controls while loading', () => {
+  it("disables controls while loading", () => {
     render(
       <DefaultPagination
         currentPage={2}
@@ -105,8 +110,8 @@ describe('DefaultPagination', () => {
         pageSize={10}
         onPageChange={vi.fn()}
         loading
-      />
+      />,
     );
-    expect(screen.getByText('›').closest('li')).toHaveClass('disabled');
+    expect(screen.getByText("›").closest("li")).toHaveClass("disabled");
   });
 });

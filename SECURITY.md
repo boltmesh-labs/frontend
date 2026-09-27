@@ -85,10 +85,10 @@ Two independent layers protect the platform:
 
 The production frontend container sets the following headers on all document and asset responses:
 
-   X-Frame-Options: SAMEORIGIN
-   X-Content-Type-Options: nosniff
-   Referrer-Policy: strict-origin-when-cross-origin
-   Permissions-Policy: camera=(), microphone=(), geolocation=()
+X-Frame-Options: SAMEORIGIN
+X-Content-Type-Options: nosniff
+Referrer-Policy: strict-origin-when-cross-origin
+Permissions-Policy: camera=(), microphone=(), geolocation=()
 
 Known gap: the API tier does not currently emit `Strict-Transport-Security` or `Content-Security-Policy` headers. Operators fronting the API with their own CDN or reverse proxy should set them at the edge; adding them in-tree is planned work.
 

@@ -1,8 +1,8 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { toast } from 'react-toastify';
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "react-toastify";
 
-import { apiClient } from '@/api/client';
-import { getApiError } from '@/utils/errorHandler';
+import { apiClient } from "@/api/client";
+import { getApiError } from "@/utils/errorHandler";
 
 /**
  * Factory for the admin CRUD hook family (use*.js siblings).
@@ -38,7 +38,7 @@ export const createAdminResource = ({
   detailOptions = {},
 }) => {
   const { transform = (data) => data } = listOptions;
-  const { pathSuffix = '', requireRealId = false } = detailOptions;
+  const { pathSuffix = "", requireRealId = false } = detailOptions;
 
   const useList = (params = {}) =>
     useQuery({
@@ -54,11 +54,13 @@ export const createAdminResource = ({
     useQuery({
       queryKey: detailKey(id),
       queryFn: async () => {
-        const { data } = await apiClient.api.get(`${resourcePath}/${id}${pathSuffix}`);
+        const { data } = await apiClient.api.get(
+          `${resourcePath}/${id}${pathSuffix}`,
+        );
         return data;
       },
       // Prevent API requests for missing or sentinel ('/new') ids.
-      enabled: requireRealId ? Boolean(id) && id !== 'new' : Boolean(id),
+      enabled: requireRealId ? Boolean(id) && id !== "new" : Boolean(id),
     });
 
   const makeUseCreate = ({ successMessage, invalidate = [listKey()] } = {}) =>
@@ -72,9 +74,11 @@ export const createAdminResource = ({
         },
         onSuccess: () => {
           toast.success(successMessage);
-          invalidate.forEach((key) => queryClient.invalidateQueries({ queryKey: key }));
+          invalidate.forEach((key) =>
+            queryClient.invalidateQueries({ queryKey: key }),
+          );
         },
-        onError: (err) => toast.error(getApiError(err, 'Creation failed')),
+        onError: (err) => toast.error(getApiError(err, "Creation failed")),
       });
     };
 
@@ -84,7 +88,10 @@ export const createAdminResource = ({
 
       return useMutation({
         mutationFn: async ({ id, ...updates }) => {
-          const { data } = await apiClient.api.patch(`${resourcePath}/${id}`, updates);
+          const { data } = await apiClient.api.patch(
+            `${resourcePath}/${id}`,
+            updates,
+          );
           return data;
         },
         onSuccess: (data, { id }) => {
@@ -92,7 +99,7 @@ export const createAdminResource = ({
           queryClient.invalidateQueries({ queryKey: detailKey(id) });
           queryClient.invalidateQueries({ queryKey: listKey() });
         },
-        onError: (err) => toast.error(getApiError(err, 'Update failed')),
+        onError: (err) => toast.error(getApiError(err, "Update failed")),
       });
     };
 
@@ -112,7 +119,7 @@ export const createAdminResource = ({
           }
           queryClient.invalidateQueries({ queryKey: listKey() });
         },
-        onError: (err) => toast.error(getApiError(err, 'Deletion failed')),
+        onError: (err) => toast.error(getApiError(err, "Deletion failed")),
       });
     };
 
@@ -172,18 +179,24 @@ export const makeUseStatusToggle = ({
         await queryClient.cancelQueries({ queryKey: scopeKey() });
 
         // Snapshot the cached scope (paginated lists + detail) for rollback
-        const previousSnapshot = queryClient.getQueriesData({ queryKey: scopeKey() });
+        const previousSnapshot = queryClient.getQueriesData({
+          queryKey: scopeKey(),
+        });
 
         // Optimistically apply the flip in every cached query of the scope
         queryClient.setQueriesData({ queryKey: scopeKey() }, (old) => {
           if (!old) return old;
           if (Array.isArray(old)) {
-            return old.map((item) => (item.id === id ? { ...item, [field]: next } : item));
+            return old.map((item) =>
+              item.id === id ? { ...item, [field]: next } : item,
+            );
           }
           if (Array.isArray(old.data)) {
             return {
               ...old,
-              data: old.data.map((item) => (item.id === id ? { ...item, [field]: next } : item)),
+              data: old.data.map((item) =>
+                item.id === id ? { ...item, [field]: next } : item,
+              ),
             };
           }
           if (includeDetailObject && old.id === id) {
@@ -204,7 +217,7 @@ export const makeUseStatusToggle = ({
       },
       onSuccess: (result, variables) => {
         const message =
-          typeof successMessage === 'function'
+          typeof successMessage === "function"
             ? successMessage({ result, variables })
             : successMessage;
         toast.success(message);
@@ -226,7 +239,12 @@ export const makeUseStatusToggle = ({
  * @param {string} config.errorFallback
  * @param {Function} config.invalidateKeys - `(id) => array of query keys`.
  */
-export const makeUseActionMutation = ({ request, successMessage, errorFallback, invalidateKeys }) =>
+export const makeUseActionMutation = ({
+  request,
+  successMessage,
+  errorFallback,
+  invalidateKeys,
+}) =>
   function useActionMutation() {
     const queryClient = useQueryClient();
 
@@ -237,7 +255,9 @@ export const makeUseActionMutation = ({ request, successMessage, errorFallback, 
       },
       onSuccess: (_, id) => {
         toast.success(successMessage);
-        invalidateKeys(id).forEach((key) => queryClient.invalidateQueries({ queryKey: key }));
+        invalidateKeys(id).forEach((key) =>
+          queryClient.invalidateQueries({ queryKey: key }),
+        );
       },
       onError: (err) => toast.error(getApiError(err, errorFallback)),
     });

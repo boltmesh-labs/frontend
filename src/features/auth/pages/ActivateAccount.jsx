@@ -1,15 +1,15 @@
-import { useEffect, useRef, useState } from 'react';
-import { Alert, Card, Container, Spinner } from 'react-bootstrap';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useEffect, useRef, useState } from "react";
+import { Alert, Card, Container, Spinner } from "react-bootstrap";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
-import { useAuth } from '@/features/auth/context/AuthContext';
-import { usePageTitle } from '@/hooks/usePageTitle';
-import { useActivateAccount } from '@/features/auth/hooks/useAuthMutations';
-import { COMPANY_NAME } from '@/utils/config';
+import { useAuth } from "@/features/auth/context/AuthContext";
+import { usePageTitle } from "@/hooks/usePageTitle";
+import { useActivateAccount } from "@/features/auth/hooks/useAuthMutations";
+import { COMPANY_NAME } from "@/utils/config";
 
 const ActivateAccount = () => {
   const [searchParams] = useSearchParams();
-  const token = searchParams.get('token');
+  const token = searchParams.get("token");
   const navigate = useNavigate();
   const { setAccessToken } = useAuth();
 
@@ -17,13 +17,14 @@ const ActivateAccount = () => {
   const [alert, setAlert] = useState(() => {
     if (!token) {
       return {
-        variant: 'danger',
-        message: '❌ Invalid activation link. The verification token is missing.',
+        variant: "danger",
+        message:
+          "❌ Invalid activation link. The verification token is missing.",
       };
     }
     return {
-      variant: 'info',
-      message: 'Verifying your link...',
+      variant: "info",
+      message: "Verifying your link...",
     };
   });
 
@@ -32,7 +33,7 @@ const ActivateAccount = () => {
 
   usePageTitle(
     `Account Activation | ${COMPANY_NAME}`,
-    `Verify and activate your account to access ${COMPANY_NAME} services.`
+    `Verify and activate your account to access ${COMPANY_NAME} services.`,
   );
 
   const { mutateAsync: activateAccount } = useActivateAccount();
@@ -62,36 +63,38 @@ const ActivateAccount = () => {
 
         const { access_token } = response;
         setAlert({
-          variant: 'success',
-          message: '✅ Account activated! Redirecting to dashboard...',
+          variant: "success",
+          message: "✅ Account activated! Redirecting to dashboard...",
         });
 
         timerRef.current = setTimeout(() => {
           if (access_token) {
             setAccessToken(access_token);
           }
-          navigate('/dashboard', { replace: true });
+          navigate("/dashboard", { replace: true });
         }, 2500);
       } catch (error) {
         if (!isActive) return;
 
         const status = error?.response?.status;
-        const detail = error?.response?.data?.detail || 'The link is either invalid or expired.';
+        const detail =
+          error?.response?.data?.detail ||
+          "The link is either invalid or expired.";
 
         if (status === 409) {
           setAlert({
-            variant: 'warning',
-            message: '⚠️ Account is already activated. Redirecting...',
+            variant: "warning",
+            message: "⚠️ Account is already activated. Redirecting...",
           });
         } else {
           setAlert({
-            variant: 'danger',
+            variant: "danger",
             message: `❌ ${detail}`,
           });
         }
 
         timerRef.current = setTimeout(() => {
-          navigate('/dashboard', { replace: true });
+          navigate("/dashboard", { replace: true });
         }, 2500);
       } finally {
         if (isActive) {

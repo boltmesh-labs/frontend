@@ -1,15 +1,15 @@
-import '@testing-library/jest-dom/vitest';
-import { cleanup } from '@testing-library/react';
-import { afterEach, beforeEach, vi } from 'vitest';
+import "@testing-library/jest-dom/vitest";
+import { cleanup } from "@testing-library/react";
+import { afterEach, beforeEach, vi } from "vitest";
 
 // Pure unit tests opt into `// @vitest-environment node` to skip jsdom startup;
 // this file still runs for them, so every DOM touch below is guarded.
-const hasDom = typeof window !== 'undefined';
+const hasDom = typeof window !== "undefined";
 
 if (hasDom) {
   // jsdom does not implement matchMedia; MainLayout and other components rely on it.
   if (!window.matchMedia) {
-    Object.defineProperty(window, 'matchMedia', {
+    Object.defineProperty(window, "matchMedia", {
       writable: true,
       enumerable: true,
       configurable: true,

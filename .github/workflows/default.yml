@@ -1,4 +1,4 @@
-name: 'Frontend CI/CD'
+name: "Frontend CI/CD"
 
 on:
   push:
@@ -25,8 +25,8 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@v7
         with:
-          node-version: '22'
-          cache: 'npm'
+          node-version: "22"
+          cache: "npm"
           cache-dependency-path: package-lock.json
 
       - name: Install dependencies
@@ -74,7 +74,7 @@ jobs:
           ! grep -RqsF '%VITE_APP_COMPANY_NAME%' dist
 
   security:
-    name: 'Security Scan'
+    name: "Security Scan"
     runs-on: ubuntu-latest
 
     steps:
@@ -86,11 +86,11 @@ jobs:
       - name: Run Trivy Filesystem Vulnerability Scanner
         uses: aquasecurity/trivy-action@v0.36.0
         with:
-          scan-type: 'fs'
-          format: 'table'
+          scan-type: "fs"
+          format: "table"
           ignore-unfixed: true
-          severity: 'CRITICAL'
-          exit-code: '1'
+          severity: "CRITICAL"
+          exit-code: "1"
 
   # build-and-push:
   #   name: 'Build & Push Frontend'

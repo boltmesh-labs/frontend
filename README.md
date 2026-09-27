@@ -94,7 +94,7 @@ Three fixture rules are worth knowing before adding a spec:
 - **Authenticated tests navigate by clicking the app's own links**, not with `page.goto()`. A full page load restarts the SPA and re-runs the silent boot refresh, which bounces a signed-in session back to `/login`. `e2e/fixtures/navigation.js` wraps the common admin and dashboard routes; `allowSessionReload()` in `fixtures/auth.js` opts a test into deep links when there is no other way in.
 - **Overlapping mocks resolve last-registered-first**, so register defaults before the ones a test cares about. A mock only claims the verb it declares and hands anything else back to the next handler, so a `PATCH /users` mock does not shadow the `GET /users` the same page makes.
 
-`mockJson` serves one fixed response; `mockSequence` serves a per-call sequence and returns a handle exposing `calls` and `queries`, which is how the session, payment and list specs assert what the *app* decided (one refresh, one replay, the exact query string) rather than only what the stub returned.
+`mockJson` serves one fixed response; `mockSequence` serves a per-call sequence and returns a handle exposing `calls` and `queries`, which is how the session, payment and list specs assert what the _app_ decided (one refresh, one replay, the exact query string) rather than only what the stub returned.
 
 ```bash
 npm run test:e2e:mocked

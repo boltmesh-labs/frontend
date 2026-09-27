@@ -3,7 +3,7 @@ name: Cross-browser E2E
 on:
   workflow_dispatch:
   schedule:
-    - cron: '17 3 * * 1'
+    - cron: "17 3 * * 1"
 
 permissions:
   contents: read
@@ -20,8 +20,8 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@v7
         with:
-          node-version: '22'
-          cache: 'npm'
+          node-version: "22"
+          cache: "npm"
           cache-dependency-path: package-lock.json
 
       - name: Install dependencies

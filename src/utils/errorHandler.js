@@ -1,5 +1,5 @@
 // src/utils/errorHandler.jsx
-import { toast } from 'react-toastify';
+import { toast } from "react-toastify";
 
 /**
  * Extracts a human-readable message from a FastAPI-style error without firing
@@ -9,13 +9,16 @@ import { toast } from 'react-toastify';
  * @param {string} [fallback='An unexpected error occurred.'] - Fallback message.
  * @returns {string}
  */
-export const getApiError = (err, fallback = 'An unexpected error occurred.') => {
+export const getApiError = (
+  err,
+  fallback = "An unexpected error occurred.",
+) => {
   const detail = err?.response?.data?.detail;
 
   if (Array.isArray(detail)) {
     return detail[0]?.msg || fallback;
   }
-  if (typeof detail === 'string') {
+  if (typeof detail === "string") {
     return detail;
   }
   if (err?.response?.data?.message) {
@@ -31,12 +34,15 @@ export const getApiError = (err, fallback = 'An unexpected error occurred.') => 
  * @param {Error} err - The error object caught from an async/axios operation.
  * @param {string} [fallbackMsg='An unexpected error occurred.'] - Default fallback toast message.
  */
-export const handleApiError = (err, fallbackMsg = 'An unexpected error occurred.') => {
+export const handleApiError = (
+  err,
+  fallbackMsg = "An unexpected error occurred.",
+) => {
   const detail = err?.response?.data?.detail;
 
   if (Array.isArray(detail)) {
     detail.forEach((error) => {
-      const field = error.loc?.[error.loc.length - 1] || 'Field';
+      const field = error.loc?.[error.loc.length - 1] || "Field";
       const formattedField = field.charAt(0).toUpperCase() + field.slice(1);
       toast.error(`${formattedField}: ${error.msg}`);
     });

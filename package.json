@@ -22,8 +22,8 @@
     "test:e2e:headed": "playwright test --headed",
     "lint": "eslint 'src/**/*.{js,jsx}' 'e2e/**/*.{js,jsx}' vite.config.js 'playwright*.config.js' eslint.config.js",
     "lint:fix": "eslint 'src/**/*.{js,jsx}' 'e2e/**/*.{js,jsx}' vite.config.js 'playwright*.config.js' eslint.config.js --fix",
-    "format": "prettier --write 'src/**/*.{js,jsx,json,css,md}' 'e2e/**/*.{js,jsx}' vite.config.js 'playwright*.config.js' eslint.config.js index.html package.json",
-    "format:check": "prettier --check 'src/**/*.{js,jsx,json,css,md}' 'e2e/**/*.{js,jsx}' vite.config.js 'playwright*.config.js' eslint.config.js index.html package.json"
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "dependencies": {
     "@tanstack/react-query": "^5.101.4",

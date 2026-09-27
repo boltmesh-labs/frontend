@@ -1,14 +1,14 @@
-import { expect } from '@playwright/test';
+import { expect } from "@playwright/test";
 
-const escapeRegExp = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const escapeRegExp = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 const getApiPathPattern = (path) => {
-  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
-  const configuredBaseUrl = process.env.E2E_API_URL?.replace(/\/$/, '');
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  const configuredBaseUrl = process.env.E2E_API_URL?.replace(/\/$/, "");
 
   if (configuredBaseUrl) {
     const url = new URL(configuredBaseUrl);
-    const pathname = `${url.pathname.replace(/\/$/, '')}${normalizedPath}`;
+    const pathname = `${url.pathname.replace(/\/$/, "")}${normalizedPath}`;
     return new RegExp(`^${escapeRegExp(url.origin + pathname)}(?:\\?.*)?$`);
   }
 
@@ -17,9 +17,11 @@ const getApiPathPattern = (path) => {
   return new RegExp(`/v1${escapeRegExp(normalizedPath)}(?:\\?.*)?$`);
 };
 
-const serializeBody = (body) => (typeof body === 'string' ? body : JSON.stringify(body));
+const serializeBody = (body) =>
+  typeof body === "string" ? body : JSON.stringify(body);
 
-const toQueryObject = (url) => Object.fromEntries(new URL(url).searchParams.entries());
+const toQueryObject = (url) =>
+  Object.fromEntries(new URL(url).searchParams.entries());
 
 /**
  * Registers one API route and asserts the method, query and body of every
@@ -32,7 +34,7 @@ const toQueryObject = (url) => Object.fromEntries(new URL(url).searchParams.entr
  * how many requests were made, and what parameters each one carried.
  */
 const registerJsonRoute = async (page, config, resolveResponse) => {
-  const { method = 'GET', path, query, requestBody } = config;
+  const { method = "GET", path, query, requestBody } = config;
   const seenQueries = [];
 
   await page.route(getApiPathPattern(path), async (route) => {
@@ -48,19 +50,30 @@ const registerJsonRoute = async (page, config, resolveResponse) => {
 
     seenQueries.push(toQueryObject(request.url()));
 
-    expect(request.method(), `Unexpected HTTP method for ${method} ${path}`).toBe(method);
+    expect(
+      request.method(),
+      `Unexpected HTTP method for ${method} ${path}`,
+    ).toBe(method);
 
     if (query) {
-      expect(seenQueries.at(-1), `Unexpected query for ${method} ${path}`).toMatchObject(query);
+      expect(
+        seenQueries.at(-1),
+        `Unexpected query for ${method} ${path}`,
+      ).toMatchObject(query);
     }
 
     if (requestBody !== undefined) {
-      expect(request.postDataJSON(), `Unexpected request body for ${method} ${path}`).toMatchObject(
-        requestBody
-      );
+      expect(
+        request.postDataJSON(),
+        `Unexpected request body for ${method} ${path}`,
+      ).toMatchObject(requestBody);
     }
 
-    const { status = 200, body = {}, delayMs = 0 } = await resolveResponse(seenQueries.length - 1);
+    const {
+      status = 200,
+      body = {},
+      delayMs = 0,
+    } = await resolveResponse(seenQueries.length - 1);
 
     if (delayMs > 0) {
       await new Promise((resolve) => setTimeout(resolve, delayMs));
@@ -68,7 +81,7 @@ const registerJsonRoute = async (page, config, resolveResponse) => {
 
     await route.fulfill({
       status,
-      contentType: 'application/json',
+      contentType: "application/json",
       body: serializeBody(body),
     });
   });

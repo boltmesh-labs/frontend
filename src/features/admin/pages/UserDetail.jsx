@@ -1,65 +1,80 @@
-import { useCallback, useMemo } from 'react';
-import { Button, Container, Spinner } from 'react-bootstrap';
-import { Link, useNavigate, useParams } from 'react-router-dom';
-import { usePageTitle } from '@/hooks/usePageTitle';
-import { useConfirm } from '@/hooks/useConfirm';
+import { useCallback, useMemo } from "react";
+import { Button, Container, Spinner } from "react-bootstrap";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { usePageTitle } from "@/hooks/usePageTitle";
+import { useConfirm } from "@/hooks/useConfirm";
 import {
   useUserDetail,
   useToggleUserStatus,
   useUserDevices,
   useUserSubscriptions,
   useUserInvoices,
-} from '@/features/admin/hooks/useUsers';
-import { formatCurrencyAmount } from '@/utils/currencyFormatter';
-import { getMethodDisplay } from '@/utils/methodDisplay';
-import { formatDate } from '@/utils/dateFormatter';
-import { DetailShell } from '@/components/DetailShell';
-import { SectionCard } from '@/components/SectionCard';
-import { DataTable } from '@/components/DataTable';
-import { UserRoleBadge, UserStateBadge, UserVerifiedBadge } from '@/components/UserBadges';
-import { SubscriptionStatusBadge } from '@/components/SubscriptionStatusBadge';
-import { InvoiceStatusBadge } from '@/components/InvoiceStatusBadge';
-import { VpnDeviceStateBadge } from '@/components/VpnDeviceStateBadge';
-import { DetailHeader } from '../components/DetailHeader';
-import { DetailSummary } from '../components/DetailSummary';
+} from "@/features/admin/hooks/useUsers";
+import { formatCurrencyAmount } from "@/utils/currencyFormatter";
+import { getMethodDisplay } from "@/utils/methodDisplay";
+import { formatDate } from "@/utils/dateFormatter";
+import { DetailShell } from "@/components/DetailShell";
+import { SectionCard } from "@/components/SectionCard";
+import { DataTable } from "@/components/DataTable";
+import {
+  UserRoleBadge,
+  UserStateBadge,
+  UserVerifiedBadge,
+} from "@/components/UserBadges";
+import { SubscriptionStatusBadge } from "@/components/SubscriptionStatusBadge";
+import { InvoiceStatusBadge } from "@/components/InvoiceStatusBadge";
+import { VpnDeviceStateBadge } from "@/components/VpnDeviceStateBadge";
+import { DetailHeader } from "../components/DetailHeader";
+import { DetailSummary } from "../components/DetailSummary";
 import {
   USER_INVOICE_COLUMNS,
   USER_SUBSCRIPTION_COLUMNS,
   VPN_DEVICE_COLUMNS,
-} from '@/constants/tableColumns';
+} from "@/constants/tableColumns";
 
 const UserDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { confirm, confirmDialog } = useConfirm();
 
-  usePageTitle(`User Profile ${id || ''}`);
+  usePageTitle(`User Profile ${id || ""}`);
 
-  const { data: profile, isLoading, isError, error, refetch } = useUserDetail(id);
+  const {
+    data: profile,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useUserDetail(id);
 
-  const { mutate: toggleUserStatus, isPending: isToggling } = useToggleUserStatus();
+  const { mutate: toggleUserStatus, isPending: isToggling } =
+    useToggleUserStatus();
 
-  const { data: devices = [], isLoading: isLoadingDevices } = useUserDevices(id);
-  const { data: subscriptions = [], isLoading: isLoadingSubscriptions } = useUserSubscriptions(id);
-  const { data: invoices = [], isLoading: isLoadingInvoices } = useUserInvoices(id);
+  const { data: devices = [], isLoading: isLoadingDevices } =
+    useUserDevices(id);
+  const { data: subscriptions = [], isLoading: isLoadingSubscriptions } =
+    useUserSubscriptions(id);
+  const { data: invoices = [], isLoading: isLoadingInvoices } =
+    useUserInvoices(id);
 
   const handleToggleStatus = useCallback(
     async (id, isActive) => {
-      const actionLabel = isActive ? 'deactivate' : 'activate';
-      const capitalized = actionLabel.charAt(0).toUpperCase() + actionLabel.slice(1);
+      const actionLabel = isActive ? "deactivate" : "activate";
+      const capitalized =
+        actionLabel.charAt(0).toUpperCase() + actionLabel.slice(1);
 
       const isConfirmed = await confirm({
         title: `${capitalized} Account`,
         message: `Are you sure you want to ${actionLabel} this user account?`,
         confirmText: capitalized,
-        confirmVariant: isActive ? 'danger' : 'primary',
+        confirmVariant: isActive ? "danger" : "primary",
       });
 
       if (!isConfirmed) return;
 
       toggleUserStatus({ id, isActive });
     },
-    [confirm, toggleUserStatus]
+    [confirm, toggleUserStatus],
   );
 
   const handleBack = useCallback(() => {
@@ -71,32 +86,32 @@ const UserDetail = () => {
 
     return [
       {
-        label: 'Username',
-        value: profile.username || 'N/A',
-        className: 'text-break',
+        label: "Username",
+        value: profile.username || "N/A",
+        className: "text-break",
       },
       {
-        label: 'Email',
-        value: profile.email || 'N/A',
-        className: 'text-break',
+        label: "Email",
+        value: profile.email || "N/A",
+        className: "text-break",
       },
       {
-        label: 'Role',
+        label: "Role",
         value: <UserRoleBadge role={profile.role} />,
       },
       {
-        label: 'Email Status',
+        label: "Email Status",
         value: <UserVerifiedBadge isVerified={profile.is_verified} />,
       },
       {
-        label: 'Created',
+        label: "Created",
         value: formatDate(profile.created_at),
-        className: 'small font-monospace text-muted',
+        className: "small font-monospace text-muted",
       },
       {
-        label: 'Last Updated',
+        label: "Last Updated",
         value: formatDate(profile.updated_at || profile.created_at),
-        className: 'small font-monospace text-muted',
+        className: "small font-monospace text-muted",
       },
     ];
   }, [profile]);
@@ -118,10 +133,12 @@ const UserDetail = () => {
         <td>
           <VpnDeviceStateBadge isActive={device.is_active} />
         </td>
-        <td className="small font-monospace">{formatDate(device.created_at)}</td>
+        <td className="small font-monospace">
+          {formatDate(device.created_at)}
+        </td>
       </tr>
     ),
-    []
+    [],
   );
 
   const renderSubscriptionRow = useCallback(
@@ -136,14 +153,16 @@ const UserDetail = () => {
             {sub.id}
           </Link>
         </td>
-        <td className="fw-bold text-body">{sub.plan?.name || 'N/A'}</td>
+        <td className="fw-bold text-body">{sub.plan?.name || "N/A"}</td>
         <td>
           <SubscriptionStatusBadge status={sub.status} />
         </td>
-        <td className="small font-monospace text-muted">{formatDate(sub.expires_at)}</td>
+        <td className="small font-monospace text-muted">
+          {formatDate(sub.expires_at)}
+        </td>
       </tr>
     ),
-    []
+    [],
   );
 
   const renderInvoiceRow = useCallback(
@@ -158,37 +177,37 @@ const UserDetail = () => {
             {inv.id}
           </Link>
         </td>
-        <td className="fw-bold text-body">{inv.plan?.name || 'N/A'}</td>
+        <td className="fw-bold text-body">{inv.plan?.name || "N/A"}</td>
         <td className="text-uppercase small text-muted text-nowrap">
           {getMethodDisplay(inv.payment_method)}
         </td>
         <td className="font-monospace fw-bold text-body">
-          {formatCurrencyAmount(inv.amount_paid ?? 0, inv.currency || 'USD')}
+          {formatCurrencyAmount(inv.amount_paid ?? 0, inv.currency || "USD")}
         </td>
         <td>
           <InvoiceStatusBadge status={inv.status} />
         </td>
       </tr>
     ),
-    []
+    [],
   );
 
   const headerActions = profile ? (
     <Button
-      variant={profile.is_active ? 'outline-warning' : 'outline-success'}
+      variant={profile.is_active ? "outline-warning" : "outline-success"}
       className="shadow-sm"
       disabled={isToggling || isLoading}
       onClick={() => handleToggleStatus(profile.id, profile.is_active)}
-      aria-label={`${profile.is_active ? 'Deactivate' : 'Activate'} account`}
+      aria-label={`${profile.is_active ? "Deactivate" : "Activate"} account`}
     >
       {isToggling ? (
         <>
           <Spinner size="sm" animation="border" className="me-2" /> Updating...
         </>
       ) : profile.is_active ? (
-        '⏸ Deactivate'
+        "⏸ Deactivate"
       ) : (
-        '▶ Activate'
+        "▶ Activate"
       )}
     </Button>
   ) : null;
@@ -206,7 +225,11 @@ const UserDetail = () => {
       <Container className="py-4 position-relative min-vh-50">
         {confirmDialog}
 
-        <DetailHeader title="User Profile" id={profile?.id} actions={headerActions} />
+        <DetailHeader
+          title="User Profile"
+          id={profile?.id}
+          actions={headerActions}
+        />
 
         {/* TOP SECTION: User Details */}
         <DetailSummary

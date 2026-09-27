@@ -1,13 +1,18 @@
-import { useEffect, useRef, useState } from 'react';
-import { Alert, Card, Container, Form } from 'react-bootstrap';
-import { usePageTitle } from '@/hooks/usePageTitle';
-import { useSendContactMessage } from '../hooks/useSupport';
-import { AsyncButton } from '@/components/AsyncButton';
-import { COMPANY_NAME } from '@/utils/config';
-import { getApiError } from '@/utils/errorHandler';
+import { useEffect, useRef, useState } from "react";
+import { Alert, Card, Container, Form } from "react-bootstrap";
+import { usePageTitle } from "@/hooks/usePageTitle";
+import { useSendContactMessage } from "../hooks/useSupport";
+import { AsyncButton } from "@/components/AsyncButton";
+import { COMPANY_NAME } from "@/utils/config";
+import { getApiError } from "@/utils/errorHandler";
 
 const Contact = () => {
-  const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' });
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    subject: "",
+    message: "",
+  });
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
 
@@ -18,7 +23,10 @@ const Contact = () => {
   const abortControllerRef = useRef(null);
 
   // Meta tag lifecycle management
-  usePageTitle(`Contact Support | ${COMPANY_NAME}`, `Support for ${COMPANY_NAME}.`);
+  usePageTitle(
+    `Contact Support | ${COMPANY_NAME}`,
+    `Support for ${COMPANY_NAME}.`,
+  );
 
   // Cleanup on unmount
   useEffect(() => {
@@ -33,11 +41,15 @@ const Contact = () => {
 
   const validate = () => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim()) {
-      return 'Please fill out all required fields.';
+    if (
+      !formData.name.trim() ||
+      !formData.email.trim() ||
+      !formData.message.trim()
+    ) {
+      return "Please fill out all required fields.";
     }
     if (!emailRegex.test(formData.email.trim())) {
-      return 'Please enter a valid email address.';
+      return "Please enter a valid email address.";
     }
     return null;
   };
@@ -61,13 +73,20 @@ const Contact = () => {
         signal: abortControllerRef.current.signal,
       });
 
-      setSuccess("Your message has been sent successfully! We'll get back to you shortly.");
-      setFormData({ name: '', email: '', subject: '', message: '' });
+      setSuccess(
+        "Your message has been sent successfully! We'll get back to you shortly.",
+      );
+      setFormData({ name: "", email: "", subject: "", message: "" });
     } catch (err) {
-      if (err.name !== 'CanceledError') {
+      if (err.name !== "CanceledError") {
         // getApiError also collapses FastAPI validation arrays to a string so a
         // raw object can never end up rendered as a React child.
-        setError(getApiError(err, 'Failed to send your message. Please try again later.'));
+        setError(
+          getApiError(
+            err,
+            "Failed to send your message. Please try again later.",
+          ),
+        );
       }
     }
   };
@@ -75,13 +94,18 @@ const Contact = () => {
   return (
     <Container
       className="d-flex align-items-center justify-content-center py-5"
-      style={{ minHeight: '75vh' }}
+      style={{ minHeight: "75vh" }}
     >
-      <Card className="p-4 shadow-sm border-0 w-100 rounded-3" style={{ maxWidth: '580px' }}>
+      <Card
+        className="p-4 shadow-sm border-0 w-100 rounded-3"
+        style={{ maxWidth: "580px" }}
+      >
         <Card.Body>
           <div className="text-center mb-4">
             <h1 className="fw-bold text-body mb-1 h2">Contact Support</h1>
-            <p className="text-muted small">Need help? Send us a message below.</p>
+            <p className="text-muted small">
+              Need help? Send us a message below.
+            </p>
           </div>
 
           {error && (

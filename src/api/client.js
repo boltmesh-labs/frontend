@@ -1,6 +1,6 @@
-import axios from 'axios';
+import axios from "axios";
 
-import { API_BASE_URL } from '@/utils/config';
+import { API_BASE_URL } from "@/utils/config";
 
 // One timeout shared by both axios instances so auth and API calls can't drift.
 const REQUEST_TIMEOUT_MS = 10000;
@@ -12,8 +12,16 @@ export class ApiClient {
     this.failedQueue = [];
     this.listeners = new Set();
 
-    this.authApi = axios.create({ baseURL, timeout: REQUEST_TIMEOUT_MS, withCredentials: true });
-    this.api = axios.create({ baseURL, timeout: REQUEST_TIMEOUT_MS, withCredentials: true });
+    this.authApi = axios.create({
+      baseURL,
+      timeout: REQUEST_TIMEOUT_MS,
+      withCredentials: true,
+    });
+    this.api = axios.create({
+      baseURL,
+      timeout: REQUEST_TIMEOUT_MS,
+      withCredentials: true,
+    });
 
     this._initInterceptors();
   }
@@ -24,7 +32,7 @@ export class ApiClient {
       try {
         cb(token);
       } catch (err) {
-        console.error('Token listener error:', err);
+        console.error("Token listener error:", err);
       }
     });
   }
@@ -37,18 +45,20 @@ export class ApiClient {
   clearAuth() {
     this.setToken(null);
     this.isRefreshing = false;
-    this._processQueue(new axios.AxiosError('Auth cleared', 'ERR_CANCELED'));
+    this._processQueue(new axios.AxiosError("Auth cleared", "ERR_CANCELED"));
   }
 
   _processQueue(error, token = null) {
-    this.failedQueue.forEach(({ resolve, reject }) => (error ? reject(error) : resolve(token)));
+    this.failedQueue.forEach(({ resolve, reject }) =>
+      error ? reject(error) : resolve(token),
+    );
     this.failedQueue = [];
   }
 
   _initInterceptors() {
     this.api.interceptors.request.use((config) => {
       if (this.accessToken) {
-        config.headers.set('Authorization', `Bearer ${this.accessToken}`);
+        config.headers.set("Authorization", `Bearer ${this.accessToken}`);
       }
       return config;
     });
@@ -58,7 +68,11 @@ export class ApiClient {
       async (error) => {
         const originalRequest = error.config;
 
-        if (!originalRequest || error.response?.status !== 401 || originalRequest._retry) {
+        if (
+          !originalRequest ||
+          error.response?.status !== 401 ||
+          originalRequest._retry
+        ) {
           return Promise.reject(error);
         }
 
@@ -78,7 +92,7 @@ export class ApiClient {
           return new Promise((resolve, reject) => {
             this.failedQueue.push({ resolve, reject });
           }).then((token) => {
-            originalRequest.headers.set('Authorization', `Bearer ${token}`);
+            originalRequest.headers.set("Authorization", `Bearer ${token}`);
             return this.api(originalRequest);
           });
         }
@@ -86,13 +100,13 @@ export class ApiClient {
         this.isRefreshing = true;
 
         try {
-          const { data } = await this.authApi.post('/auth/refresh-token');
+          const { data } = await this.authApi.post("/auth/refresh-token");
           const newToken = data.access_token;
 
           this.setToken(newToken);
           this._processQueue(null, newToken);
 
-          originalRequest.headers.set('Authorization', `Bearer ${newToken}`);
+          originalRequest.headers.set("Authorization", `Bearer ${newToken}`);
           return this.api(originalRequest);
         } catch (refreshErr) {
           this._processQueue(refreshErr);
@@ -101,7 +115,7 @@ export class ApiClient {
         } finally {
           this.isRefreshing = false;
         }
-      }
+      },
     );
   }
 }

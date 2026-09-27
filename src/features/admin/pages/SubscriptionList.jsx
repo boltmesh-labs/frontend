@@ -1,49 +1,50 @@
-import React, { useCallback } from 'react';
-import { Container } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
-import { useTableQuery } from '@/hooks/useTableQuery';
-import { usePageTitle } from '@/hooks/usePageTitle';
-import { getPaginationTotals } from '@/utils/pagination';
-import { useSubscriptions } from '@/features/admin/hooks/useSubscriptions';
-import { formatDate } from '@/utils/dateFormatter';
-import { DataTable } from '@/components/DataTable';
-import { DefaultPagination } from '@/components/DefaultPagination';
-import { StatusAlert } from '@/components/StatusAlert';
-import { SubscriptionStatusBadge } from '@/components/SubscriptionStatusBadge';
-import { TableFiltersBar } from '@/components/TableFiltersBar';
-import { PageHeader } from '../components/ListHeader';
-import { SUBSCRIPTION_STATUSES } from '@/constants/statuses';
+import React, { useCallback } from "react";
+import { Container } from "react-bootstrap";
+import { Link } from "react-router-dom";
+import { useTableQuery } from "@/hooks/useTableQuery";
+import { usePageTitle } from "@/hooks/usePageTitle";
+import { getPaginationTotals } from "@/utils/pagination";
+import { useSubscriptions } from "@/features/admin/hooks/useSubscriptions";
+import { formatDate } from "@/utils/dateFormatter";
+import { DataTable } from "@/components/DataTable";
+import { DefaultPagination } from "@/components/DefaultPagination";
+import { StatusAlert } from "@/components/StatusAlert";
+import { SubscriptionStatusBadge } from "@/components/SubscriptionStatusBadge";
+import { TableFiltersBar } from "@/components/TableFiltersBar";
+import { PageHeader } from "../components/ListHeader";
+import { SUBSCRIPTION_STATUSES } from "@/constants/statuses";
 
 const TABLE_COLUMNS = [
-  { header: 'Subscription' },
-  { header: 'Assigned Plan' },
-  { header: 'Status' },
-  { header: 'Started On' },
-  { header: 'Expires On' },
+  { header: "Subscription" },
+  { header: "Assigned Plan" },
+  { header: "Status" },
+  { header: "Started On" },
+  { header: "Expires On" },
 ];
 
 const STATUS_OPTIONS = [
-  { value: '', label: 'All Statuses' },
-  { value: SUBSCRIPTION_STATUSES.active, label: 'Active' },
-  { value: SUBSCRIPTION_STATUSES.trialing, label: 'Trialing' },
-  { value: SUBSCRIPTION_STATUSES.grace_period, label: 'Grace Period' },
-  { value: SUBSCRIPTION_STATUSES.past_due, label: 'Past Due' },
-  { value: SUBSCRIPTION_STATUSES.canceled, label: 'Canceled' },
-  { value: SUBSCRIPTION_STATUSES.expired, label: 'Expired' },
-  { value: SUBSCRIPTION_STATUSES.pending, label: 'Pending' },
+  { value: "", label: "All Statuses" },
+  { value: SUBSCRIPTION_STATUSES.active, label: "Active" },
+  { value: SUBSCRIPTION_STATUSES.trialing, label: "Trialing" },
+  { value: SUBSCRIPTION_STATUSES.grace_period, label: "Grace Period" },
+  { value: SUBSCRIPTION_STATUSES.past_due, label: "Past Due" },
+  { value: SUBSCRIPTION_STATUSES.canceled, label: "Canceled" },
+  { value: SUBSCRIPTION_STATUSES.expired, label: "Expired" },
+  { value: SUBSCRIPTION_STATUSES.pending, label: "Pending" },
 ];
 
 const FILTERS = [
   {
-    key: 'status',
+    key: "status",
     options: STATUS_OPTIONS,
-    ariaLabel: 'Filter by subscription status',
-    paramKey: 'subscription_status',
+    ariaLabel: "Filter by subscription status",
+    paramKey: "subscription_status",
   },
 ];
 
 const SubscriptionRow = React.memo(({ subscription }) => {
-  const planNameDisplay = subscription.plan?.name || `Plan #${subscription.plan_id ?? 'N/A'}`;
+  const planNameDisplay =
+    subscription.plan?.name || `Plan #${subscription.plan_id ?? "N/A"}`;
   const status = subscription.status;
 
   return (
@@ -63,7 +64,9 @@ const SubscriptionRow = React.memo(({ subscription }) => {
       <td>
         <SubscriptionStatusBadge status={status} />
       </td>
-      <td className="text-muted font-monospace">{formatDate(subscription.started_at)}</td>
+      <td className="text-muted font-monospace">
+        {formatDate(subscription.started_at)}
+      </td>
       <td className="text-muted font-monospace fw-semibold">
         {formatDate(subscription.expires_at)}
       </td>
@@ -71,10 +74,10 @@ const SubscriptionRow = React.memo(({ subscription }) => {
   );
 });
 
-SubscriptionRow.displayName = 'SubscriptionRow';
+SubscriptionRow.displayName = "SubscriptionRow";
 
 const SubscriptionList = () => {
-  usePageTitle('Subscription Management');
+  usePageTitle("Subscription Management");
 
   const {
     currentPage,
@@ -94,8 +97,10 @@ const SubscriptionList = () => {
   const { totalCount, totalPages } = getPaginationTotals(data, pageSize);
 
   const renderRow = useCallback(
-    (subscription) => <SubscriptionRow key={subscription.id} subscription={subscription} />,
-    []
+    (subscription) => (
+      <SubscriptionRow key={subscription.id} subscription={subscription} />
+    ),
+    [],
   );
 
   return (

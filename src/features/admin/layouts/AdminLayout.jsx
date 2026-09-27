@@ -1,18 +1,18 @@
-import { Suspense } from 'react';
-import { Card, Col, ListGroup, Row } from 'react-bootstrap';
-import { NavLink, Outlet } from 'react-router-dom';
+import { Suspense } from "react";
+import { Card, Col, ListGroup, Row } from "react-bootstrap";
+import { NavLink, Outlet } from "react-router-dom";
 
-import { PageLoader } from '@/components/PageLoader';
+import { PageLoader } from "@/components/PageLoader";
 
 const ADMIN_LINKS = [
-  { to: 'users', label: 'Users', icon: '👤' },
-  { to: 'plans', label: 'Plans', icon: '📦' },
-  { to: 'subscriptions', label: 'Subscriptions', icon: '📅' },
-  { to: 'invoices', label: 'Invoices', icon: '🧾' },
-  { to: 'payments', label: 'Payments & Transactions', icon: '💳' },
-  { to: 'vpn-regions', label: 'VPN Regions', icon: '🌐' },
-  { to: 'vpn-servers', label: 'VPN Servers', icon: '🖧' },
-  { to: 'vpn-devices', label: 'VPN Devices', icon: '📱' },
+  { to: "users", label: "Users", icon: "👤" },
+  { to: "plans", label: "Plans", icon: "📦" },
+  { to: "subscriptions", label: "Subscriptions", icon: "📅" },
+  { to: "invoices", label: "Invoices", icon: "🧾" },
+  { to: "payments", label: "Payments & Transactions", icon: "💳" },
+  { to: "vpn-regions", label: "VPN Regions", icon: "🌐" },
+  { to: "vpn-servers", label: "VPN Servers", icon: "🖧" },
+  { to: "vpn-devices", label: "VPN Devices", icon: "📱" },
 ];
 
 const AdminLayout = () => {
@@ -35,7 +35,7 @@ const AdminLayout = () => {
               >
                 <span
                   className="d-inline-flex align-items-center justify-content-center me-2"
-                  style={{ width: '1.5rem', flexShrink: 0 }}
+                  style={{ width: "1.5rem", flexShrink: 0 }}
                 >
                   {link.icon}
                 </span>
@@ -51,7 +51,7 @@ const AdminLayout = () => {
             >
               <span
                 className="d-inline-flex align-items-center justify-content-center me-2"
-                style={{ width: '1.5rem', flexShrink: 0 }}
+                style={{ width: "1.5rem", flexShrink: 0 }}
               >
                 ↩️
               </span>

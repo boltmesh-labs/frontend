@@ -5,17 +5,18 @@
  * @returns {string} Formatted currency string.
  */
 export const formatCurrencyAmount = (rawAmount, currency) => {
-  if (rawAmount === undefined || rawAmount === null || isNaN(Number(rawAmount))) return '0';
+  if (rawAmount === undefined || rawAmount === null || isNaN(Number(rawAmount)))
+    return "0";
   if (!currency) return String(rawAmount);
 
   const num = Number(rawAmount);
   const currencyLower = String(currency).toLowerCase();
 
   switch (currencyLower) {
-    case 'btc': {
+    case "btc": {
       // Convert standard BTC decimal to Satoshis (1 BTC = 100,000,000 Sats)
       const sats = Math.round(num * 1e8);
-      const formattedSats = sats.toLocaleString('en-US');
+      const formattedSats = sats.toLocaleString("en-US");
 
       // Keep up to 8 decimal places for BTC display, stripping trailing zeros
       const formattedBtc = Number(num.toFixed(8));
@@ -23,20 +24,20 @@ export const formatCurrencyAmount = (rawAmount, currency) => {
       return `${formattedSats} Sats (${formattedBtc} BTC)`;
     }
 
-    case 'xmr':
+    case "xmr":
       // Formats XMR with up to 6 decimal places, removing unnecessary trailing zeros
       return `${Number(num.toFixed(6))} XMR`;
 
-    case 'eur':
-      return `€${num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    case "eur":
+      return `€${num.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-    case 'gbp':
-      return `£${num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    case "gbp":
+      return `£${num.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-    case 'usd':
-      return `$${num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    case "usd":
+      return `$${num.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
     default:
-      return `${num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currency.toUpperCase()}`;
+      return `${num.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currency.toUpperCase()}`;
   }
 };

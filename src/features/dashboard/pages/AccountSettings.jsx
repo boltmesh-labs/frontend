@@ -1,22 +1,22 @@
-import { useEffect, useState } from 'react';
-import { Alert, Card, Col, Form, Nav, Row, Tab } from 'react-bootstrap';
-import { PageLoader } from '@/components/PageLoader';
-import { StatusAlert } from '@/components/StatusAlert';
-import { AsyncButton } from '@/components/AsyncButton';
-import { toast } from 'react-toastify';
-import { usePageTitle } from '@/hooks/usePageTitle';
-import { useForm } from '@/hooks/useForm';
-import { useConfirm } from '@/hooks/useConfirm';
+import { useEffect, useState } from "react";
+import { Alert, Card, Col, Form, Nav, Row, Tab } from "react-bootstrap";
+import { PageLoader } from "@/components/PageLoader";
+import { StatusAlert } from "@/components/StatusAlert";
+import { AsyncButton } from "@/components/AsyncButton";
+import { toast } from "react-toastify";
+import { usePageTitle } from "@/hooks/usePageTitle";
+import { useForm } from "@/hooks/useForm";
+import { useConfirm } from "@/hooks/useConfirm";
 import {
   useDashboardProfile,
   useUpdateProfile,
   useChangePassword,
   useRequestAccountDeletion,
-} from '@/features/dashboard/hooks/useDashboard';
-import { DashboardContainer } from '@/features/dashboard/components/DashboardContainer';
-import { DashboardHeader } from '../components/DashboardHeader';
-import { handleApiError } from '@/utils/errorHandler';
-import { COMPANY_NAME } from '@/utils/config';
+} from "@/features/dashboard/hooks/useDashboard";
+import { DashboardContainer } from "@/features/dashboard/components/DashboardContainer";
+import { DashboardHeader } from "../components/DashboardHeader";
+import { handleApiError } from "@/utils/errorHandler";
+import { COMPANY_NAME } from "@/utils/config";
 
 const ProfileForm = ({ initialUser }) => {
   const {
@@ -24,9 +24,9 @@ const ProfileForm = ({ initialUser }) => {
     handleChange,
     setValue,
   } = useForm({
-    username: initialUser?.username || '',
-    email: initialUser?.email || '',
-    currentPassword: '',
+    username: initialUser?.username || "",
+    email: initialUser?.email || "",
+    currentPassword: "",
   });
   const updateMutation = useUpdateProfile();
   // Pending state comes straight from the mutation (no parallel useState flag).
@@ -39,16 +39,16 @@ const ProfileForm = ({ initialUser }) => {
     e.preventDefault();
 
     if (!profile.currentPassword) {
-      toast.error('Current password is required to update email or username.');
+      toast.error("Current password is required to update email or username.");
       return;
     }
 
     const isConfirmed = await confirm({
-      title: 'Save Profile Changes?',
+      title: "Save Profile Changes?",
       message:
-        'Your username and email address will be updated across the account immediately. You will keep the same current password.',
-      confirmText: 'Save Changes',
-      confirmVariant: 'primary',
+        "Your username and email address will be updated across the account immediately. You will keep the same current password.",
+      confirmText: "Save Changes",
+      confirmVariant: "primary",
     });
     if (!isConfirmed) return;
 
@@ -58,7 +58,7 @@ const ProfileForm = ({ initialUser }) => {
         email: profile.email,
         current_password: profile.currentPassword,
       });
-      setValue('currentPassword', '');
+      setValue("currentPassword", "");
     } catch {
       // Success/error feedback (the toasts) is owned by useUpdateProfile; the
       // rejection is contained here so the page does not double-toast.
@@ -71,7 +71,9 @@ const ProfileForm = ({ initialUser }) => {
       <Row className="g-3">
         <Col md={6}>
           <Form.Group controlId="formUsername">
-            <Form.Label className="small fw-bold text-secondary">Username</Form.Label>
+            <Form.Label className="small fw-bold text-secondary">
+              Username
+            </Form.Label>
             <Form.Control
               type="text"
               name="username"
@@ -85,7 +87,9 @@ const ProfileForm = ({ initialUser }) => {
 
         <Col md={6}>
           <Form.Group controlId="formEmail">
-            <Form.Label className="small fw-bold text-secondary">Email Address</Form.Label>
+            <Form.Label className="small fw-bold text-secondary">
+              Email Address
+            </Form.Label>
             <Form.Control
               type="email"
               name="email"
@@ -99,7 +103,9 @@ const ProfileForm = ({ initialUser }) => {
 
         <Col xs={12}>
           <Form.Group controlId="formProfileCurrentPassword">
-            <Form.Label className="small fw-bold text-secondary">Current Password</Form.Label>
+            <Form.Label className="small fw-bold text-secondary">
+              Current Password
+            </Form.Label>
             <Form.Control
               type="password"
               name="currentPassword"
@@ -135,9 +141,9 @@ const PasswordForm = ({ username }) => {
     handleChange,
     reset,
   } = useForm({
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: '',
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
   });
   const changePasswordMutation = useChangePassword();
   // Pending state comes straight from the mutation (no parallel useState flag).
@@ -148,24 +154,24 @@ const PasswordForm = ({ username }) => {
     e.preventDefault();
 
     if (passwords.newPassword !== passwords.confirmPassword) {
-      toast.error('New passwords do not match.');
+      toast.error("New passwords do not match.");
       return;
     }
     if (passwords.newPassword.length < 8) {
-      toast.error('Password must be at least 8 characters long.');
+      toast.error("Password must be at least 8 characters long.");
       return;
     }
     if (passwords.currentPassword === passwords.newPassword) {
-      toast.error('New password must be different from your current password.');
+      toast.error("New password must be different from your current password.");
       return;
     }
 
     const isConfirmed = await confirm({
-      title: 'Update Password?',
+      title: "Update Password?",
       message:
-        'Your login credentials will change immediately. Make sure you remember the new password before continuing.',
-      confirmText: 'Update Password',
-      confirmVariant: 'primary',
+        "Your login credentials will change immediately. Make sure you remember the new password before continuing.",
+      confirmText: "Update Password",
+      confirmVariant: "primary",
     });
     if (!isConfirmed) return;
 
@@ -187,7 +193,7 @@ const PasswordForm = ({ username }) => {
       <input
         type="text"
         name="username"
-        value={username || ''}
+        value={username || ""}
         autoComplete="username"
         readOnly
         className="d-none"
@@ -196,7 +202,9 @@ const PasswordForm = ({ username }) => {
       <Row className="g-3">
         <Col md={6}>
           <Form.Group controlId="formNewPassword">
-            <Form.Label className="small fw-bold text-secondary">New Password</Form.Label>
+            <Form.Label className="small fw-bold text-secondary">
+              New Password
+            </Form.Label>
             <Form.Control
               type="password"
               name="newPassword"
@@ -210,7 +218,9 @@ const PasswordForm = ({ username }) => {
         </Col>
         <Col md={6}>
           <Form.Group controlId="formConfirmPassword">
-            <Form.Label className="small fw-bold text-secondary">Confirm New Password</Form.Label>
+            <Form.Label className="small fw-bold text-secondary">
+              Confirm New Password
+            </Form.Label>
             <Form.Control
               type="password"
               name="confirmPassword"
@@ -224,7 +234,9 @@ const PasswordForm = ({ username }) => {
         </Col>
         <Col xs={12}>
           <Form.Group controlId="formCurrentPassword">
-            <Form.Label className="small fw-bold text-secondary">Current Password</Form.Label>
+            <Form.Label className="small fw-bold text-secondary">
+              Current Password
+            </Form.Label>
             <Form.Control
               type="password"
               name="currentPassword"
@@ -255,7 +267,7 @@ const PasswordForm = ({ username }) => {
 };
 
 const DeleteAccountForm = ({ onEmailSent }) => {
-  const { values, handleChange } = useForm({ confirmDelete: '' });
+  const { values, handleChange } = useForm({ confirmDelete: "" });
 
   const deleteRequestMutation = useRequestAccountDeletion();
   const isPending = deleteRequestMutation.isPending;
@@ -263,8 +275,8 @@ const DeleteAccountForm = ({ onEmailSent }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (values.confirmDelete !== 'DELETE') {
-      toast.error('Please type DELETE to confirm account deletion.');
+    if (values.confirmDelete !== "DELETE") {
+      toast.error("Please type DELETE to confirm account deletion.");
       return;
     }
 
@@ -272,7 +284,9 @@ const DeleteAccountForm = ({ onEmailSent }) => {
       await deleteRequestMutation.mutateAsync();
       // Flip the parent into its "confirmation email sent" panel.
       onEmailSent?.();
-      toast.info('Confirmation email sent. Click the link in your inbox to complete deletion.');
+      toast.info(
+        "Confirmation email sent. Click the link in your inbox to complete deletion.",
+      );
     } catch (err) {
       handleApiError(err);
     }
@@ -302,7 +316,7 @@ const DeleteAccountForm = ({ onEmailSent }) => {
             type="submit"
             variant="danger"
             className="fw-bold py-2 px-4 shadow-sm"
-            disabled={values.confirmDelete !== 'DELETE'}
+            disabled={values.confirmDelete !== "DELETE"}
             loading={isPending}
             loadingLabel="Deleting Account..."
           >
@@ -322,13 +336,20 @@ const AccountSettings = () => {
 
   usePageTitle(
     `Account Settings | ${COMPANY_NAME}`,
-    `Update your profile, change your password, and manage security settings.`
+    `Update your profile, change your password, and manage security settings.`,
   );
 
-  const { data: user, isLoading, isError, error, refetch } = useDashboardProfile();
+  const {
+    data: user,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useDashboardProfile();
 
   useEffect(() => {
-    if (isError) toast.error('Failed to load profile settings. Please refresh.');
+    if (isError)
+      toast.error("Failed to load profile settings. Please refresh.");
   }, [isError]);
 
   if (isLoading) {
@@ -347,7 +368,9 @@ const AccountSettings = () => {
           subtitle="Manage your profile details, password, and security settings."
         />
         <StatusAlert
-          message={error || 'Failed to load profile settings. Please try again.'}
+          message={
+            error || "Failed to load profile settings. Please try again."
+          }
           onRetry={refetch}
         />
       </DashboardContainer>
@@ -367,17 +390,26 @@ const AccountSettings = () => {
             <Card className="border-0 shadow-sm p-2">
               <Nav variant="pills" className="flex-column gap-1">
                 <Nav.Item>
-                  <Nav.Link eventKey="profile" className="fw-semibold px-3 py-2">
+                  <Nav.Link
+                    eventKey="profile"
+                    className="fw-semibold px-3 py-2"
+                  >
                     👤 Profile Settings
                   </Nav.Link>
                 </Nav.Item>
                 <Nav.Item>
-                  <Nav.Link eventKey="security" className="fw-semibold px-3 py-2">
+                  <Nav.Link
+                    eventKey="security"
+                    className="fw-semibold px-3 py-2"
+                  >
                     🔒 Security
                   </Nav.Link>
                 </Nav.Item>
                 <Nav.Item>
-                  <Nav.Link eventKey="danger" className="fw-semibold px-3 py-2 text-danger">
+                  <Nav.Link
+                    eventKey="danger"
+                    className="fw-semibold px-3 py-2 text-danger"
+                  >
                     ⚠️ Delete Account
                   </Nav.Link>
                 </Nav.Item>
@@ -416,17 +448,21 @@ const AccountSettings = () => {
                   </Card.Header>
                   <Card.Body className="p-4">
                     <p className="text-muted small mb-3">
-                      Deleting your account is permanent. All active subscriptions and configuration
-                      access will be revoked.
+                      Deleting your account is permanent. All active
+                      subscriptions and configuration access will be revoked.
                     </p>
                     {deleteEmailSent ? (
                       <Alert variant="info" className="mb-0 border-0 shadow-sm">
-                        <strong>Confirmation email sent.</strong> We&apos;ve emailed a confirmation
-                        link to <strong>{user?.email}</strong>. Click the link in your inbox to
-                        complete the deletion. The link expires in 15 minutes.
+                        <strong>Confirmation email sent.</strong> We&apos;ve
+                        emailed a confirmation link to{" "}
+                        <strong>{user?.email}</strong>. Click the link in your
+                        inbox to complete the deletion. The link expires in 15
+                        minutes.
                       </Alert>
                     ) : (
-                      <DeleteAccountForm onEmailSent={() => setDeleteEmailSent(true)} />
+                      <DeleteAccountForm
+                        onEmailSent={() => setDeleteEmailSent(true)}
+                      />
                     )}
                   </Card.Body>
                 </Card>

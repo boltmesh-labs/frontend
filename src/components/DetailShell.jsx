@@ -1,8 +1,8 @@
-import { Container, Button } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
+import { Container, Button } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
 
-import { PageLoader } from '@/components/PageLoader';
-import { StatusAlert } from '@/components/StatusAlert';
+import { PageLoader } from "@/components/PageLoader";
+import { StatusAlert } from "@/components/StatusAlert";
 
 /**
  * Reusable skeleton for entity detail pages.
@@ -38,13 +38,13 @@ export const DetailShell = ({
   refetch,
   children,
   loadingComponent,
-  notFoundMessage = 'The requested resource could not be found.',
+  notFoundMessage = "The requested resource could not be found.",
   backTo,
-  backLabel = '← Back',
-  backVariant = 'outline-secondary',
+  backLabel = "← Back",
+  backVariant = "outline-secondary",
   onBack,
   nullCheck = true,
-  className = '',
+  className = "",
 }) => {
   const navigate = useNavigate();
 
@@ -56,7 +56,10 @@ export const DetailShell = ({
   if (error || isEmpty) {
     const message = error || (isEmpty ? notFoundMessage : null);
     return (
-      <Container className={`py-4 ${className}`.trim()} style={{ maxWidth: '600px' }}>
+      <Container
+        className={`py-4 ${className}`.trim()}
+        style={{ maxWidth: "600px" }}
+      >
         <StatusAlert message={message} onRetry={refetch} />
         {(onBack || backTo) && (
           <div className="text-center mt-3">

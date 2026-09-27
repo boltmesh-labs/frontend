@@ -1,34 +1,37 @@
-import React, { useCallback, useMemo } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { Container, Card, Row, Col, Button, Spinner } from 'react-bootstrap';
+import React, { useCallback, useMemo } from "react";
+import { useParams, Link } from "react-router-dom";
+import { Container, Card, Row, Col, Button, Spinner } from "react-bootstrap";
 
-import { useConfirm } from '@/hooks/useConfirm';
-import { useCopied } from '@/hooks/useCopied';
-import { usePageTitle } from '@/hooks/usePageTitle';
-import { useVpnDeviceDetail, useToggleVpnDeviceStatus } from '@/features/admin/hooks/useVpnDevices';
-import { useUserDetail } from '@/features/admin/hooks/useUsers';
-import { formatDate } from '@/utils/dateFormatter';
-import { formatBytes } from '@/utils/byteFormatter';
-import { copyToClipboard } from '@/utils/clipboard';
+import { useConfirm } from "@/hooks/useConfirm";
+import { useCopied } from "@/hooks/useCopied";
+import { usePageTitle } from "@/hooks/usePageTitle";
+import {
+  useVpnDeviceDetail,
+  useToggleVpnDeviceStatus,
+} from "@/features/admin/hooks/useVpnDevices";
+import { useUserDetail } from "@/features/admin/hooks/useUsers";
+import { formatDate } from "@/utils/dateFormatter";
+import { formatBytes } from "@/utils/byteFormatter";
+import { copyToClipboard } from "@/utils/clipboard";
 
-import { DetailShell } from '@/components/DetailShell';
-import { DataTable } from '@/components/DataTable';
-import { VpnDeviceStateBadge } from '@/components/VpnDeviceStateBadge';
-import { DetailHeader } from '../components/DetailHeader';
-import { AccountOwnerCard } from '../components/DetailAccount';
-import { LinkedCard } from '../components/DetailLinked';
-import { DetailSummary } from '../components/DetailSummary';
+import { DetailShell } from "@/components/DetailShell";
+import { DataTable } from "@/components/DataTable";
+import { VpnDeviceStateBadge } from "@/components/VpnDeviceStateBadge";
+import { DetailHeader } from "../components/DetailHeader";
+import { AccountOwnerCard } from "../components/DetailAccount";
+import { LinkedCard } from "../components/DetailLinked";
+import { DetailSummary } from "../components/DetailSummary";
 
 const PEER_TABLE_COLUMNS = [
-  { header: 'Peer' },
-  { header: 'Public Key' },
-  { header: 'IP Address' },
-  { header: 'Server' },
-  { header: 'Status' },
-  { header: 'Connected' },
-  { header: 'Last Active' },
-  { header: 'Created' },
-  { header: 'Tx / Rx' },
+  { header: "Peer" },
+  { header: "Public Key" },
+  { header: "IP Address" },
+  { header: "Server" },
+  { header: "Status" },
+  { header: "Connected" },
+  { header: "Last Active" },
+  { header: "Created" },
+  { header: "Tx / Rx" },
 ];
 
 const PeerRow = React.memo(({ peer }) => {
@@ -39,8 +42,8 @@ const PeerRow = React.memo(({ peer }) => {
   const handleCopyKey = async () => {
     if (!peer.public_key) return;
     const didCopy = await copyToClipboard(peer.public_key, {
-      success: 'Public key copied to clipboard!',
-      error: 'Failed to copy public key.',
+      success: "Public key copied to clipboard!",
+      error: "Failed to copy public key.",
     });
     if (didCopy) markCopied();
   };
@@ -60,7 +63,7 @@ const PeerRow = React.memo(({ peer }) => {
           <div className="d-flex align-items-center gap-1">
             <span
               className="font-monospace text-truncate user-select-all text-body"
-              style={{ maxWidth: '100px' }}
+              style={{ maxWidth: "100px" }}
               title={peer.public_key}
             >
               {peer.public_key}
@@ -73,14 +76,14 @@ const PeerRow = React.memo(({ peer }) => {
               title="Copy Public Key"
               aria-label="Copy public key"
             >
-              {copied ? '✓' : '📋'}
+              {copied ? "✓" : "📋"}
             </Button>
           </div>
         ) : (
           <span className="font-monospace text-muted">—</span>
         )}
       </td>
-      <td className="font-monospace text-body">{peer.assigned_ip || '—'}</td>
+      <td className="font-monospace text-body">{peer.assigned_ip || "—"}</td>
       <td className="font-monospace small text-break">
         {peer.server_id ? (
           <Link
@@ -100,11 +103,13 @@ const PeerRow = React.memo(({ peer }) => {
       <td className="text-muted">
         <span className="d-inline-flex align-items-center gap-2">
           <span
-            className={`rounded-circle ${peer.is_connected ? 'bg-success' : 'bg-danger'}`}
-            style={{ width: '8px', height: '8px' }}
+            className={`rounded-circle ${peer.is_connected ? "bg-success" : "bg-danger"}`}
+            style={{ width: "8px", height: "8px" }}
             aria-hidden="true"
           />
-          <span className="small">{peer.is_connected ? 'Connected' : 'Disconnected'}</span>
+          <span className="small">
+            {peer.is_connected ? "Connected" : "Disconnected"}
+          </span>
         </span>
       </td>
       <td className="text-muted">{formatDate(peer.last_seen_at)}</td>
@@ -115,42 +120,50 @@ const PeerRow = React.memo(({ peer }) => {
     </tr>
   );
 });
-PeerRow.displayName = 'PeerRow';
+PeerRow.displayName = "PeerRow";
 
 const VpnDeviceDetail = () => {
   const { id } = useParams();
 
   usePageTitle(`VPN Device ${id}`);
 
-  const { data: device, isLoading, isError, error, refetch } = useVpnDeviceDetail(id);
+  const {
+    data: device,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useVpnDeviceDetail(id);
   const { data: user } = useUserDetail(device?.user_id);
 
   const userContext = user || {
-    username: device?.user_id ? `User #${device.user_id}` : 'Unknown User',
-    email: 'No email linked',
+    username: device?.user_id ? `User #${device.user_id}` : "Unknown User",
+    email: "No email linked",
   };
 
-  const { mutate: toggleDeviceStatus, isPending: isToggling } = useToggleVpnDeviceStatus();
+  const { mutate: toggleDeviceStatus, isPending: isToggling } =
+    useToggleVpnDeviceStatus();
 
   const { confirm, confirmDialog } = useConfirm();
 
   const handleToggleStatus = useCallback(
     async ({ id, isActive }) => {
-      const actionLabel = isActive ? 'deactivate' : 'activate';
-      const capitalized = actionLabel.charAt(0).toUpperCase() + actionLabel.slice(1);
+      const actionLabel = isActive ? "deactivate" : "activate";
+      const capitalized =
+        actionLabel.charAt(0).toUpperCase() + actionLabel.slice(1);
 
       const isConfirmed = await confirm({
         title: `${capitalized} Device`,
         message: `Are you sure you want to ${actionLabel} this VPN device?`,
         confirmText: capitalized,
-        confirmVariant: isActive ? 'danger' : 'primary',
+        confirmVariant: isActive ? "danger" : "primary",
       });
 
       if (!isConfirmed) return;
 
       toggleDeviceStatus({ id, isActive });
     },
-    [confirm, toggleDeviceStatus]
+    [confirm, toggleDeviceStatus],
   );
 
   const summaryItems = useMemo(() => {
@@ -158,31 +171,31 @@ const VpnDeviceDetail = () => {
 
     return [
       {
-        label: 'Display Name',
-        value: device.name || 'Unnamed Device',
+        label: "Display Name",
+        value: device.name || "Unnamed Device",
       },
       {
-        label: 'Platform',
-        value: (device.platform || 'N/A').toUpperCase(),
+        label: "Platform",
+        value: (device.platform || "N/A").toUpperCase(),
       },
       {
-        label: 'Provisioned',
+        label: "Provisioned",
         value: formatDate(device.created_at),
-        className: 'text-muted',
+        className: "text-muted",
       },
       ...(device.last_active_at
         ? [
             {
-              label: 'Last Active',
+              label: "Last Active",
               value: formatDate(device.last_active_at),
-              className: 'text-muted',
+              className: "text-muted",
             },
           ]
         : []),
       {
-        label: 'Last Modified',
+        label: "Last Modified",
         value: formatDate(device.updated_at || device.created_at),
-        className: 'text-muted',
+        className: "text-muted",
       },
     ];
   }, [device]);
@@ -203,18 +216,25 @@ const VpnDeviceDetail = () => {
           badge={<VpnDeviceStateBadge isActive={device?.is_active} />}
           actions={
             <Button
-              variant={device?.is_active ? 'outline-warning' : 'outline-success'}
+              variant={
+                device?.is_active ? "outline-warning" : "outline-success"
+              }
               className="shadow-sm"
               disabled={isToggling}
-              onClick={() => handleToggleStatus({ id: device?.id, isActive: device?.is_active })}
-              aria-label={`${device?.is_active ? 'Deactivate' : 'Activate'} device`}
+              onClick={() =>
+                handleToggleStatus({
+                  id: device?.id,
+                  isActive: device?.is_active,
+                })
+              }
+              aria-label={`${device?.is_active ? "Deactivate" : "Activate"} device`}
             >
               {isToggling ? (
                 <Spinner size="sm" animation="border" className="me-1" />
               ) : device?.is_active ? (
-                '⏸ Deactivate'
+                "⏸ Deactivate"
               ) : (
-                '▶ Activate'
+                "▶ Activate"
               )}
             </Button>
           }
@@ -247,7 +267,8 @@ const VpnDeviceDetail = () => {
             <div>
               <h5 className="fw-bold text-body m-0">Associated Peers</h5>
               <p className="text-muted small m-0">
-                All active and historical VPN peers registered under this device.
+                All active and historical VPN peers registered under this
+                device.
               </p>
             </div>
           </div>

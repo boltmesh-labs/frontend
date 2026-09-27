@@ -10,16 +10,16 @@
  */
 
 export const INVOICE_STATUSES = {
-  pending: 'pending',
-  paid: 'paid',
-  confirming: 'confirming',
-  expired: 'expired',
-  partially_paid: 'partially_paid',
-  expired_partially_paid: 'expired_partially_paid',
-  canceled: 'canceled',
-  failed: 'failed',
-  refund_required: 'refund_required',
-  refunded: 'refunded',
+  pending: "pending",
+  paid: "paid",
+  confirming: "confirming",
+  expired: "expired",
+  partially_paid: "partially_paid",
+  expired_partially_paid: "expired_partially_paid",
+  canceled: "canceled",
+  failed: "failed",
+  refund_required: "refund_required",
+  refunded: "refunded",
 };
 
 /**
@@ -45,13 +45,13 @@ export const ACTIONABLE_INVOICE_STATUSES = [
 ];
 
 export const SUBSCRIPTION_STATUSES = {
-  active: 'active',
-  expired: 'expired',
-  canceled: 'canceled',
-  pending: 'pending',
-  grace_period: 'grace_period',
-  past_due: 'past_due',
-  trialing: 'trialing',
+  active: "active",
+  expired: "expired",
+  canceled: "canceled",
+  pending: "pending",
+  grace_period: "grace_period",
+  past_due: "past_due",
+  trialing: "trialing",
 };
 
 /** Subscriptions whose owner can extend/renew in place. */
@@ -62,21 +62,21 @@ export const RENEWABLE_SUBSCRIPTION_STATUSES = [
 ];
 
 export const PAYMENT_STATUSES = {
-  processing: 'processing',
-  succeeded: 'succeeded',
-  failed: 'failed',
-  refunded: 'refunded',
-  refund_required: 'refund_required',
+  processing: "processing",
+  succeeded: "succeeded",
+  failed: "failed",
+  refunded: "refunded",
+  refund_required: "refund_required",
 };
 
 /** Canonical VPN server operational states (mirrors backend/app/vpn/enums.py). */
 export const VPN_SERVER_STATUSES = {
-  online: 'online',
-  provisioning: 'provisioning',
-  maintenance: 'maintenance',
-  offline: 'offline',
-  decommissioned: 'decommissioned',
-  error: 'error',
+  online: "online",
+  provisioning: "provisioning",
+  maintenance: "maintenance",
+  offline: "offline",
+  decommissioned: "decommissioned",
+  error: "error",
 };
 
 /**
@@ -85,23 +85,23 @@ export const VPN_SERVER_STATUSES = {
  * via its paramValue transform (there is no backend enum for this pair).
  */
 export const VPN_REGION_STATES = {
-  active: 'active',
-  inactive: 'inactive',
+  active: "active",
+  inactive: "inactive",
 };
 
 export const NODE_REGISTRATION_STATUSES = {
-  SUCCESS: 'SUCCESS',
-  INVALID_SECRET: 'INVALID_SECRET',
-  IID_VERIFICATION_FAILED: 'IID_VERIFICATION_FAILED',
-  EXPIRED: 'EXPIRED',
-  REGION_CONFLICT: 'REGION_CONFLICT',
-  TUNNEL_ADDRESS_OVERLAP: 'TUNNEL_ADDRESS_OVERLAP',
-  REGION_NOT_FOUND: 'REGION_NOT_FOUND',
-  INTERNAL_ERROR: 'INTERNAL_ERROR',
+  SUCCESS: "SUCCESS",
+  INVALID_SECRET: "INVALID_SECRET",
+  IID_VERIFICATION_FAILED: "IID_VERIFICATION_FAILED",
+  EXPIRED: "EXPIRED",
+  REGION_CONFLICT: "REGION_CONFLICT",
+  TUNNEL_ADDRESS_OVERLAP: "TUNNEL_ADDRESS_OVERLAP",
+  REGION_NOT_FOUND: "REGION_NOT_FOUND",
+  INTERNAL_ERROR: "INTERNAL_ERROR",
 };
 
 export const NODE_REGISTRATION_AUTH_METHODS = {
-  AWS_IID: 'AWS_IID',
-  BOOTSTRAP_SECRET: 'BOOTSTRAP_SECRET',
-  FAILED: 'FAILED',
+  AWS_IID: "AWS_IID",
+  BOOTSTRAP_SECRET: "BOOTSTRAP_SECRET",
+  FAILED: "FAILED",
 };

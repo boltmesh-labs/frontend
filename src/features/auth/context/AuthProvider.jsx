@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { apiClient } from '@/api/client';
-import { AuthContext } from './AuthContext';
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { apiClient } from "@/api/client";
+import { AuthContext } from "./AuthContext";
 
 // Decodes JWT claims for UX only (identity display, role-gated navigation).
 // The signature is intentionally NOT verified here — every request is
@@ -8,18 +8,21 @@ import { AuthContext } from './AuthContext';
 const parseUser = (token) => {
   if (!token) return null;
   try {
-    const base64Url = token.split('.')[1];
+    const base64Url = token.split(".")[1];
     if (!base64Url) return null;
 
     // Add missing padding if needed
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    const padded = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), '=');
+    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+    const padded = base64.padEnd(
+      base64.length + ((4 - (base64.length % 4)) % 4),
+      "=",
+    );
 
     const jsonPayload = decodeURIComponent(
       atob(padded)
-        .split('')
-        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-        .join('')
+        .split("")
+        .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+        .join(""),
     );
     const payload = JSON.parse(jsonPayload);
     return { id: payload.sub, role: payload.role };
@@ -49,7 +52,7 @@ export const AuthProvider = ({ children }) => {
       }
       applyTokenState(token);
     },
-    [applyTokenState]
+    [applyTokenState],
   );
 
   // Subscribe to automatic token updates originating from ApiClient
@@ -64,7 +67,7 @@ export const AuthProvider = ({ children }) => {
   }, [applyTokenState]);
 
   const logout = useCallback(async () => {
-    await apiClient.api.post('/auth/logout');
+    await apiClient.api.post("/auth/logout");
     updateAuthState(null);
   }, [updateAuthState]);
 
@@ -91,15 +94,22 @@ export const AuthProvider = ({ children }) => {
     bootstrappedRef.current = true;
 
     apiClient.authApi
-      .post('/auth/refresh-token')
+      .post("/auth/refresh-token")
       .then(({ data }) => updateAuthState(data.access_token))
       .catch(() => updateAuthState(null))
       .finally(() => setLoading(false));
   }, [updateAuthState]);
 
   const value = useMemo(
-    () => ({ accessToken, setAccessToken: updateAuthState, user, loading, logout, updateUser }),
-    [accessToken, updateAuthState, user, loading, logout, updateUser]
+    () => ({
+      accessToken,
+      setAccessToken: updateAuthState,
+      user,
+      loading,
+      logout,
+      updateUser,
+    }),
+    [accessToken, updateAuthState, user, loading, logout, updateUser],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

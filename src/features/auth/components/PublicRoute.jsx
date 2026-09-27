@@ -1,7 +1,7 @@
-import { Navigate } from 'react-router-dom';
+import { Navigate } from "react-router-dom";
 
-import { PageLoader } from '@/components/PageLoader';
-import { useAuth } from '@/features/auth/context/AuthContext';
+import { PageLoader } from "@/components/PageLoader";
+import { useAuth } from "@/features/auth/context/AuthContext";
 
 const PublicRoute = ({ children, redirectOnAuth = true }) => {
   const { accessToken, loading } = useAuth();

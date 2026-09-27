@@ -1,21 +1,21 @@
-import { act, render, screen } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { act, render, screen } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { MemoryRouter, Route, Routes } from "react-router-dom";
 
-import { useConfirmAccountDeletion } from '@/features/auth/hooks/useAuthMutations';
-import { AuthContext } from '@/features/auth/context/AuthContext';
-import PublicRoute from '@/features/auth/components/PublicRoute';
-import ConfirmDelete from './ConfirmDelete';
+import { useConfirmAccountDeletion } from "@/features/auth/hooks/useAuthMutations";
+import { AuthContext } from "@/features/auth/context/AuthContext";
+import PublicRoute from "@/features/auth/components/PublicRoute";
+import ConfirmDelete from "./ConfirmDelete";
 
-vi.mock('@/features/auth/hooks/useAuthMutations', () => ({
+vi.mock("@/features/auth/hooks/useAuthMutations", () => ({
   useConfirmAccountDeletion: vi.fn(),
 }));
 
-const renderAt = (search = '', setAccessToken = vi.fn()) =>
+const renderAt = (search = "", setAccessToken = vi.fn()) =>
   render(
     <AuthContext.Provider
       value={{
-        accessToken: 'existing-session',
+        accessToken: "existing-session",
         loading: false,
         setAccessToken,
       }}
@@ -33,10 +33,10 @@ const renderAt = (search = '', setAccessToken = vi.fn()) =>
           <Route path="/login" element={<div>Login page</div>} />
         </Routes>
       </MemoryRouter>
-    </AuthContext.Provider>
+    </AuthContext.Provider>,
   );
 
-describe('ConfirmDelete', () => {
+describe("ConfirmDelete", () => {
   let mutate;
 
   beforeEach(() => {
@@ -49,16 +49,18 @@ describe('ConfirmDelete', () => {
     vi.useRealTimers();
   });
 
-  it('reports a missing token without calling the API', () => {
+  it("reports a missing token without calling the API", () => {
     renderAt();
 
-    expect(screen.getByText(/invalid link.*token is missing/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/invalid link.*token is missing/i),
+    ).toBeInTheDocument();
     expect(mutate).not.toHaveBeenCalled();
   });
 
-  it('clears the authenticated context before returning to login after the delay', async () => {
+  it("clears the authenticated context before returning to login after the delay", async () => {
     const setAccessToken = vi.fn();
-    renderAt('?token=tok-1', setAccessToken);
+    renderAt("?token=tok-1", setAccessToken);
 
     const opts = mutate.mock.calls[0][1];
     act(() => {
@@ -71,22 +73,22 @@ describe('ConfirmDelete', () => {
     await act(async () => {
       await vi.advanceTimersByTimeAsync(2500);
     });
-    expect(screen.getByText('Login page')).toBeInTheDocument();
+    expect(screen.getByText("Login page")).toBeInTheDocument();
   });
 
-  it('shows the backend failure detail before bouncing back to login', async () => {
-    renderAt('?token=bad');
+  it("shows the backend failure detail before bouncing back to login", async () => {
+    renderAt("?token=bad");
 
     const opts = mutate.mock.calls[0][1];
     act(() => {
-      opts.onError({ response: { data: { detail: 'Link expired' } } });
+      opts.onError({ response: { data: { detail: "Link expired" } } });
       opts.onSettled();
     });
 
-    expect(screen.getByText('❌ Link expired')).toBeInTheDocument();
+    expect(screen.getByText("❌ Link expired")).toBeInTheDocument();
     await act(async () => {
       await vi.advanceTimersByTimeAsync(2500);
     });
-    expect(screen.getByText('Login page')).toBeInTheDocument();
+    expect(screen.getByText("Login page")).toBeInTheDocument();
   });
 });

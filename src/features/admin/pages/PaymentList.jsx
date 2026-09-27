@@ -1,64 +1,67 @@
-import React, { useCallback } from 'react';
-import { Button, Container } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
-import { useTableQuery } from '@/hooks/useTableQuery';
-import { usePageTitle } from '@/hooks/usePageTitle';
-import { getPaginationTotals } from '@/utils/pagination';
-import { usePayments } from '@/features/admin/hooks/usePayments';
-import { formatCurrencyAmount } from '@/utils/currencyFormatter';
-import { formatDate } from '@/utils/dateFormatter';
-import { getMethodDisplay } from '@/utils/methodDisplay';
-import { copyToClipboard } from '@/utils/clipboard';
-import { DataTable } from '@/components/DataTable';
-import { DefaultPagination } from '@/components/DefaultPagination';
-import { PaymentStatusBadge } from '@/components/PaymentStatusBadge';
-import { StatusAlert } from '@/components/StatusAlert';
-import { TableFiltersBar } from '@/components/TableFiltersBar';
-import { PageHeader } from '../components/ListHeader';
-import { PAYMENT_STATUSES } from '@/constants/statuses';
+import React, { useCallback } from "react";
+import { Button, Container } from "react-bootstrap";
+import { Link } from "react-router-dom";
+import { useTableQuery } from "@/hooks/useTableQuery";
+import { usePageTitle } from "@/hooks/usePageTitle";
+import { getPaginationTotals } from "@/utils/pagination";
+import { usePayments } from "@/features/admin/hooks/usePayments";
+import { formatCurrencyAmount } from "@/utils/currencyFormatter";
+import { formatDate } from "@/utils/dateFormatter";
+import { getMethodDisplay } from "@/utils/methodDisplay";
+import { copyToClipboard } from "@/utils/clipboard";
+import { DataTable } from "@/components/DataTable";
+import { DefaultPagination } from "@/components/DefaultPagination";
+import { PaymentStatusBadge } from "@/components/PaymentStatusBadge";
+import { StatusAlert } from "@/components/StatusAlert";
+import { TableFiltersBar } from "@/components/TableFiltersBar";
+import { PageHeader } from "../components/ListHeader";
+import { PAYMENT_STATUSES } from "@/constants/statuses";
 
 const TABLE_COLUMNS = [
-  { header: 'Payment' },
-  { header: 'Invoice' },
-  { header: 'Method' },
-  { header: 'TXID' },
-  { header: 'Amount' },
-  { header: 'Status' },
-  { header: 'Created' },
+  { header: "Payment" },
+  { header: "Invoice" },
+  { header: "Method" },
+  { header: "TXID" },
+  { header: "Amount" },
+  { header: "Status" },
+  { header: "Created" },
 ];
 
 const STATUS_OPTIONS = [
-  { value: '', label: 'All Statuses' },
-  { value: PAYMENT_STATUSES.processing, label: 'Processing' },
-  { value: PAYMENT_STATUSES.succeeded, label: 'Succeeded' },
-  { value: PAYMENT_STATUSES.failed, label: 'Failed' },
-  { value: PAYMENT_STATUSES.refunded, label: 'Refunded' },
-  { value: PAYMENT_STATUSES.refund_required, label: 'Refund Required' },
+  { value: "", label: "All Statuses" },
+  { value: PAYMENT_STATUSES.processing, label: "Processing" },
+  { value: PAYMENT_STATUSES.succeeded, label: "Succeeded" },
+  { value: PAYMENT_STATUSES.failed, label: "Failed" },
+  { value: PAYMENT_STATUSES.refunded, label: "Refunded" },
+  { value: PAYMENT_STATUSES.refund_required, label: "Refund Required" },
 ];
 
 const FILTERS = [
   {
-    key: 'status',
+    key: "status",
     options: STATUS_OPTIONS,
-    ariaLabel: 'Filter by status',
-    paramKey: 'payment_status',
+    ariaLabel: "Filter by status",
+    paramKey: "payment_status",
   },
 ];
 
 const PaymentRow = React.memo(({ pay, onCopyTxId }) => {
-  const txIdStr = String(pay.external_tx_id || '');
+  const txIdStr = String(pay.external_tx_id || "");
   const formattedTxId =
     txIdStr.length > 12
       ? `${txIdStr.substring(0, 5)}...${txIdStr.substring(txIdStr.length - 6)}`
       : txIdStr;
 
   const method = pay.invoice?.payment_method;
-  const currency = pay.invoice?.currency || 'USD';
+  const currency = pay.invoice?.currency || "USD";
 
   return (
     <tr>
       <td className="fw-bold font-monospace small text-break">
-        <Link to={`/admin/payments/${pay.id}`} className="text-primary text-decoration-none">
+        <Link
+          to={`/admin/payments/${pay.id}`}
+          className="text-primary text-decoration-none"
+        >
           {pay.id}
         </Link>
       </td>
@@ -77,7 +80,7 @@ const PaymentRow = React.memo(({ pay, onCopyTxId }) => {
             <span
               className="font-monospace text-muted"
               title={txIdStr}
-              style={{ fontSize: '0.85rem' }}
+              style={{ fontSize: "0.85rem" }}
             >
               {formattedTxId}
             </span>
@@ -95,7 +98,9 @@ const PaymentRow = React.memo(({ pay, onCopyTxId }) => {
           <span className="text-muted text-opacity-50 font-monospace">—</span>
         )}
       </td>
-      <td className="font-monospace fw-bold">{formatCurrencyAmount(pay.amount, currency)}</td>
+      <td className="font-monospace fw-bold">
+        {formatCurrencyAmount(pay.amount, currency)}
+      </td>
       <td>
         <PaymentStatusBadge status={pay.status} />
         Confirmations: {pay.confirmations ?? 0}
@@ -105,10 +110,10 @@ const PaymentRow = React.memo(({ pay, onCopyTxId }) => {
   );
 });
 
-PaymentRow.displayName = 'PaymentRow';
+PaymentRow.displayName = "PaymentRow";
 
 const PaymentList = () => {
-  usePageTitle('Payments Management');
+  usePageTitle("Payments Management");
 
   const {
     currentPage,
@@ -129,7 +134,7 @@ const PaymentList = () => {
 
   const renderRow = useCallback(
     (pay) => <PaymentRow key={pay.id} pay={pay} onCopyTxId={copyToClipboard} />,
-    []
+    [],
   );
 
   return (

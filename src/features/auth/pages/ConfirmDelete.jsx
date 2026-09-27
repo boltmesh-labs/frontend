@@ -1,19 +1,19 @@
-import { useEffect, useRef, useState } from 'react';
-import { Alert, Card, Container, Spinner } from 'react-bootstrap';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useEffect, useRef, useState } from "react";
+import { Alert, Card, Container, Spinner } from "react-bootstrap";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
-import { useConfirmAccountDeletion } from '@/features/auth/hooks/useAuthMutations';
-import { useAuth } from '@/features/auth/context/AuthContext';
-import { usePageTitle } from '@/hooks/usePageTitle';
-import { COMPANY_NAME } from '@/utils/config';
-import { getApiError } from '@/utils/errorHandler';
+import { useConfirmAccountDeletion } from "@/features/auth/hooks/useAuthMutations";
+import { useAuth } from "@/features/auth/context/AuthContext";
+import { usePageTitle } from "@/hooks/usePageTitle";
+import { COMPANY_NAME } from "@/utils/config";
+import { getApiError } from "@/utils/errorHandler";
 
 const REDIRECT_DELAY_MS = 2500;
-const DEFAULT_FAILURE_MESSAGE = 'The link is either invalid or expired.';
+const DEFAULT_FAILURE_MESSAGE = "The link is either invalid or expired.";
 
 const ConfirmDelete = () => {
   const [searchParams] = useSearchParams();
-  const token = searchParams.get('token');
+  const token = searchParams.get("token");
   const navigate = useNavigate();
   const [successMessage, setSuccessMessage] = useState(null);
   const [errorDetail, setErrorDetail] = useState(null);
@@ -24,7 +24,7 @@ const ConfirmDelete = () => {
 
   usePageTitle(
     `Confirm Account Deletion | ${COMPANY_NAME}`,
-    'Confirm the permanent deletion of your account.'
+    "Confirm the permanent deletion of your account.",
   );
 
   const { mutate: confirmDeletion } = useConfirmAccountDeletion();
@@ -42,7 +42,9 @@ const ConfirmDelete = () => {
         // still-mounted PublicRoute (or API client) cannot retain the old
         // authenticated session.
         setAccessToken(null);
-        setSuccessMessage('Your account has been deleted. Redirecting to login...');
+        setSuccessMessage(
+          "Your account has been deleted. Redirecting to login...",
+        );
       },
       onError: (error) => {
         // Surface the backend's detail (e.g. "link expired") with the original
@@ -59,7 +61,7 @@ const ConfirmDelete = () => {
     if (isLoading) return;
 
     timerRef.current = setTimeout(() => {
-      navigate('/login', { replace: true });
+      navigate("/login", { replace: true });
     }, REDIRECT_DELAY_MS);
 
     return () => clearTimeout(timerRef.current);
@@ -67,12 +69,12 @@ const ConfirmDelete = () => {
 
   const isProcessing = Boolean(token) && isLoading;
 
-  const alertVariant = successMessage ? 'success' : 'danger';
+  const alertVariant = successMessage ? "success" : "danger";
   const alertMessage = successMessage
     ? `✅ ${successMessage}`
     : token
       ? `❌ ${errorDetail || DEFAULT_FAILURE_MESSAGE}`
-      : '❌ Invalid link. The deletion confirmation token is missing.';
+      : "❌ Invalid link. The deletion confirmation token is missing.";
 
   return (
     <Container className="d-flex align-items-center justify-content-center min-vh-75">
@@ -82,7 +84,9 @@ const ConfirmDelete = () => {
         {isProcessing ? (
           <div className="py-4">
             <Spinner animation="border" variant="primary" className="mb-3" />
-            <p className="text-muted mb-0">Confirming your account deletion...</p>
+            <p className="text-muted mb-0">
+              Confirming your account deletion...
+            </p>
           </div>
         ) : (
           <Alert variant={alertVariant} className="mb-0 border-0 shadow-sm">

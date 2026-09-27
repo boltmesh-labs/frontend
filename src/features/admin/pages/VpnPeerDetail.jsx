@@ -1,28 +1,34 @@
-import { useCallback, useMemo } from 'react';
-import { Col, Container, Row } from 'react-bootstrap';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useCallback, useMemo } from "react";
+import { Col, Container, Row } from "react-bootstrap";
+import { useNavigate, useParams } from "react-router-dom";
 
-import { usePageTitle } from '@/hooks/usePageTitle';
-import { useVpnPeerDetail } from '@/features/admin/hooks/useVpnPeers';
-import { formatDate } from '@/utils/dateFormatter';
-import { formatBytes } from '@/utils/byteFormatter';
-import { COMPANY_NAME } from '@/utils/config';
+import { usePageTitle } from "@/hooks/usePageTitle";
+import { useVpnPeerDetail } from "@/features/admin/hooks/useVpnPeers";
+import { formatDate } from "@/utils/dateFormatter";
+import { formatBytes } from "@/utils/byteFormatter";
+import { COMPANY_NAME } from "@/utils/config";
 
-import { CopyableField } from '@/components/CopyableField';
-import { DetailShell } from '@/components/DetailShell';
-import { DetailHeader } from '../components/DetailHeader';
-import { LinkedCard } from '../components/DetailLinked';
-import { DetailSummary } from '../components/DetailSummary';
+import { CopyableField } from "@/components/CopyableField";
+import { DetailShell } from "@/components/DetailShell";
+import { DetailHeader } from "../components/DetailHeader";
+import { LinkedCard } from "../components/DetailLinked";
+import { DetailSummary } from "../components/DetailSummary";
 
 const VpnPeerDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const { data: peer, isLoading, isError, error, refetch } = useVpnPeerDetail(id);
+  const {
+    data: peer,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useVpnPeerDetail(id);
 
   usePageTitle(
-    `Peer ${id || ''} Detail | ${COMPANY_NAME}`,
-    `Details of active VPN peer tunnel, network assignments, and peer status.`
+    `Peer ${id || ""} Detail | ${COMPANY_NAME}`,
+    `Details of active VPN peer tunnel, network assignments, and peer status.`,
   );
 
   const handleBack = useCallback(() => {
@@ -37,44 +43,46 @@ const VpnPeerDetail = () => {
 
     return [
       {
-        label: 'Assigned IP Address',
-        value: peer.assigned_ip || 'N/A',
+        label: "Assigned IP Address",
+        value: peer.assigned_ip || "N/A",
       },
       {
-        label: 'Server ID',
-        value: peer.server_id || 'N/A',
+        label: "Server ID",
+        value: peer.server_id || "N/A",
       },
       {
-        label: 'Connected',
+        label: "Connected",
         value: (
           <span className="d-inline-flex align-items-center gap-2">
             <span
-              className={`rounded-circle ${peer.is_connected ? 'bg-success' : 'bg-danger'}`}
-              style={{ width: '8px', height: '8px' }}
+              className={`rounded-circle ${peer.is_connected ? "bg-success" : "bg-danger"}`}
+              style={{ width: "8px", height: "8px" }}
               aria-hidden="true"
             />
-            <span className="small">{peer.is_connected ? 'Connected' : 'Disconnected'}</span>
+            <span className="small">
+              {peer.is_connected ? "Connected" : "Disconnected"}
+            </span>
           </span>
         ),
-        className: 'text-muted',
+        className: "text-muted",
       },
       {
-        label: 'Tx / Rx',
+        label: "Tx / Rx",
         value: `${formattedTx} / ${formattedRx}`,
       },
       {
-        label: 'Last Active',
-        value: peer.last_seen_at ? formatDate(peer.last_seen_at) : 'N/A',
+        label: "Last Active",
+        value: peer.last_seen_at ? formatDate(peer.last_seen_at) : "N/A",
       },
       {
-        label: 'Date Created',
-        value: peer.created_at ? formatDate(peer.created_at) : 'N/A',
-        className: 'text-muted',
+        label: "Date Created",
+        value: peer.created_at ? formatDate(peer.created_at) : "N/A",
+        className: "text-muted",
       },
       {
-        label: 'Last Updated',
-        value: peer.updated_at ? formatDate(peer.updated_at) : 'N/A',
-        className: 'text-muted',
+        label: "Last Updated",
+        value: peer.updated_at ? formatDate(peer.updated_at) : "N/A",
+        className: "text-muted",
       },
     ];
   }, [peer]);
@@ -99,11 +107,11 @@ const VpnPeerDetail = () => {
               badge={
                 <div className="d-flex align-items-center gap-2 fs-6 fw-bold">
                   <span
-                    className={`d-inline-block rounded-circle ${peer?.is_active ? 'bg-success' : 'bg-danger'}`}
-                    style={{ width: '8px', height: '8px' }}
+                    className={`d-inline-block rounded-circle ${peer?.is_active ? "bg-success" : "bg-danger"}`}
+                    style={{ width: "8px", height: "8px" }}
                     aria-hidden="true"
                   />
-                  <span>{peer?.is_active ? 'Active' : 'Inactive'}</span>
+                  <span>{peer?.is_active ? "Active" : "Inactive"}</span>
                 </div>
               }
               items={summaryItems}

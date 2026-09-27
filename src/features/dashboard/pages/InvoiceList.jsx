@@ -1,27 +1,30 @@
-import React, { useCallback } from 'react';
-import { Link } from 'react-router-dom';
-import { usePageTitle } from '@/hooks/usePageTitle';
-import { useTableQuery } from '@/hooks/useTableQuery';
-import { getPaginationTotals } from '@/utils/pagination';
-import { usePlanMap } from '@/hooks/usePlanMap';
-import { usePublicPlans, useUserInvoices } from '@/features/dashboard/hooks/useDashboard';
-import { DataTable } from '@/components/DataTable';
-import { MobileRecordCard } from '@/components/MobileRecordCard';
-import { DefaultPagination } from '@/components/DefaultPagination';
-import { StatusAlert } from '@/components/StatusAlert';
-import { InvoiceStatusBadge } from '@/components/InvoiceStatusBadge';
-import { DashboardContainer } from '@/features/dashboard/components/DashboardContainer';
-import { DashboardHeader } from '../components/DashboardHeader';
-import { formatDate } from '@/utils/dateFormatter';
-import { getMethodDisplay } from '@/utils/methodDisplay';
-import { COMPANY_NAME } from '@/utils/config';
+import React, { useCallback } from "react";
+import { Link } from "react-router-dom";
+import { usePageTitle } from "@/hooks/usePageTitle";
+import { useTableQuery } from "@/hooks/useTableQuery";
+import { getPaginationTotals } from "@/utils/pagination";
+import { usePlanMap } from "@/hooks/usePlanMap";
+import {
+  usePublicPlans,
+  useUserInvoices,
+} from "@/features/dashboard/hooks/useDashboard";
+import { DataTable } from "@/components/DataTable";
+import { MobileRecordCard } from "@/components/MobileRecordCard";
+import { DefaultPagination } from "@/components/DefaultPagination";
+import { StatusAlert } from "@/components/StatusAlert";
+import { InvoiceStatusBadge } from "@/components/InvoiceStatusBadge";
+import { DashboardContainer } from "@/features/dashboard/components/DashboardContainer";
+import { DashboardHeader } from "../components/DashboardHeader";
+import { formatDate } from "@/utils/dateFormatter";
+import { getMethodDisplay } from "@/utils/methodDisplay";
+import { COMPANY_NAME } from "@/utils/config";
 
 const TABLE_COLUMNS = [
-  { header: 'Invoice' },
-  { header: 'Payment Method' },
-  { header: 'Plan' },
-  { header: 'Status' },
-  { header: 'Date' },
+  { header: "Invoice" },
+  { header: "Payment Method" },
+  { header: "Plan" },
+  { header: "Status" },
+  { header: "Date" },
 ];
 
 const InvoiceMobileCard = ({ inv, planMap }) => {
@@ -33,9 +36,12 @@ const InvoiceMobileCard = ({ inv, planMap }) => {
       titleHref={`/invoices/${inv.id}`}
       subtitle={planName || `Plan #${inv.plan_id}`}
       items={[
-        { label: 'Payment method', value: getMethodDisplay(inv.payment_method) },
-        { label: 'Status', value: <InvoiceStatusBadge status={inv.status} /> },
-        { label: 'Date', value: formatDate(inv.created_at) },
+        {
+          label: "Payment method",
+          value: getMethodDisplay(inv.payment_method),
+        },
+        { label: "Status", value: <InvoiceStatusBadge status={inv.status} /> },
+        { label: "Date", value: formatDate(inv.created_at) },
       ]}
     />
   );
@@ -46,12 +52,19 @@ const InvoiceRow = React.memo(({ inv, planMap }) => {
   return (
     <tr>
       <td className="font-monospace fw-bold text-break">
-        <Link to={`/invoices/${inv.id}`} className="text-primary text-decoration-none">
+        <Link
+          to={`/invoices/${inv.id}`}
+          className="text-primary text-decoration-none"
+        >
           {inv.id}
         </Link>
       </td>
-      <td className="fw-bold text-body">{getMethodDisplay(inv.payment_method)}</td>
-      <td className="fw-bold text-secondary">{planName || `Plan #${inv.plan_id}`}</td>
+      <td className="fw-bold text-body">
+        {getMethodDisplay(inv.payment_method)}
+      </td>
+      <td className="fw-bold text-secondary">
+        {planName || `Plan #${inv.plan_id}`}
+      </td>
       <td>
         <InvoiceStatusBadge status={inv.status} />
       </td>
@@ -60,12 +73,12 @@ const InvoiceRow = React.memo(({ inv, planMap }) => {
   );
 });
 
-InvoiceRow.displayName = 'InvoiceRow';
+InvoiceRow.displayName = "InvoiceRow";
 
 const InvoiceList = () => {
   usePageTitle(
     `Invoices & Billing History | ${COMPANY_NAME}`,
-    'Review your subscription plan details, active invoices, and past payments.'
+    "Review your subscription plan details, active invoices, and past payments.",
   );
 
   // GET /v1/invoices supports skip/limit pagination only.
@@ -80,12 +93,12 @@ const InvoiceList = () => {
 
   const renderRow = useCallback(
     (inv) => <InvoiceRow key={inv.id} inv={inv} planMap={planMap} />,
-    [planMap]
+    [planMap],
   );
 
   const renderMobileItem = useCallback(
     (inv) => <InvoiceMobileCard inv={inv} planMap={planMap} />,
-    [planMap]
+    [planMap],
   );
 
   return (

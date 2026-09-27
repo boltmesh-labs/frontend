@@ -1,48 +1,51 @@
-import React, { useCallback } from 'react';
-import { Badge, Button, Container, Form } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
-import { useTableQuery } from '@/hooks/useTableQuery';
-import { usePageTitle } from '@/hooks/usePageTitle';
-import { getPaginationTotals } from '@/utils/pagination';
-import { useConfirm } from '@/hooks/useConfirm';
-import { useVpnRegions, useToggleVpnRegionStatus } from '@/features/admin/hooks/useVpnRegions';
-import { DataTable } from '@/components/DataTable';
-import { StatusAlert } from '@/components/StatusAlert';
-import { DefaultPagination } from '@/components/DefaultPagination';
-import { TableFiltersBar } from '@/components/TableFiltersBar';
-import { StatusBadge } from '@/components/StatusBadge';
-import { PageHeader } from '../components/ListHeader';
-import { VPN_REGION_STATES } from '@/constants/statuses';
-import { formatDate } from '@/utils/dateFormatter';
+import React, { useCallback } from "react";
+import { Badge, Button, Container, Form } from "react-bootstrap";
+import { Link } from "react-router-dom";
+import { useTableQuery } from "@/hooks/useTableQuery";
+import { usePageTitle } from "@/hooks/usePageTitle";
+import { getPaginationTotals } from "@/utils/pagination";
+import { useConfirm } from "@/hooks/useConfirm";
+import {
+  useVpnRegions,
+  useToggleVpnRegionStatus,
+} from "@/features/admin/hooks/useVpnRegions";
+import { DataTable } from "@/components/DataTable";
+import { StatusAlert } from "@/components/StatusAlert";
+import { DefaultPagination } from "@/components/DefaultPagination";
+import { TableFiltersBar } from "@/components/TableFiltersBar";
+import { StatusBadge } from "@/components/StatusBadge";
+import { PageHeader } from "../components/ListHeader";
+import { VPN_REGION_STATES } from "@/constants/statuses";
+import { formatDate } from "@/utils/dateFormatter";
 
 const TABLE_COLUMNS = [
-  { header: 'Region' },
-  { header: 'Country' },
-  { header: 'Status' },
-  { header: 'Created' },
-  { header: 'Updated' },
+  { header: "Region" },
+  { header: "Country" },
+  { header: "Status" },
+  { header: "Created" },
+  { header: "Updated" },
 ];
 
 // Values feed the is_active query param through the paramValue transform
 // below; both come from the shared region-state vocabulary.
 const ACTIVE_OPTIONS = [
-  { label: 'All Statuses', value: '' },
-  { label: 'Active', value: VPN_REGION_STATES.active },
-  { label: 'Inactive', value: VPN_REGION_STATES.inactive },
+  { label: "All Statuses", value: "" },
+  { label: "Active", value: VPN_REGION_STATES.active },
+  { label: "Inactive", value: VPN_REGION_STATES.inactive },
 ];
 
 const FILTERS = [
   {
-    key: 'is_active',
+    key: "is_active",
     options: ACTIVE_OPTIONS,
-    ariaLabel: 'Filter by region active status',
-    paramValue: (value) => value === 'active',
+    ariaLabel: "Filter by region active status",
+    paramValue: (value) => value === "active",
   },
 ];
 
 const REGION_STATUS_VARIANTS = {
-  [VPN_REGION_STATES.active]: 'success',
-  [VPN_REGION_STATES.inactive]: 'secondary',
+  [VPN_REGION_STATES.active]: "success",
+  [VPN_REGION_STATES.inactive]: "secondary",
 };
 
 const VpnRegionRow = React.memo(({ region, processingId, toggle }) => {
@@ -74,20 +77,24 @@ const VpnRegionRow = React.memo(({ region, processingId, toggle }) => {
           aria-label={`Toggle active status for ${region.name}`}
           label={
             <StatusBadge
-              status={region.is_active ? 'active' : 'inactive'}
+              status={region.is_active ? "active" : "inactive"}
               variantMap={REGION_STATUS_VARIANTS}
             />
           }
           className="d-inline-flex align-items-center gap-2 pointer-switch"
         />
       </td>
-      <td className="small font-monospace text-muted">{formatDate(region.created_at)}</td>
-      <td className="small font-monospace text-muted">{formatDate(region.updated_at)}</td>
+      <td className="small font-monospace text-muted">
+        {formatDate(region.created_at)}
+      </td>
+      <td className="small font-monospace text-muted">
+        {formatDate(region.updated_at)}
+      </td>
     </tr>
   );
 });
 
-VpnRegionRow.displayName = 'VpnRegionRow';
+VpnRegionRow.displayName = "VpnRegionRow";
 
 const VpnRegionList = () => {
   const {
@@ -120,21 +127,22 @@ const VpnRegionList = () => {
 
   const handleToggleActive = useCallback(
     async ({ id, isActive }) => {
-      const actionLabel = isActive ? 'deactivate' : 'activate';
-      const capitalizedLabel = actionLabel.charAt(0).toUpperCase() + actionLabel.slice(1);
+      const actionLabel = isActive ? "deactivate" : "activate";
+      const capitalizedLabel =
+        actionLabel.charAt(0).toUpperCase() + actionLabel.slice(1);
 
       const isConfirmed = await confirm({
         title: `${capitalizedLabel} Region`,
         message: `Are you sure you want to ${actionLabel} this VPN region?`,
         confirmText: capitalizedLabel,
-        confirmVariant: isActive ? 'danger' : 'primary',
+        confirmVariant: isActive ? "danger" : "primary",
       });
 
       if (!isConfirmed) return;
 
       toggleRegionStatus({ id, isActive });
     },
-    [confirm, toggleRegionStatus]
+    [confirm, toggleRegionStatus],
   );
 
   const renderRow = useCallback(
@@ -146,10 +154,10 @@ const VpnRegionList = () => {
         processingId={processingId}
       />
     ),
-    [handleToggleActive, processingId]
+    [handleToggleActive, processingId],
   );
 
-  usePageTitle('VPN Regions');
+  usePageTitle("VPN Regions");
 
   return (
     <Container className="py-5">

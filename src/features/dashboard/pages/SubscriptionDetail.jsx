@@ -1,32 +1,39 @@
-import { useCallback } from 'react';
-import { Badge, Button, Card, Table } from 'react-bootstrap';
-import { useNavigate, useParams, Link } from 'react-router-dom';
-import { AsyncButton } from '@/components/AsyncButton';
-import { useConfirm } from '@/hooks/useConfirm';
-import { usePageTitle } from '@/hooks/usePageTitle';
+import { useCallback } from "react";
+import { Badge, Button, Card, Table } from "react-bootstrap";
+import { useNavigate, useParams, Link } from "react-router-dom";
+import { AsyncButton } from "@/components/AsyncButton";
+import { useConfirm } from "@/hooks/useConfirm";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import {
   useUserSubscriptionDetail,
   useCancelUserSubscription,
   useUserInvoicesBySubscription,
   useUserDevicesBySubscription,
-} from '@/features/dashboard/hooks/useDashboard';
-import { DetailShell } from '@/components/DetailShell';
-import { SectionCard } from '@/components/SectionCard';
-import { DataTable } from '@/components/DataTable';
-import { MobileRecordCard } from '@/components/MobileRecordCard';
-import { DashboardContainer } from '@/features/dashboard/components/DashboardContainer';
-import { DashboardHeader } from '../components/DashboardHeader';
-import { formatCurrencyAmount } from '@/utils/currencyFormatter';
-import { formatDate } from '@/utils/dateFormatter';
-import { copyToClipboard } from '@/utils/clipboard';
-import { InvoiceStatusBadge } from '@/components/InvoiceStatusBadge';
-import { SubscriptionStatusBadge } from '@/components/SubscriptionStatusBadge';
-import { getPlatformLabel } from '@/utils/devicePlatformDisplay';
-import { COMPANY_NAME } from '@/utils/config';
-import { INVOICE_COLUMNS } from '@/constants/tableColumns';
-import { RENEWABLE_SUBSCRIPTION_STATUSES, SUBSCRIPTION_STATUSES } from '@/constants/statuses';
+} from "@/features/dashboard/hooks/useDashboard";
+import { DetailShell } from "@/components/DetailShell";
+import { SectionCard } from "@/components/SectionCard";
+import { DataTable } from "@/components/DataTable";
+import { MobileRecordCard } from "@/components/MobileRecordCard";
+import { DashboardContainer } from "@/features/dashboard/components/DashboardContainer";
+import { DashboardHeader } from "../components/DashboardHeader";
+import { formatCurrencyAmount } from "@/utils/currencyFormatter";
+import { formatDate } from "@/utils/dateFormatter";
+import { copyToClipboard } from "@/utils/clipboard";
+import { InvoiceStatusBadge } from "@/components/InvoiceStatusBadge";
+import { SubscriptionStatusBadge } from "@/components/SubscriptionStatusBadge";
+import { getPlatformLabel } from "@/utils/devicePlatformDisplay";
+import { COMPANY_NAME } from "@/utils/config";
+import { INVOICE_COLUMNS } from "@/constants/tableColumns";
+import {
+  RENEWABLE_SUBSCRIPTION_STATUSES,
+  SUBSCRIPTION_STATUSES,
+} from "@/constants/statuses";
 
-const DEVICE_COLUMNS = [{ header: 'Device' }, { header: 'Platform' }, { header: 'Created' }];
+const DEVICE_COLUMNS = [
+  { header: "Device" },
+  { header: "Platform" },
+  { header: "Created" },
+];
 
 const SubscriptionDetail = () => {
   const { id } = useParams();
@@ -34,16 +41,25 @@ const SubscriptionDetail = () => {
   const { confirm, confirmDialog } = useConfirm();
 
   usePageTitle(
-    `Subscription ${id || ''} | ${COMPANY_NAME}`,
-    'View and manage your active subscription details, billing cycle, and renewal settings.'
+    `Subscription ${id || ""} | ${COMPANY_NAME}`,
+    "View and manage your active subscription details, billing cycle, and renewal settings.",
   );
 
-  const { data: subscription, isLoading, isError, error, refetch } = useUserSubscriptionDetail(id);
+  const {
+    data: subscription,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useUserSubscriptionDetail(id);
 
-  const { data: invoices = [], isLoading: isInvoicesLoading } = useUserInvoicesBySubscription(id);
-  const { data: devices = [], isLoading: isDevicesLoading } = useUserDevicesBySubscription(id);
+  const { data: invoices = [], isLoading: isInvoicesLoading } =
+    useUserInvoicesBySubscription(id);
+  const { data: devices = [], isLoading: isDevicesLoading } =
+    useUserDevicesBySubscription(id);
 
-  const { mutate: cancelSubscription, isPending: isCancelling } = useCancelUserSubscription();
+  const { mutate: cancelSubscription, isPending: isCancelling } =
+    useCancelUserSubscription();
 
   // The mutation owns success/error toasts and cache invalidation, so the page
   // only gates the action behind the confirm dialog — no parallel pending flag
@@ -51,11 +67,11 @@ const SubscriptionDetail = () => {
   // through the hook's onError.)
   const handleCancelSubscription = async () => {
     const isConfirmed = await confirm({
-      title: 'Cancel Subscription',
+      title: "Cancel Subscription",
       message:
-        'Are you sure you want to cancel this subscription? You will retain access until the end of your current billing period.',
-      confirmText: 'Confirm Cancellation',
-      confirmVariant: 'danger',
+        "Are you sure you want to cancel this subscription? You will retain access until the end of your current billing period.",
+      confirmText: "Confirm Cancellation",
+      confirmVariant: "danger",
     });
 
     if (!isConfirmed) return;
@@ -74,15 +90,20 @@ const SubscriptionDetail = () => {
       <tr key={invoice.id}>
         <td className="font-monospace">
           <div className="d-flex align-items-center gap-2">
-            <Link to={`/invoices/${invoice.id}`} className="text-primary text-decoration-none">
+            <Link
+              to={`/invoices/${invoice.id}`}
+              className="text-primary text-decoration-none"
+            >
               {invoice.id}
             </Link>
             <Button
               variant="link"
               className="p-0 text-decoration-none text-muted lh-1"
-              style={{ fontSize: '0.85rem' }}
+              style={{ fontSize: "0.85rem" }}
               title="Copy Invoice ID"
-              onClick={() => copyToClipboard(invoice.id, { success: 'Invoice ID copied!' })}
+              onClick={() =>
+                copyToClipboard(invoice.id, { success: "Invoice ID copied!" })
+              }
             >
               📋
             </Button>
@@ -97,7 +118,7 @@ const SubscriptionDetail = () => {
         <td className="text-muted">{formatDate(invoice.created_at)}</td>
       </tr>
     ),
-    []
+    [],
   );
 
   const renderDeviceRow = useCallback(
@@ -108,11 +129,13 @@ const SubscriptionDetail = () => {
             <span>{device.name}</span>
           </div>
         </td>
-        <td className="text-capitalize text-muted">{getPlatformLabel(device.platform)}</td>
+        <td className="text-capitalize text-muted">
+          {getPlatformLabel(device.platform)}
+        </td>
         <td className="text-muted">{formatDate(device.created_at)}</td>
       </tr>
     ),
-    []
+    [],
   );
 
   const renderMobileInvoice = useCallback(
@@ -122,15 +145,21 @@ const SubscriptionDetail = () => {
         titleHref={`/invoices/${invoice.id}`}
         items={[
           {
-            label: 'Amount',
-            value: formatCurrencyAmount(invoice.amount_requested, invoice.currency),
+            label: "Amount",
+            value: formatCurrencyAmount(
+              invoice.amount_requested,
+              invoice.currency,
+            ),
           },
-          { label: 'Status', value: <InvoiceStatusBadge status={invoice.status} /> },
-          { label: 'Date', value: formatDate(invoice.created_at) },
+          {
+            label: "Status",
+            value: <InvoiceStatusBadge status={invoice.status} />,
+          },
+          { label: "Date", value: formatDate(invoice.created_at) },
         ]}
       />
     ),
-    []
+    [],
   );
 
   const renderMobileDevice = useCallback(
@@ -138,18 +167,18 @@ const SubscriptionDetail = () => {
       <MobileRecordCard
         title={device.name}
         items={[
-          { label: 'Platform', value: getPlatformLabel(device.platform) },
-          { label: 'Created', value: formatDate(device.created_at) },
+          { label: "Platform", value: getPlatformLabel(device.platform) },
+          { label: "Created", value: formatDate(device.created_at) },
         ]}
       />
     ),
-    []
+    [],
   );
 
-  const normalizedStatus = subscription?.status?.toLowerCase() || '';
+  const normalizedStatus = subscription?.status?.toLowerCase() || "";
 
   const canRenew =
-    normalizedStatus !== '' &&
+    normalizedStatus !== "" &&
     [
       SUBSCRIPTION_STATUSES.active,
       SUBSCRIPTION_STATUSES.grace_period,
@@ -159,11 +188,12 @@ const SubscriptionDetail = () => {
       SUBSCRIPTION_STATUSES.canceled,
     ].includes(normalizedStatus);
   const renewLabel = RENEWABLE_SUBSCRIPTION_STATUSES.includes(normalizedStatus)
-    ? 'Extend Plan'
-    : 'Renew Plan';
+    ? "Extend Plan"
+    : "Renew Plan";
 
   const canBeCanceled =
-    normalizedStatus !== '' && normalizedStatus !== SUBSCRIPTION_STATUSES.canceled;
+    normalizedStatus !== "" &&
+    normalizedStatus !== SUBSCRIPTION_STATUSES.canceled;
 
   return (
     <DetailShell
@@ -214,36 +244,45 @@ const SubscriptionDetail = () => {
           <div className="d-flex justify-content-between align-items-start border-bottom pb-3 mb-4">
             <div>
               <h4 className="fw-bold text-body mb-1">
-                {subscription?.plan?.name || `Plan #${subscription?.plan_id || '—'}`}
+                {subscription?.plan?.name ||
+                  `Plan #${subscription?.plan_id || "—"}`}
               </h4>
-              <span className="text-muted small font-monospace">UUID: {subscription?.id}</span>
+              <span className="text-muted small font-monospace">
+                UUID: {subscription?.id}
+              </span>
             </div>
             <div className="text-end">
               <SubscriptionStatusBadge status={subscription?.status} />
             </div>
           </div>
 
-          <Table responsive borderless className="align-middle m-0 small detail-table">
+          <Table
+            responsive
+            borderless
+            className="align-middle m-0 small detail-table"
+          >
             <tbody>
               <tr>
                 <td className="text-secondary py-2">Plan Price</td>
                 <td className="font-monospace fw-bold text-body text-end fs-6">
-                  {formatCurrencyAmount(subscription?.plan?.price_usd, 'USD')}{' '}
+                  {formatCurrencyAmount(subscription?.plan?.price_usd, "USD")}{" "}
                   <span className="text-muted fs-7">
-                    / {subscription?.plan?.billing_cycle || 'period'}
+                    / {subscription?.plan?.billing_cycle || "period"}
                   </span>
                 </td>
               </tr>
               <tr>
                 <td className="text-secondary py-2">Duration</td>
                 <td className="text-body text-end">
-                  {subscription?.plan?.duration_in_days || '—'} days
+                  {subscription?.plan?.duration_in_days || "—"} days
                 </td>
               </tr>
               {subscription?.plan?.description && (
                 <tr>
                   <td className="text-secondary py-2">Description</td>
-                  <td className="text-body text-end">{subscription.plan.description}</td>
+                  <td className="text-body text-end">
+                    {subscription.plan.description}
+                  </td>
                 </tr>
               )}
               {subscription?.plan?.features?.length > 0 && (
@@ -264,7 +303,9 @@ const SubscriptionDetail = () => {
                 <td className="text-secondary py-2">Auto Renewal</td>
                 <td className="text-end">
                   <Badge bg="secondary">Coming Soon</Badge>
-                  <div className="text-muted small">Available with fiat payments</div>
+                  <div className="text-muted small">
+                    Available with fiat payments
+                  </div>
                 </td>
               </tr>
               <tr>
@@ -311,7 +352,11 @@ const SubscriptionDetail = () => {
             subtitle="Active sessions and registered hardware assigned to this subscription slot."
             actions={
               subscription?.plan?.max_devices && (
-                <Badge bg="light" text="dark" className="border px-3 py-2 font-monospace">
+                <Badge
+                  bg="light"
+                  text="dark"
+                  className="border px-3 py-2 font-monospace"
+                >
                   Slots: {devices.length} / {subscription?.plan?.max_devices}
                 </Badge>
               )

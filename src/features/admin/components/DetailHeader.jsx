@@ -1,5 +1,5 @@
-import { Button } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
+import { Button } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
 
 /**
  * DetailHeader
@@ -19,12 +19,12 @@ export const DetailHeader = ({
   title,
   badge,
   id,
-  idPrefix = 'UUID:',
+  idPrefix = "UUID:",
   actions,
-  className = '',
+  className = "",
   showBackButton = true,
-  backButtonLabel = '↩ Back',
-  backButtonAriaLabel = 'Back to previous page',
+  backButtonLabel = "↩ Back",
+  backButtonAriaLabel = "Back to previous page",
 }) => {
   const navigate = useNavigate();
   return (

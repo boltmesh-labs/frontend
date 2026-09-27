@@ -1,6 +1,12 @@
-import { Link } from 'react-router-dom';
+import { Link } from "react-router-dom";
 
-export const MobileRecordCard = ({ title, titleHref, subtitle, items = [], actions }) => (
+export const MobileRecordCard = ({
+  title,
+  titleHref,
+  subtitle,
+  items = [],
+  actions,
+}) => (
   <div className="p-3">
     <div className="d-flex align-items-start justify-content-between gap-2 mb-3">
       <div className="min-w-0">
@@ -11,7 +17,9 @@ export const MobileRecordCard = ({ title, titleHref, subtitle, items = [], actio
         ) : (
           <div className="fw-bold text-body text-break">{title}</div>
         )}
-        {subtitle && <div className="small text-body-secondary text-break">{subtitle}</div>}
+        {subtitle && (
+          <div className="small text-body-secondary text-break">{subtitle}</div>
+        )}
       </div>
     </div>
 

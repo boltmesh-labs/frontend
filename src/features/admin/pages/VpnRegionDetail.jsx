@@ -1,27 +1,35 @@
-import { useState, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Container, Row, Col, Card, Button, Spinner, Form } from 'react-bootstrap';
+import { useState, useCallback } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import {
+  Container,
+  Row,
+  Col,
+  Card,
+  Button,
+  Spinner,
+  Form,
+} from "react-bootstrap";
 
-import { usePageTitle } from '@/hooks/usePageTitle';
-import { useConfirm } from '@/hooks/useConfirm';
+import { usePageTitle } from "@/hooks/usePageTitle";
+import { useConfirm } from "@/hooks/useConfirm";
 import {
   useVpnRegionDetail,
   useCreateVpnRegion,
   useUpdateVpnRegion,
   useDeleteVpnRegion,
-} from '@/features/admin/hooks/useVpnRegions';
-import { DetailShell } from '@/components/DetailShell';
-import { DetailHeader } from '../components/DetailHeader';
-import { StatusBadge } from '@/components/StatusBadge';
+} from "@/features/admin/hooks/useVpnRegions";
+import { DetailShell } from "@/components/DetailShell";
+import { DetailHeader } from "../components/DetailHeader";
+import { StatusBadge } from "@/components/StatusBadge";
 
-import { formatDate } from '@/utils/dateFormatter';
+import { formatDate } from "@/utils/dateFormatter";
 
-const REGION_STATUS_VARIANTS = { active: 'success', inactive: 'secondary' };
+const REGION_STATUS_VARIANTS = { active: "success", inactive: "secondary" };
 
 const mapRegionToForm = (region) => ({
-  id: region?.id || '',
-  name: region?.name || '',
-  country_code: region?.country_code || '',
+  id: region?.id || "",
+  name: region?.name || "",
+  country_code: region?.country_code || "",
   is_active: region?.is_active ?? true,
   created_at: region?.created_at || null,
   updated_at: region?.updated_at || null,
@@ -47,7 +55,7 @@ const VpnRegionForm = ({ initialData, isNew, refetchData }) => {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value,
+      [name]: type === "checkbox" ? checked : value,
     }));
   };
 
@@ -92,15 +100,15 @@ const VpnRegionForm = ({ initialData, isNew, refetchData }) => {
 
   const handleDelete = async () => {
     const confirmed = await confirm({
-      title: 'Delete VPN Region',
+      title: "Delete VPN Region",
       message: `Are you sure you want to delete "${formData.name || id}"? This action cannot be undone.`,
-      confirmText: 'Delete Region',
-      confirmVariant: 'danger',
+      confirmText: "Delete Region",
+      confirmVariant: "danger",
     });
     if (!confirmed) return;
     try {
       await deleteMutation.mutateAsync(id);
-      navigate('/admin/vpn-regions');
+      navigate("/admin/vpn-regions");
     } catch {
       // Feedback is owned by useDeleteVpnRegion (toasts); the rejection is
       // contained here so the page does not double-toast.
@@ -136,16 +144,18 @@ const VpnRegionForm = ({ initialData, isNew, refetchData }) => {
           form="vpn-region-form"
           variant="outline-success"
           className="shadow-sm"
-          disabled={saving || createMutation.isPending || updateMutation.isPending}
+          disabled={
+            saving || createMutation.isPending || updateMutation.isPending
+          }
         >
           {(saving || createMutation.isPending || updateMutation.isPending) && (
             <Spinner size="sm" animation="border" className="me-2" />
           )}
           {saving || createMutation.isPending || updateMutation.isPending
-            ? 'Saving...'
+            ? "Saving..."
             : isNew
-              ? 'Create Region'
-              : 'Save Changes'}
+              ? "Create Region"
+              : "Save Changes"}
         </Button>
       </>
     );
@@ -155,13 +165,13 @@ const VpnRegionForm = ({ initialData, isNew, refetchData }) => {
     <Container className="py-5">
       {confirmDialog}
       <DetailHeader
-        title={isNew ? 'Create VPN Region' : initialData?.name || 'VPN Region'}
+        title={isNew ? "Create VPN Region" : initialData?.name || "VPN Region"}
         idPrefix="Region ID:"
-        id={isNew ? 'NEW_REGION' : initialData?.id}
+        id={isNew ? "NEW_REGION" : initialData?.id}
         badge={
           !isNew && (
             <StatusBadge
-              status={initialData?.is_active ? 'active' : 'inactive'}
+              status={initialData?.is_active ? "active" : "inactive"}
               variantMap={REGION_STATUS_VARIANTS}
             />
           )
@@ -180,7 +190,9 @@ const VpnRegionForm = ({ initialData, isNew, refetchData }) => {
               <Row className="g-3 small">
                 <Col md={4}>
                   <Form.Group className="mb-3">
-                    <Form.Label className="text-secondary fw-semibold">Region ID</Form.Label>
+                    <Form.Label className="text-secondary fw-semibold">
+                      Region ID
+                    </Form.Label>
                     <Form.Control
                       type="text"
                       name="id"
@@ -196,7 +208,9 @@ const VpnRegionForm = ({ initialData, isNew, refetchData }) => {
 
                 <Col md={4}>
                   <Form.Group className="mb-3">
-                    <Form.Label className="text-secondary fw-semibold">Region Name</Form.Label>
+                    <Form.Label className="text-secondary fw-semibold">
+                      Region Name
+                    </Form.Label>
                     <Form.Control
                       type="text"
                       name="name"
@@ -212,7 +226,9 @@ const VpnRegionForm = ({ initialData, isNew, refetchData }) => {
 
                 <Col md={4}>
                   <Form.Group className="mb-3">
-                    <Form.Label className="text-secondary fw-semibold">Country Code</Form.Label>
+                    <Form.Label className="text-secondary fw-semibold">
+                      Country Code
+                    </Form.Label>
                     <Form.Control
                       type="text"
                       name="country_code"
@@ -239,7 +255,8 @@ const VpnRegionForm = ({ initialData, isNew, refetchData }) => {
                     disabled={!isEditing || saving}
                     label={
                       <span className="fw-semibold text-body">
-                        Region Active — new devices and peers can be provisioned in this region
+                        Region Active — new devices and peers can be provisioned
+                        in this region
                       </span>
                     }
                     className="pointer-switch"
@@ -252,11 +269,15 @@ const VpnRegionForm = ({ initialData, isNew, refetchData }) => {
                   <div className="pt-3 border-top mt-4">
                     <Row className="g-2 text-muted small font-monospace">
                       <Col sm={6}>
-                        <span className="fw-semibold text-secondary">Created:</span>{' '}
+                        <span className="fw-semibold text-secondary">
+                          Created:
+                        </span>{" "}
                         {formatDate(formData.created_at)}
                       </Col>
                       <Col sm={6} className="text-sm-end">
-                        <span className="fw-semibold text-secondary">Last Updated:</span>{' '}
+                        <span className="fw-semibold text-secondary">
+                          Last Updated:
+                        </span>{" "}
                         {formatDate(formData.updated_at || formData.created_at)}
                       </Col>
                     </Row>
@@ -270,7 +291,7 @@ const VpnRegionForm = ({ initialData, isNew, refetchData }) => {
                           onClick={handleDelete}
                           disabled={saving || deleting}
                         >
-                          {deleting ? 'Deleting...' : 'Delete Region'}
+                          {deleting ? "Deleting..." : "Delete Region"}
                         </Button>
                       </div>
                       <span className="text-muted small">
@@ -290,11 +311,17 @@ const VpnRegionForm = ({ initialData, isNew, refetchData }) => {
 
 const VpnRegionDetail = () => {
   const { id } = useParams();
-  const isNew = id === 'new';
+  const isNew = id === "new";
 
-  const { data: region, isLoading, isError, error, refetch } = useVpnRegionDetail(id);
+  const {
+    data: region,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useVpnRegionDetail(id);
 
-  usePageTitle(isNew ? 'Create VPN Region' : `Region ${id || ''} Details`);
+  usePageTitle(isNew ? "Create VPN Region" : `Region ${id || ""} Details`);
 
   return (
     <DetailShell
@@ -307,7 +334,7 @@ const VpnRegionDetail = () => {
       backLabel="← Back to Regions"
     >
       <VpnRegionForm
-        key={region?.id || 'new'}
+        key={region?.id || "new"}
         initialData={region}
         isNew={isNew}
         refetchData={refetch}

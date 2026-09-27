@@ -1,11 +1,12 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from "react";
 
-import { useDebounce } from '@/hooks/useDebounce';
-import { DEFAULT_PAGE_SIZE } from '@/utils/config';
+import { useDebounce } from "@/hooks/useDebounce";
+import { DEFAULT_PAGE_SIZE } from "@/utils/config";
 
 const SEARCH_DEBOUNCE_MS = 400;
 
-const emptyFilterValues = (filters) => Object.fromEntries(filters.map((f) => [f.key, '']));
+const emptyFilterValues = (filters) =>
+  Object.fromEntries(filters.map((f) => [f.key, ""]));
 
 /**
  * Shared state machine for paginated/filterable list pages (search box +
@@ -37,8 +38,10 @@ export const useTableQuery = ({
   debounceMs = SEARCH_DEBOUNCE_MS,
 } = {}) => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [searchInput, setSearchInput] = useState('');
-  const [filterValues, setFilterValues] = useState(() => emptyFilterValues(filters));
+  const [searchInput, setSearchInput] = useState("");
+  const [filterValues, setFilterValues] = useState(() =>
+    emptyFilterValues(filters),
+  );
 
   const debouncedSearch = useDebounce(searchInput, debounceMs);
 
@@ -52,17 +55,17 @@ export const useTableQuery = ({
       setFilterValues((prev) => ({ ...prev, [key]: value }));
       setCurrentPage(1);
     },
-    []
+    [],
   );
 
   const clearFilters = useCallback(() => {
-    setSearchInput('');
+    setSearchInput("");
     setFilterValues(emptyFilterValues(filters));
     setCurrentPage(1);
   }, [filters]);
 
-  const hasActiveSearch = debouncedSearch.trim() !== '';
-  const hasActiveFilters = Object.values(filterValues).some((v) => v !== '');
+  const hasActiveSearch = debouncedSearch.trim() !== "";
+  const hasActiveFilters = Object.values(filterValues).some((v) => v !== "");
   const isFiltered = hasActiveSearch || hasActiveFilters;
 
   const params = useMemo(() => {
@@ -77,7 +80,14 @@ export const useTableQuery = ({
       query[paramKey || key] = paramValue ? paramValue(raw) : raw;
     });
     return query;
-  }, [currentPage, pageSize, hasActiveSearch, debouncedSearch, filters, filterValues]);
+  }, [
+    currentPage,
+    pageSize,
+    hasActiveSearch,
+    debouncedSearch,
+    filters,
+    filterValues,
+  ]);
 
   const filterConfigs = useMemo(
     () =>
@@ -87,7 +97,7 @@ export const useTableQuery = ({
         options: f.options,
         ariaLabel: f.ariaLabel,
       })),
-    [filters, filterValues, onFilterChange]
+    [filters, filterValues, onFilterChange],
   );
 
   return {

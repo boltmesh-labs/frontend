@@ -1,12 +1,15 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from "@tanstack/react-query";
 
-import { apiClient } from '@/api/client';
+import { apiClient } from "@/api/client";
 
-import { adminKeys } from '../api/queryKeys';
-import { createAdminResource, makeUseActionMutation } from './createAdminResource';
+import { adminKeys } from "../api/queryKeys";
+import {
+  createAdminResource,
+  makeUseActionMutation,
+} from "./createAdminResource";
 
 const resource = createAdminResource({
-  resourcePath: '/admin/subscriptions',
+  resourcePath: "/admin/subscriptions",
   listKey: adminKeys.subscriptions,
   detailKey: adminKeys.subscriptionDetail,
 });
@@ -19,7 +22,7 @@ export const useSubscriptionDevices = (subscriptionId) =>
     queryKey: adminKeys.subscriptionDevices(subscriptionId),
     queryFn: async () => {
       const { data } = await apiClient.api.get(
-        `/admin/vpn-devices/by-subscription/${subscriptionId}`
+        `/admin/vpn-devices/by-subscription/${subscriptionId}`,
       );
       return data;
     },
@@ -30,7 +33,9 @@ export const useSubscriptionInvoices = (subscriptionId) =>
   useQuery({
     queryKey: adminKeys.subscriptionInvoices(subscriptionId),
     queryFn: async () => {
-      const { data } = await apiClient.api.get(`/admin/invoices/by-subscription/${subscriptionId}`);
+      const { data } = await apiClient.api.get(
+        `/admin/invoices/by-subscription/${subscriptionId}`,
+      );
       return data;
     },
     enabled: Boolean(subscriptionId),
@@ -40,7 +45,7 @@ export const useSubscriptionInvoices = (subscriptionId) =>
 // subscription detail page refetches on mount via staleTime handling.
 export const useCancelSubscription = makeUseActionMutation({
   request: (id) => apiClient.api.post(`/admin/subscriptions/${id}/cancel`),
-  successMessage: 'Subscription cancelled',
-  errorFallback: 'Cancellation failed',
+  successMessage: "Subscription cancelled",
+  errorFallback: "Cancellation failed",
   invalidateKeys: () => [adminKeys.subscriptions()],
 });

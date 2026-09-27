@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo } from "react";
 
 /**
  * Memoized id → plan lookup for pages that join list rows to their plan name
@@ -9,4 +9,7 @@ import { useMemo } from 'react';
  * @returns {Map<string, object>}
  */
 export const usePlanMap = (plans) =>
-  useMemo(() => (plans ? new Map(plans.map((plan) => [plan.id, plan])) : new Map()), [plans]);
+  useMemo(
+    () => (plans ? new Map(plans.map((plan) => [plan.id, plan])) : new Map()),
+    [plans],
+  );

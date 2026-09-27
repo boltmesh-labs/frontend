@@ -1,55 +1,61 @@
-import React, { useCallback } from 'react';
-import { Container } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
-import { AsyncButton } from '@/components/AsyncButton';
-import { useTableQuery } from '@/hooks/useTableQuery';
-import { usePageTitle } from '@/hooks/usePageTitle';
-import { getPaginationTotals } from '@/utils/pagination';
-import { useConfirm } from '@/hooks/useConfirm';
-import { useVpnDevices, useToggleVpnDeviceStatus } from '@/features/admin/hooks/useVpnDevices';
-import { DataTable } from '@/components/DataTable';
-import { DefaultPagination } from '@/components/DefaultPagination';
-import { StatusAlert } from '@/components/StatusAlert';
-import { TableFiltersBar } from '@/components/TableFiltersBar';
-import { VpnDeviceStateBadge } from '@/components/VpnDeviceStateBadge';
-import { PageHeader } from '../components/ListHeader';
-import { formatDate } from '@/utils/dateFormatter';
-import { COMPANY_NAME } from '@/utils/config';
-import { PLATFORM_OPTIONS } from '@/utils/devicePlatformDisplay';
+import React, { useCallback } from "react";
+import { Container } from "react-bootstrap";
+import { Link } from "react-router-dom";
+import { AsyncButton } from "@/components/AsyncButton";
+import { useTableQuery } from "@/hooks/useTableQuery";
+import { usePageTitle } from "@/hooks/usePageTitle";
+import { getPaginationTotals } from "@/utils/pagination";
+import { useConfirm } from "@/hooks/useConfirm";
+import {
+  useVpnDevices,
+  useToggleVpnDeviceStatus,
+} from "@/features/admin/hooks/useVpnDevices";
+import { DataTable } from "@/components/DataTable";
+import { DefaultPagination } from "@/components/DefaultPagination";
+import { StatusAlert } from "@/components/StatusAlert";
+import { TableFiltersBar } from "@/components/TableFiltersBar";
+import { VpnDeviceStateBadge } from "@/components/VpnDeviceStateBadge";
+import { PageHeader } from "../components/ListHeader";
+import { formatDate } from "@/utils/dateFormatter";
+import { COMPANY_NAME } from "@/utils/config";
+import { PLATFORM_OPTIONS } from "@/utils/devicePlatformDisplay";
 
 const TABLE_COLUMNS = [
-  { header: 'Device' },
-  { header: 'Subscription' },
-  { header: 'Platform' },
-  { header: 'State' },
-  { header: 'Created' },
-  { header: 'Actions', className: 'text-center' },
+  { header: "Device" },
+  { header: "Subscription" },
+  { header: "Platform" },
+  { header: "State" },
+  { header: "Created" },
+  { header: "Actions", className: "text-center" },
 ];
 
 // 'true'/'false' are raw select values; paramValue decodes them into real
 // booleans for the is_active query param.
 const STATUS_OPTIONS = [
-  { value: '', label: 'All Statuses' },
-  { value: 'true', label: 'Active' },
-  { value: 'false', label: 'Inactive' },
+  { value: "", label: "All Statuses" },
+  { value: "true", label: "Active" },
+  { value: "false", label: "Inactive" },
 ];
 
 // Canonical platform list lives in utils/devicePlatformDisplay (mirrors
 // backend VpnDevicePlatformEnum); prepend the "all" sentinel for the filter.
-const PLATFORM_FILTER_OPTIONS = [{ value: '', label: 'All Platforms' }, ...PLATFORM_OPTIONS];
+const PLATFORM_FILTER_OPTIONS = [
+  { value: "", label: "All Platforms" },
+  ...PLATFORM_OPTIONS,
+];
 
 const FILTERS = [
   {
-    key: 'status',
+    key: "status",
     options: STATUS_OPTIONS,
-    ariaLabel: 'Filter by active status',
-    paramKey: 'is_active',
-    paramValue: (v) => v === 'true',
+    ariaLabel: "Filter by active status",
+    paramKey: "is_active",
+    paramValue: (v) => v === "true",
   },
   {
-    key: 'platform',
+    key: "platform",
     options: PLATFORM_FILTER_OPTIONS,
-    ariaLabel: 'Filter by platform',
+    ariaLabel: "Filter by platform",
   },
 ];
 
@@ -81,36 +87,40 @@ const VpnDeviceRow = React.memo(({ device, processingId, toggle }) => {
         )}
       </td>
 
-      <td className="font-monospace text-muted small">{device.platform || '—'}</td>
+      <td className="font-monospace text-muted small">
+        {device.platform || "—"}
+      </td>
       <td>
         <VpnDeviceStateBadge isActive={device.is_active} />
       </td>
-      <td className="small font-monospace text-muted">{formatDate(device.created_at)}</td>
+      <td className="small font-monospace text-muted">
+        {formatDate(device.created_at)}
+      </td>
       <td className="text-end">
         <AsyncButton
-          variant={device.is_active ? 'outline-warning' : 'outline-success'}
+          variant={device.is_active ? "outline-warning" : "outline-success"}
           size="sm"
           className="px-3 fw-bold shadow-sm"
           loading={isProcessing}
-          loadingLabel={device.is_active ? 'Deactivating...' : 'Activating...'}
-          aria-label={`${device.is_active ? 'Deactivate' : 'Activate'} device ${device.name || device.id}`}
+          loadingLabel={device.is_active ? "Deactivating..." : "Activating..."}
+          aria-label={`${device.is_active ? "Deactivate" : "Activate"} device ${device.name || device.id}`}
           onClick={() => toggle(device.id, device.is_active)}
         >
-          {device.is_active ? 'Deactivate' : 'Activate'}
+          {device.is_active ? "Deactivate" : "Activate"}
         </AsyncButton>
       </td>
     </tr>
   );
 });
 
-VpnDeviceRow.displayName = 'VpnDeviceRow';
+VpnDeviceRow.displayName = "VpnDeviceRow";
 
 const VpnDeviceList = () => {
   const { confirm, confirmDialog } = useConfirm();
 
   usePageTitle(
     `VPN Devices | ${COMPANY_NAME}`,
-    `Manage provisioned client VPN devices, active tunnel nodes, and device permissions for ${COMPANY_NAME}.`
+    `Manage provisioned client VPN devices, active tunnel nodes, and device permissions for ${COMPANY_NAME}.`,
   );
 
   const {
@@ -141,21 +151,22 @@ const VpnDeviceList = () => {
 
   const handleToggle = useCallback(
     async (id, currentStatus) => {
-      const actionLabel = currentStatus ? 'deactivate' : 'activate';
-      const capitalizedLabel = actionLabel.charAt(0).toUpperCase() + actionLabel.slice(1);
+      const actionLabel = currentStatus ? "deactivate" : "activate";
+      const capitalizedLabel =
+        actionLabel.charAt(0).toUpperCase() + actionLabel.slice(1);
 
       const isConfirmed = await confirm({
         title: `${capitalizedLabel} Device`,
         message: `Are you sure you want to ${actionLabel} this VPN device?`,
         confirmText: capitalizedLabel,
-        confirmVariant: currentStatus ? 'danger' : 'primary',
+        confirmVariant: currentStatus ? "danger" : "primary",
       });
 
       if (!isConfirmed) return;
 
       toggleDeviceStatus({ id, isActive: currentStatus });
     },
-    [confirm, toggleDeviceStatus]
+    [confirm, toggleDeviceStatus],
   );
 
   const renderRow = useCallback(
@@ -167,7 +178,7 @@ const VpnDeviceList = () => {
         toggle={handleToggle}
       />
     ),
-    [handleToggle, togglingId]
+    [handleToggle, togglingId],
   );
 
   return (

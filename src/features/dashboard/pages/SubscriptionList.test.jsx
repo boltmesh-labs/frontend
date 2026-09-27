@@ -1,26 +1,26 @@
-import { render, screen } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { MemoryRouter } from 'react-router-dom';
+import { render, screen } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { MemoryRouter } from "react-router-dom";
 
-import { useUserSubscriptions } from '@/features/dashboard/hooks/useDashboard';
-import SubscriptionList from './SubscriptionList';
+import { useUserSubscriptions } from "@/features/dashboard/hooks/useDashboard";
+import SubscriptionList from "./SubscriptionList";
 
-vi.mock('@/features/dashboard/hooks/useDashboard', () => ({
+vi.mock("@/features/dashboard/hooks/useDashboard", () => ({
   useUserSubscriptions: vi.fn(),
 }));
 
 const subscriptions = [
   {
-    id: 's1',
-    status: 'active',
-    expires_at: '2026-02-01T00:00:00Z',
-    plan: { name: 'Pro', billing_cycle: 'monthly', price_usd: 10 },
+    id: "s1",
+    status: "active",
+    expires_at: "2026-02-01T00:00:00Z",
+    plan: { name: "Pro", billing_cycle: "monthly", price_usd: 10 },
   },
   {
-    id: 's2',
-    status: 'expired',
-    expires_at: '2026-01-01T00:00:00Z',
-    plan: { name: 'Starter', billing_cycle: 'monthly', price_usd: 5 },
+    id: "s2",
+    status: "expired",
+    expires_at: "2026-01-01T00:00:00Z",
+    plan: { name: "Starter", billing_cycle: "monthly", price_usd: 5 },
   },
 ];
 
@@ -28,15 +28,15 @@ const renderPage = () =>
   render(
     <MemoryRouter>
       <SubscriptionList />
-    </MemoryRouter>
+    </MemoryRouter>,
   );
 
-describe('SubscriptionList (dashboard)', () => {
+describe("SubscriptionList (dashboard)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('shows a loader while subscriptions boot', () => {
+  it("shows a loader while subscriptions boot", () => {
     vi.mocked(useUserSubscriptions).mockReturnValue({
       data: undefined,
       isLoading: true,
@@ -46,10 +46,10 @@ describe('SubscriptionList (dashboard)', () => {
     });
     renderPage();
 
-    expect(screen.getByRole('status')).toBeInTheDocument();
+    expect(screen.getByRole("status")).toBeInTheDocument();
   });
 
-  it('renders summary counts and subscription rows with a details action', async () => {
+  it("renders summary counts and subscription rows with a details action", async () => {
     vi.mocked(useUserSubscriptions).mockReturnValue({
       data: subscriptions,
       isLoading: false,
@@ -57,30 +57,30 @@ describe('SubscriptionList (dashboard)', () => {
       error: null,
       refetch: vi.fn(),
     });
-    const user = (await import('@testing-library/user-event')).default.setup();
+    const user = (await import("@testing-library/user-event")).default.setup();
     renderPage();
 
-    expect(screen.getByText('Total Subscriptions')).toBeInTheDocument();
-    expect(screen.getAllByText('Pro')).toHaveLength(2);
-    expect(screen.getAllByText('Starter')).toHaveLength(2);
+    expect(screen.getByText("Total Subscriptions")).toBeInTheDocument();
+    expect(screen.getAllByText("Pro")).toHaveLength(2);
+    expect(screen.getAllByText("Starter")).toHaveLength(2);
 
-    await user.click(screen.getAllByRole('button', { name: /details/i })[0]);
+    await user.click(screen.getAllByRole("button", { name: /details/i })[0]);
   });
 
-  it('surfaces API failures through the shared alert', () => {
+  it("surfaces API failures through the shared alert", () => {
     vi.mocked(useUserSubscriptions).mockReturnValue({
       data: [],
       isLoading: false,
       isError: true,
-      error: new Error('boom'),
+      error: new Error("boom"),
       refetch: vi.fn(),
     });
     renderPage();
 
-    expect(screen.getByRole('alert')).toBeInTheDocument();
+    expect(screen.getByRole("alert")).toBeInTheDocument();
   });
 
-  it('renders the empty state when there are no subscriptions', () => {
+  it("renders the empty state when there are no subscriptions", () => {
     vi.mocked(useUserSubscriptions).mockReturnValue({
       data: [],
       isLoading: false,
@@ -90,6 +90,8 @@ describe('SubscriptionList (dashboard)', () => {
     });
     renderPage();
 
-    expect(screen.getAllByText(/no active or past subscriptions found/i)).toHaveLength(2);
+    expect(
+      screen.getAllByText(/no active or past subscriptions found/i),
+    ).toHaveLength(2);
   });
 });

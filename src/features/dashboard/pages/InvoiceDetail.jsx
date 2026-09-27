@@ -1,30 +1,33 @@
-import { useCallback, useState } from 'react';
-import { Alert, Button, Card, Table } from 'react-bootstrap';
-import { useNavigate, useParams } from 'react-router-dom';
-import { AsyncButton } from '@/components/AsyncButton';
-import { useConfirmAction } from '@/hooks/useConfirmAction';
-import { useCountdown } from '@/hooks/useCountdown';
-import { usePageTitle } from '@/hooks/usePageTitle';
+import { useCallback, useState } from "react";
+import { Alert, Button, Card, Table } from "react-bootstrap";
+import { useNavigate, useParams } from "react-router-dom";
+import { AsyncButton } from "@/components/AsyncButton";
+import { useConfirmAction } from "@/hooks/useConfirmAction";
+import { useCountdown } from "@/hooks/useCountdown";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import {
   useCancelInvoice,
   usePlanDetail,
   useUserInvoiceDetail,
-} from '@/features/dashboard/hooks/useDashboard';
-import { copyToClipboard } from '@/utils/clipboard';
-import { formatCurrencyAmount } from '@/utils/currencyFormatter';
-import { formatDate } from '@/utils/dateFormatter';
-import { getMethodDisplay } from '@/utils/methodDisplay';
-import { PAYMENT_TABLE_COLUMNS } from '@/constants/tableColumns';
-import { ACTIONABLE_INVOICE_STATUSES, INVOICE_STATUSES } from '@/constants/statuses';
-import { InvoiceStatusBadge } from '@/components/InvoiceStatusBadge';
-import { PaymentStatusBadge } from '@/components/PaymentStatusBadge';
-import { DetailShell } from '@/components/DetailShell';
-import { SectionCard } from '@/components/SectionCard';
-import { DataTable } from '@/components/DataTable';
-import { MobileRecordCard } from '@/components/MobileRecordCard';
-import { DashboardContainer } from '@/features/dashboard/components/DashboardContainer';
-import { DashboardHeader } from '../components/DashboardHeader';
-import { COMPANY_NAME } from '@/utils/config';
+} from "@/features/dashboard/hooks/useDashboard";
+import { copyToClipboard } from "@/utils/clipboard";
+import { formatCurrencyAmount } from "@/utils/currencyFormatter";
+import { formatDate } from "@/utils/dateFormatter";
+import { getMethodDisplay } from "@/utils/methodDisplay";
+import { PAYMENT_TABLE_COLUMNS } from "@/constants/tableColumns";
+import {
+  ACTIONABLE_INVOICE_STATUSES,
+  INVOICE_STATUSES,
+} from "@/constants/statuses";
+import { InvoiceStatusBadge } from "@/components/InvoiceStatusBadge";
+import { PaymentStatusBadge } from "@/components/PaymentStatusBadge";
+import { DetailShell } from "@/components/DetailShell";
+import { SectionCard } from "@/components/SectionCard";
+import { DataTable } from "@/components/DataTable";
+import { MobileRecordCard } from "@/components/MobileRecordCard";
+import { DashboardContainer } from "@/features/dashboard/components/DashboardContainer";
+import { DashboardHeader } from "../components/DashboardHeader";
+import { COMPANY_NAME } from "@/utils/config";
 
 const formatRemainingText = (diff) => {
   if (diff <= 0) return null;
@@ -59,15 +62,21 @@ const InvoiceDetail = () => {
   const { runConfirmed, busy, confirmDialog } = useConfirmAction();
 
   usePageTitle(
-    `Invoice ${id || ''} | ${COMPANY_NAME}`,
-    'Review detailed invoice metadata and transaction history.'
+    `Invoice ${id || ""} | ${COMPANY_NAME}`,
+    "Review detailed invoice metadata and transaction history.",
   );
 
   const [isTimerExpired, setIsTimerExpired] = useState(false);
 
   const cancelMutation = useCancelInvoice();
 
-  const { data: invoice, isLoading, isError, error, refetch } = useUserInvoiceDetail(id);
+  const {
+    data: invoice,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useUserInvoiceDetail(id);
 
   const { data: plan } = usePlanDetail(invoice?.plan_id);
 
@@ -84,44 +93,46 @@ const InvoiceDetail = () => {
       if (!inv?.id) return;
       navigate(`/payment/${inv.id}`);
     },
-    [navigate]
+    [navigate],
   );
 
   // useConfirmAction owns the confirm dialog, busy flag, and success/error
   // feedback; the mutation itself only invalidates the invoice caches, which
   // refetches this page — no manual refetch() needed.
   const handleCancelInvoice = () =>
-    runConfirmed('cancel-invoice', {
-      title: 'Cancel Invoice',
-      message: 'Are you sure you want to cancel this invoice?',
-      confirmText: 'Cancel',
-      confirmVariant: 'danger',
+    runConfirmed("cancel-invoice", {
+      title: "Cancel Invoice",
+      message: "Are you sure you want to cancel this invoice?",
+      confirmText: "Cancel",
+      confirmVariant: "danger",
       run: () => cancelMutation.mutateAsync(id),
-      successMessage: 'Invoice has been canceled.',
+      successMessage: "Invoice has been canceled.",
     });
 
-  const currency = invoice?.currency || 'USD';
+  const currency = invoice?.currency || "USD";
 
   const renderPaymentRow = useCallback(
     (payment) => (
       <tr key={payment.id}>
-        <td className="font-monospace" style={{ maxWidth: '220px' }}>
+        <td className="font-monospace" style={{ maxWidth: "220px" }}>
           <div className="d-flex align-items-center gap-2">
             <span
               className="text-truncate d-inline-block"
-              style={{ maxWidth: '160px' }}
-              title={payment.external_tx_id || '—'}
+              style={{ maxWidth: "160px" }}
+              title={payment.external_tx_id || "—"}
             >
-              {payment.external_tx_id || '—'}
+              {payment.external_tx_id || "—"}
             </span>
             {payment.external_tx_id && (
               <Button
                 variant="link"
                 className="p-0 text-decoration-none text-muted lh-1"
-                style={{ fontSize: '0.85rem' }}
+                style={{ fontSize: "0.85rem" }}
                 title="Copy Transaction ID"
                 onClick={() =>
-                  copyToClipboard(payment.external_tx_id, { success: 'Transaction ID copied!' })
+                  copyToClipboard(payment.external_tx_id, {
+                    success: "Transaction ID copied!",
+                  })
                 }
               >
                 📋
@@ -129,19 +140,27 @@ const InvoiceDetail = () => {
             )}
           </div>
         </td>
-        <td className="font-monospace fw-bold">{formatCurrencyAmount(payment.amount, currency)}</td>
+        <td className="font-monospace fw-bold">
+          {formatCurrencyAmount(payment.amount, currency)}
+        </td>
         <td>
           <div className="d-flex flex-column gap-1 align-items-start">
             <PaymentStatusBadge status={payment.status} />
 
-            {typeof payment.confirmations === 'number' && (
-              <span className="text-muted font-monospace" style={{ fontSize: '0.75rem' }}>
+            {typeof payment.confirmations === "number" && (
+              <span
+                className="text-muted font-monospace"
+                style={{ fontSize: "0.75rem" }}
+              >
                 {payment.confirmations} confirmations
               </span>
             )}
 
             {payment.fee > 0 && (
-              <span className="text-muted font-monospace" style={{ fontSize: '0.75rem' }}>
+              <span
+                className="text-muted font-monospace"
+                style={{ fontSize: "0.75rem" }}
+              >
                 Fee: {formatCurrencyAmount(payment.fee, currency)}
               </span>
             )}
@@ -150,22 +169,33 @@ const InvoiceDetail = () => {
         <td className="text-muted">{formatDate(payment.created_at)}</td>
       </tr>
     ),
-    [currency]
+    [currency],
   );
 
   const renderMobilePayment = useCallback(
     (payment) => (
       <MobileRecordCard
-        title={payment.external_tx_id || 'Payment'}
+        title={payment.external_tx_id || "Payment"}
         items={[
-          { label: 'Amount', value: formatCurrencyAmount(payment.amount, currency) },
-          { label: 'Status', value: <PaymentStatusBadge status={payment.status} /> },
-          { label: 'Date', value: formatDate(payment.created_at) },
-          ...(typeof payment.confirmations === 'number'
-            ? [{ label: 'Confirmations', value: payment.confirmations }]
+          {
+            label: "Amount",
+            value: formatCurrencyAmount(payment.amount, currency),
+          },
+          {
+            label: "Status",
+            value: <PaymentStatusBadge status={payment.status} />,
+          },
+          { label: "Date", value: formatDate(payment.created_at) },
+          ...(typeof payment.confirmations === "number"
+            ? [{ label: "Confirmations", value: payment.confirmations }]
             : []),
           ...(payment.fee > 0
-            ? [{ label: 'Fee', value: formatCurrencyAmount(payment.fee, currency) }]
+            ? [
+                {
+                  label: "Fee",
+                  value: formatCurrencyAmount(payment.fee, currency),
+                },
+              ]
             : []),
         ]}
         actions={
@@ -175,7 +205,7 @@ const InvoiceDetail = () => {
               size="sm"
               onClick={() =>
                 copyToClipboard(payment.external_tx_id, {
-                  success: 'Transaction ID copied!',
+                  success: "Transaction ID copied!",
                 })
               }
             >
@@ -185,10 +215,10 @@ const InvoiceDetail = () => {
         }
       />
     ),
-    [currency]
+    [currency],
   );
 
-  const normalizedStatus = invoice?.status?.toLowerCase() || '';
+  const normalizedStatus = invoice?.status?.toLowerCase() || "";
   const isPending = normalizedStatus === INVOICE_STATUSES.pending;
   const isPaid = normalizedStatus === INVOICE_STATUSES.paid;
 
@@ -200,11 +230,13 @@ const InvoiceDetail = () => {
     (canBeExpired && isTimerExpired);
 
   const isCancellable = isPending && !isExpired;
-  const canPay = (isPending || normalizedStatus === INVOICE_STATUSES.partially_paid) && !isExpired;
+  const canPay =
+    (isPending || normalizedStatus === INVOICE_STATUSES.partially_paid) &&
+    !isExpired;
   const showPaymentDetails = isPending && !isExpired;
 
-  const displayAddress = invoice?.crypto_address || '';
-  const paymentUri = invoice?.payment_uri || '';
+  const displayAddress = invoice?.crypto_address || "";
+  const paymentUri = invoice?.payment_uri || "";
 
   return (
     <DetailShell
@@ -273,12 +305,16 @@ const InvoiceDetail = () => {
             </div>
           </div>
 
-          <Table responsive borderless className="align-middle m-0 small detail-table">
+          <Table
+            responsive
+            borderless
+            className="align-middle m-0 small detail-table"
+          >
             <tbody>
               <tr>
                 <td className="text-secondary py-2">Plan</td>
                 <td className="fw-bold text-body text-end">
-                  {plan?.name || `Plan #${invoice?.plan_id || '—'}`}
+                  {plan?.name || `Plan #${invoice?.plan_id || "—"}`}
                 </td>
               </tr>
               <tr>
@@ -289,19 +325,27 @@ const InvoiceDetail = () => {
               </tr>
               <tr>
                 <td className="text-secondary py-2">Currency</td>
-                <td className="fw-bold text-body text-end">{invoice?.currency || '—'}</td>
+                <td className="fw-bold text-body text-end">
+                  {invoice?.currency || "—"}
+                </td>
               </tr>
               <tr>
                 <td className="text-secondary py-2">Amount Due</td>
                 <td className="font-monospace fw-bold text-body text-end fs-6">
-                  {formatCurrencyAmount(invoice?.amount_requested, invoice?.currency)}
+                  {formatCurrencyAmount(
+                    invoice?.amount_requested,
+                    invoice?.currency,
+                  )}
                 </td>
               </tr>
-              <tr className={isPaid ? 'border-bottom' : ''}>
+              <tr className={isPaid ? "border-bottom" : ""}>
                 <td className="text-secondary py-2">Amount Paid</td>
                 <td className="font-monospace fw-bold text-success text-end fs-6">
                   {isPaid && <span className="me-1">✓</span>}
-                  {formatCurrencyAmount(invoice?.amount_paid || 0, invoice?.currency)}
+                  {formatCurrencyAmount(
+                    invoice?.amount_paid || 0,
+                    invoice?.currency,
+                  )}
                 </td>
               </tr>
               <tr>
@@ -310,20 +354,20 @@ const InvoiceDetail = () => {
                   <div className="d-flex align-items-center justify-content-end gap-2">
                     <span
                       className="text-truncate d-inline-block"
-                      style={{ maxWidth: '200px' }}
-                      title={invoice?.tracking_id || '—'}
+                      style={{ maxWidth: "200px" }}
+                      title={invoice?.tracking_id || "—"}
                     >
-                      {invoice?.tracking_id || '—'}
+                      {invoice?.tracking_id || "—"}
                     </span>
                     {invoice?.tracking_id && (
                       <Button
                         variant="link"
                         className="p-0 text-decoration-none text-muted lh-1 flex-shrink-0"
-                        style={{ fontSize: '0.85rem' }}
+                        style={{ fontSize: "0.85rem" }}
                         title="Copy Tracking ID"
                         onClick={() =>
                           copyToClipboard(invoice?.tracking_id, {
-                            success: 'Tracking ID copied!',
+                            success: "Tracking ID copied!",
                           })
                         }
                       >
@@ -335,7 +379,9 @@ const InvoiceDetail = () => {
               </tr>
               {(isPaid || invoice?.paid_at) && (
                 <tr className="border-bottom">
-                  <td className="text-secondary py-2 fw-semibold text-success">Paid On</td>
+                  <td className="text-secondary py-2 fw-semibold text-success">
+                    Paid On
+                  </td>
                   <td className="text-success fw-bold text-end font-monospace">
                     {formatDate(invoice?.paid_at)}
                   </td>
@@ -344,7 +390,9 @@ const InvoiceDetail = () => {
 
               {invoice?.canceled_at && (
                 <tr className="border-bottom">
-                  <td className="text-secondary py-2 fw-semibold text-danger">Canceled On</td>
+                  <td className="text-secondary py-2 fw-semibold text-danger">
+                    Canceled On
+                  </td>
                   <td className="text-danger fw-bold text-end font-monospace">
                     {formatDate(invoice?.canceled_at)}
                   </td>
@@ -353,7 +401,9 @@ const InvoiceDetail = () => {
 
               {invoice?.refunded_at && (
                 <tr className="border-bottom">
-                  <td className="text-secondary py-2 fw-semibold text-info">Refunded On</td>
+                  <td className="text-secondary py-2 fw-semibold text-info">
+                    Refunded On
+                  </td>
                   <td className="text-info fw-bold text-end font-monospace">
                     {formatDate(invoice?.refunded_at)}
                   </td>
@@ -365,17 +415,19 @@ const InvoiceDetail = () => {
                   <td className="text-secondary py-2">Expires On</td>
                   <td
                     className={`fw-bold text-end font-monospace ${
-                      isExpired ? 'text-danger' : 'text-muted'
+                      isExpired ? "text-danger" : "text-muted"
                     }`}
                   >
-                    {formatDate(invoice?.expires_at)} {isExpired && '(Expired)'}
+                    {formatDate(invoice?.expires_at)} {isExpired && "(Expired)"}
                   </td>
                 </tr>
               )}
 
               <tr>
                 <td className="text-secondary py-2">Created</td>
-                <td className="text-muted text-end">{formatDate(invoice?.created_at)}</td>
+                <td className="text-muted text-end">
+                  {formatDate(invoice?.created_at)}
+                </td>
               </tr>
               <tr>
                 <td className="text-secondary py-2">Last Updated</td>
@@ -387,9 +439,13 @@ const InvoiceDetail = () => {
           </Table>
 
           {isExpired && (
-            <Alert variant="warning" className="mt-4 mb-0 border-0 shadow-sm text-center">
-              ⚠️ This invoice expired on <strong>{formatDate(invoice?.expires_at)}</strong>. Please
-              create a new invoice to proceed with payment.
+            <Alert
+              variant="warning"
+              className="mt-4 mb-0 border-0 shadow-sm text-center"
+            >
+              ⚠️ This invoice expired on{" "}
+              <strong>{formatDate(invoice?.expires_at)}</strong>. Please create
+              a new invoice to proceed with payment.
             </Alert>
           )}
 
@@ -409,7 +465,9 @@ const InvoiceDetail = () => {
                       size="sm"
                       className="fw-bold flex-shrink-0 rounded-3"
                       onClick={() =>
-                        copyToClipboard(displayAddress, { success: 'Address copied!' })
+                        copyToClipboard(displayAddress, {
+                          success: "Address copied!",
+                        })
                       }
                     >
                       Copy
@@ -432,7 +490,9 @@ const InvoiceDetail = () => {
                       size="sm"
                       className="fw-bold flex-shrink-0 rounded-3"
                       onClick={() =>
-                        copyToClipboard(paymentUri, { success: 'Payment URI copied!' })
+                        copyToClipboard(paymentUri, {
+                          success: "Payment URI copied!",
+                        })
                       }
                     >
                       Copy Link

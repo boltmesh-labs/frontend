@@ -1,21 +1,21 @@
-import { Button, Card, Table } from 'react-bootstrap';
-import { PageLoader } from '@/components/PageLoader';
-import { MobileRecordCard } from '@/components/MobileRecordCard';
-import { useConfirmAction } from '@/hooks/useConfirmAction';
-import { usePageTitle } from '@/hooks/usePageTitle';
+import { Button, Card, Table } from "react-bootstrap";
+import { PageLoader } from "@/components/PageLoader";
+import { MobileRecordCard } from "@/components/MobileRecordCard";
+import { useConfirmAction } from "@/hooks/useConfirmAction";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import {
   useUserDevices,
   useDeleteDevice,
   useUserSubscriptions,
   useDashboardProfile,
-} from '@/features/dashboard/hooks/useDashboard';
-import { DashboardContainer } from '@/features/dashboard/components/DashboardContainer';
-import { DashboardHeader } from '../components/DashboardHeader';
-import { formatDate } from '@/utils/dateFormatter';
-import { formatBytes } from '@/utils/byteFormatter';
-import { getPlatformLabel } from '@/utils/devicePlatformDisplay';
-import { COMPANY_NAME } from '@/utils/config';
-import { resolveActivePlan } from '../utils/activePlan';
+} from "@/features/dashboard/hooks/useDashboard";
+import { DashboardContainer } from "@/features/dashboard/components/DashboardContainer";
+import { DashboardHeader } from "../components/DashboardHeader";
+import { formatDate } from "@/utils/dateFormatter";
+import { formatBytes } from "@/utils/byteFormatter";
+import { getPlatformLabel } from "@/utils/devicePlatformDisplay";
+import { COMPANY_NAME } from "@/utils/config";
+import { resolveActivePlan } from "../utils/activePlan";
 
 const DeviceMobileCard = ({ device, onRevoke, disabled }) => {
   const primaryPeer = device.peers?.[0];
@@ -26,24 +26,26 @@ const DeviceMobileCard = ({ device, onRevoke, disabled }) => {
     <MobileRecordCard
       title={`📱 ${device.name}`}
       items={[
-        { label: 'Platform', value: getPlatformLabel(device.platform) },
+        { label: "Platform", value: getPlatformLabel(device.platform) },
         {
-          label: 'Connection',
+          label: "Connection",
           value: (
             <>
-              <span className={isConnected ? 'text-success' : 'text-body-secondary'}>
-                {isConnected ? 'Connected' : 'Disconnected'}
+              <span
+                className={isConnected ? "text-success" : "text-body-secondary"}
+              >
+                {isConnected ? "Connected" : "Disconnected"}
               </span>
               <div className="small text-body-secondary">
-                {lastSeen ? formatDate(lastSeen) : 'Never connected'}
+                {lastSeen ? formatDate(lastSeen) : "Never connected"}
               </div>
             </>
           ),
         },
         {
-          label: 'Tx / Rx',
+          label: "Tx / Rx",
           value: `${formatBytes(primaryPeer?.tx_bytes ?? 0)} / ${formatBytes(
-            primaryPeer?.rx_bytes ?? 0
+            primaryPeer?.rx_bytes ?? 0,
           )}`,
         },
       ]}
@@ -64,9 +66,16 @@ const DeviceMobileCard = ({ device, onRevoke, disabled }) => {
 const DeviceList = () => {
   const { runConfirmed, busy, confirmDialog } = useConfirmAction();
 
-  usePageTitle(`VPN Devices | ${COMPANY_NAME}`, `View and manage your WireGuard VPN devices.`);
+  usePageTitle(
+    `VPN Devices | ${COMPANY_NAME}`,
+    `View and manage your WireGuard VPN devices.`,
+  );
 
-  const { data: devicesData, isLoading: devicesLoading, isError: devicesError } = useUserDevices();
+  const {
+    data: devicesData,
+    isLoading: devicesLoading,
+    isError: devicesError,
+  } = useUserDevices();
   const { data: subscriptionData } = useUserSubscriptions();
   const { data: profileData } = useDashboardProfile();
 
@@ -83,10 +92,10 @@ const DeviceList = () => {
   // feedback for the revoke flow.
   const handleRevokeDevice = (device) =>
     runConfirmed(device.id, {
-      title: 'Revoke Device',
+      title: "Revoke Device",
       message: `Are you sure you want to revoke access for "${device.name}"? This key will be permanently removed from the server, immediately disconnecting the device.`,
-      confirmText: 'Confirm Revoke',
-      confirmVariant: 'danger',
+      confirmText: "Confirm Revoke",
+      confirmVariant: "danger",
       run: () => deleteMutation.mutateAsync(device.id),
       successMessage: `Device "${device.name}" has been revoked.`,
     });
@@ -116,25 +125,32 @@ const DeviceList = () => {
         <Card className="border-0 shadow-sm mb-4">
           <Card.Body className="p-3 d-flex flex-wrap align-items-center gap-3">
             <div className="me-auto text-start">
-              <div className="text-body-secondary small fw-bold text-uppercase">Device Slots</div>
+              <div className="text-body-secondary small fw-bold text-uppercase">
+                Device Slots
+              </div>
               <div className="small text-body-secondary">
-                {activePlan?.name || 'Current'} plan allows up to {maxDevices} devices
+                {activePlan?.name || "Current"} plan allows up to {maxDevices}{" "}
+                devices
               </div>
             </div>
             <div className="d-flex align-items-center gap-3">
               <span
                 className={`fw-bold font-monospace ${
-                  slotsFull ? 'text-danger' : 'text-body-emphasis'
+                  slotsFull ? "text-danger" : "text-body-emphasis"
                 }`}
               >
                 {usedDevices} / {maxDevices}
               </span>
-              <div className="d-flex gap-1" role="progressbar" style={{ width: 120 }}>
+              <div
+                className="d-flex gap-1"
+                role="progressbar"
+                style={{ width: 120 }}
+              >
                 {Array.from({ length: maxDevices }).map((_, i) => (
                   <span
                     key={i}
                     className={`flex-fill rounded ${
-                      i < usedDevices ? 'bg-success' : 'bg-body-secondary'
+                      i < usedDevices ? "bg-success" : "bg-body-secondary"
                     }`}
                     style={{ height: 8 }}
                   />
@@ -149,7 +165,11 @@ const DeviceList = () => {
         <Card.Body className="p-0">
           {devices && devices.length > 0 ? (
             <>
-              <Table responsive hover className="mb-0 align-middle text-start mobile-hidden-table">
+              <Table
+                responsive
+                hover
+                className="mb-0 align-middle text-start mobile-hidden-table"
+              >
                 <thead className="bg-body-secondary">
                   <tr className="small text-uppercase text-body-secondary">
                     <th>Name</th>
@@ -169,7 +189,9 @@ const DeviceList = () => {
 
                     return (
                       <tr key={device.id}>
-                        <td className="ps-4 fw-bold text-body-emphasis">📱 {device.name}</td>
+                        <td className="ps-4 fw-bold text-body-emphasis">
+                          📱 {device.name}
+                        </td>
                         <td className="font-monospace small text-body-secondary">
                           {getPlatformLabel(device.platform)}
                         </td>
@@ -177,21 +199,24 @@ const DeviceList = () => {
                           <span className="d-inline-flex align-items-center gap-2">
                             <span
                               className={`rounded-circle ${
-                                isConnected ? 'bg-success' : 'bg-secondary'
+                                isConnected ? "bg-success" : "bg-secondary"
                               }`}
-                              style={{ width: '8px', height: '8px' }}
+                              style={{ width: "8px", height: "8px" }}
                               aria-hidden="true"
                             />
                             <span className="small">
-                              {isConnected ? 'Connected' : 'Disconnected'}
+                              {isConnected ? "Connected" : "Disconnected"}
                             </span>
                           </span>
                           <div className="small text-body-secondary">
-                            {lastSeen ? formatDate(lastSeen) : 'Never connected'}
+                            {lastSeen
+                              ? formatDate(lastSeen)
+                              : "Never connected"}
                           </div>
                         </td>
                         <td className="text-muted small">
-                          {formatBytes(txBytes ?? 0)} / {formatBytes(rxBytes ?? 0)}
+                          {formatBytes(txBytes ?? 0)} /{" "}
+                          {formatBytes(rxBytes ?? 0)}
                         </td>
                         <td className="text-end pe-4">
                           <Button
@@ -226,8 +251,8 @@ const DeviceList = () => {
               <div className="fs-1 mb-2">📱</div>
               <h5 className="fw-bold text-body-emphasis">No Active Devices</h5>
               <p className="text-body-secondary small mb-0">
-                Devices are created from your client app after login — they will appear here once
-                connected.
+                Devices are created from your client app after login — they will
+                appear here once connected.
               </p>
             </div>
           )}

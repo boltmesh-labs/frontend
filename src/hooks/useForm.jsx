@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef } from "react";
 
 /**
  * Lightweight controlled-form state helper.
@@ -17,15 +17,16 @@ export const useForm = (initialValues = {}, options = {}) => {
       const name = e.target.name || e.target.id;
       if (!name) return;
 
-      let value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
-      if (e.target.type !== 'checkbox') {
+      let value =
+        e.target.type === "checkbox" ? e.target.checked : e.target.value;
+      if (e.target.type !== "checkbox") {
         if (trim) value = value.trim();
-        else if (trimStart) value = value.replace(/^\s+/, '');
+        else if (trimStart) value = value.replace(/^\s+/, "");
       }
 
       setValues((prev) => ({ ...prev, [name]: value }));
     },
-    [trimStart, trim]
+    [trimStart, trim],
   );
 
   const setValue = useCallback((name, value) => {
@@ -37,7 +38,10 @@ export const useForm = (initialValues = {}, options = {}) => {
   // while still restoring the values the form was created with.
   const initialValuesRef = useRef(initialValues);
 
-  const reset = useCallback(() => setValues({ ...initialValuesRef.current }), []);
+  const reset = useCallback(
+    () => setValues({ ...initialValuesRef.current }),
+    [],
+  );
 
   return { values, handleChange, setValue, setValues, reset };
 };

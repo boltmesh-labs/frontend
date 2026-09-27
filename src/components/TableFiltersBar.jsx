@@ -1,9 +1,9 @@
-import { Card, Row, Col, Form, Button } from 'react-bootstrap';
+import { Card, Row, Col, Form, Button } from "react-bootstrap";
 
 export const TableFiltersBar = ({
   searchInput,
   onSearchChange,
-  searchPlaceholder = '🔍 Search...',
+  searchPlaceholder = "🔍 Search...",
   filters = [], // Array of { value, onChange, options, ariaLabel }
   onClear,
   isClearDisabled,

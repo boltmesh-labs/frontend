@@ -1,6 +1,6 @@
-import { Alert, Button } from 'react-bootstrap';
+import { Alert, Button } from "react-bootstrap";
 
-import { getApiError } from '@/utils/errorHandler';
+import { getApiError } from "@/utils/errorHandler";
 
 /**
  * Reusable alert banner supporting any bootstrap variant and a free-form
@@ -16,7 +16,7 @@ import { getApiError } from '@/utils/errorHandler';
 const normalizeMessage = (message) => {
   const isErrorLike =
     message instanceof Error ||
-    (typeof message === 'object' &&
+    (typeof message === "object" &&
       message !== null &&
       !Array.isArray(message) &&
       !message.$$typeof);
@@ -26,9 +26,9 @@ const normalizeMessage = (message) => {
 export const StatusAlert = ({
   message,
   onRetry,
-  variant = 'danger',
+  variant = "danger",
   children,
-  className = 'mb-4 p-3',
+  className = "mb-4 p-3",
 }) => {
   const safeMessage = normalizeMessage(message);
 
@@ -40,12 +40,17 @@ export const StatusAlert = ({
       className={`border-0 shadow-sm ${className} d-flex align-items-center justify-content-between`}
     >
       <span className="small fw-medium">
-        {variant === 'danger' ? '⚠️ ' : ''}
+        {variant === "danger" ? "⚠️ " : ""}
         {safeMessage}
         {children}
       </span>
       {onRetry && (
-        <Button variant={`outline-${variant}`} size="sm" className="fw-bold" onClick={onRetry}>
+        <Button
+          variant={`outline-${variant}`}
+          size="sm"
+          className="fw-bold"
+          onClick={onRetry}
+        >
           Retry
         </Button>
       )}

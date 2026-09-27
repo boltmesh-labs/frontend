@@ -1,21 +1,24 @@
-import { Card } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
+import { Card } from "react-bootstrap";
+import { Link } from "react-router-dom";
 
 /**
  * AccountOwnerCard displays user information inside detail views.
  */
-export const AccountOwnerCard = ({ user, className = '' }) => {
+export const AccountOwnerCard = ({ user, className = "" }) => {
   if (!user) return null;
 
-  const avatarInitial = user.username !== 'N/A' ? user.username.charAt(0).toUpperCase() : '?';
+  const avatarInitial =
+    user.username !== "N/A" ? user.username.charAt(0).toUpperCase() : "?";
 
   return (
-    <Card className={`border-0 shadow-sm p-3 bg-body-tertiary rounded-3 ${className}`}>
+    <Card
+      className={`border-0 shadow-sm p-3 bg-body-tertiary rounded-3 ${className}`}
+    >
       <div className="p-3 rounded-3 border mb-3">
         <div className="d-flex align-items-center gap-3">
           <div
             className="bg-primary text-white rounded-circle d-flex justify-content-center align-items-center fw-bold"
-            style={{ width: '42px', height: '42px', flexShrink: 0 }}
+            style={{ width: "42px", height: "42px", flexShrink: 0 }}
             aria-hidden="true"
           >
             {avatarInitial}

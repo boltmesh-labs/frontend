@@ -1,92 +1,117 @@
-import React, { useCallback } from 'react';
-import { Badge, Container } from 'react-bootstrap';
-import { useTableQuery } from '@/hooks/useTableQuery';
-import { usePageTitle } from '@/hooks/usePageTitle';
-import { getPaginationTotals } from '@/utils/pagination';
-import { useVpnNodeAudit } from '@/features/admin/hooks/useVpnNodeAudit';
-import { DataTable } from '@/components/DataTable';
-import { StatusAlert } from '@/components/StatusAlert';
-import { DefaultPagination } from '@/components/DefaultPagination';
-import { TableFiltersBar } from '@/components/TableFiltersBar';
-import { PageHeader } from '../components/ListHeader';
-import { formatDate } from '@/utils/dateFormatter';
-import { NODE_REGISTRATION_STATUSES, NODE_REGISTRATION_AUTH_METHODS } from '@/constants/statuses';
+import React, { useCallback } from "react";
+import { Badge, Container } from "react-bootstrap";
+import { useTableQuery } from "@/hooks/useTableQuery";
+import { usePageTitle } from "@/hooks/usePageTitle";
+import { getPaginationTotals } from "@/utils/pagination";
+import { useVpnNodeAudit } from "@/features/admin/hooks/useVpnNodeAudit";
+import { DataTable } from "@/components/DataTable";
+import { StatusAlert } from "@/components/StatusAlert";
+import { DefaultPagination } from "@/components/DefaultPagination";
+import { TableFiltersBar } from "@/components/TableFiltersBar";
+import { PageHeader } from "../components/ListHeader";
+import { formatDate } from "@/utils/dateFormatter";
+import {
+  NODE_REGISTRATION_STATUSES,
+  NODE_REGISTRATION_AUTH_METHODS,
+} from "@/constants/statuses";
 
 const TABLE_COLUMNS = [
-  { header: 'Instance ID' },
-  { header: 'Region' },
-  { header: 'Auth Method' },
-  { header: 'Status' },
-  { header: 'IP Address' },
-  { header: 'Timestamp' },
+  { header: "Instance ID" },
+  { header: "Region" },
+  { header: "Auth Method" },
+  { header: "Status" },
+  { header: "IP Address" },
+  { header: "Timestamp" },
 ];
 
 const STATUS_OPTIONS = [
-  { label: 'All Statuses', value: '' },
-  { label: 'Success', value: NODE_REGISTRATION_STATUSES.SUCCESS },
-  { label: 'Invalid Secret', value: NODE_REGISTRATION_STATUSES.INVALID_SECRET },
-  { label: 'IID Verification Failed', value: NODE_REGISTRATION_STATUSES.IID_VERIFICATION_FAILED },
-  { label: 'Expired', value: NODE_REGISTRATION_STATUSES.EXPIRED },
-  { label: 'Region Conflict', value: NODE_REGISTRATION_STATUSES.REGION_CONFLICT },
-  { label: 'Tunnel Address Overlap', value: NODE_REGISTRATION_STATUSES.TUNNEL_ADDRESS_OVERLAP },
-  { label: 'Region Not Found', value: NODE_REGISTRATION_STATUSES.REGION_NOT_FOUND },
-  { label: 'Internal Error', value: NODE_REGISTRATION_STATUSES.INTERNAL_ERROR },
+  { label: "All Statuses", value: "" },
+  { label: "Success", value: NODE_REGISTRATION_STATUSES.SUCCESS },
+  { label: "Invalid Secret", value: NODE_REGISTRATION_STATUSES.INVALID_SECRET },
+  {
+    label: "IID Verification Failed",
+    value: NODE_REGISTRATION_STATUSES.IID_VERIFICATION_FAILED,
+  },
+  { label: "Expired", value: NODE_REGISTRATION_STATUSES.EXPIRED },
+  {
+    label: "Region Conflict",
+    value: NODE_REGISTRATION_STATUSES.REGION_CONFLICT,
+  },
+  {
+    label: "Tunnel Address Overlap",
+    value: NODE_REGISTRATION_STATUSES.TUNNEL_ADDRESS_OVERLAP,
+  },
+  {
+    label: "Region Not Found",
+    value: NODE_REGISTRATION_STATUSES.REGION_NOT_FOUND,
+  },
+  { label: "Internal Error", value: NODE_REGISTRATION_STATUSES.INTERNAL_ERROR },
 ];
 
 const AUTH_METHOD_OPTIONS = [
-  { label: 'All Methods', value: '' },
-  { label: 'AWS IID', value: NODE_REGISTRATION_AUTH_METHODS.AWS_IID },
-  { label: 'Bootstrap Secret', value: NODE_REGISTRATION_AUTH_METHODS.BOOTSTRAP_SECRET },
-  { label: 'Failed', value: NODE_REGISTRATION_AUTH_METHODS.FAILED },
+  { label: "All Methods", value: "" },
+  { label: "AWS IID", value: NODE_REGISTRATION_AUTH_METHODS.AWS_IID },
+  {
+    label: "Bootstrap Secret",
+    value: NODE_REGISTRATION_AUTH_METHODS.BOOTSTRAP_SECRET,
+  },
+  { label: "Failed", value: NODE_REGISTRATION_AUTH_METHODS.FAILED },
 ];
 
 const FILTERS = [
   {
-    key: 'status',
+    key: "status",
     options: STATUS_OPTIONS,
-    ariaLabel: 'Filter by registration status',
+    ariaLabel: "Filter by registration status",
   },
   {
-    key: 'auth_method',
+    key: "auth_method",
     options: AUTH_METHOD_OPTIONS,
-    ariaLabel: 'Filter by authentication method',
+    ariaLabel: "Filter by authentication method",
   },
 ];
 
 const getStatusVariant = (status) => {
   switch (status) {
     case NODE_REGISTRATION_STATUSES.SUCCESS:
-      return 'success';
+      return "success";
     case NODE_REGISTRATION_STATUSES.INVALID_SECRET:
     case NODE_REGISTRATION_STATUSES.EXPIRED:
-      return 'warning';
+      return "warning";
     case NODE_REGISTRATION_STATUSES.IID_VERIFICATION_FAILED:
-      return 'danger';
+      return "danger";
     default:
-      return 'secondary';
+      return "secondary";
   }
 };
 
 const getAuthMethodVariant = (method) => {
   switch (method) {
     case NODE_REGISTRATION_AUTH_METHODS.AWS_IID:
-      return 'info';
+      return "info";
     case NODE_REGISTRATION_AUTH_METHODS.BOOTSTRAP_SECRET:
-      return 'primary';
+      return "primary";
     default:
-      return 'secondary';
+      return "secondary";
   }
 };
 
 const VpnNodeAuditRow = React.memo(({ audit }) => {
   return (
     <tr className="align-middle">
-      <td className="font-monospace text-body fw-bold">{audit.server_name || '—'}</td>
-      <td>
-        <span className="font-monospace text-muted">{audit.region_id || '—'}</span>
+      <td className="font-monospace text-body fw-bold">
+        {audit.server_name || "—"}
       </td>
       <td>
-        <Badge bg={getAuthMethodVariant(audit.auth_method)} className="px-2 py-1 fs-7">
+        <span className="font-monospace text-muted">
+          {audit.region_id || "—"}
+        </span>
+      </td>
+      <td>
+        <Badge
+          bg={getAuthMethodVariant(audit.auth_method)}
+          className="px-2 py-1 fs-7"
+        >
           {audit.auth_method}
         </Badge>
       </td>
@@ -96,7 +121,9 @@ const VpnNodeAuditRow = React.memo(({ audit }) => {
         </Badge>
       </td>
       <td>
-        <span className="font-monospace text-muted">{audit.ip_address || '—'}</span>
+        <span className="font-monospace text-muted">
+          {audit.ip_address || "—"}
+        </span>
       </td>
       <td>
         <span className="text-body">{formatDate(audit.created_at)}</span>
@@ -105,7 +132,7 @@ const VpnNodeAuditRow = React.memo(({ audit }) => {
   );
 });
 
-VpnNodeAuditRow.displayName = 'VpnNodeAuditRow';
+VpnNodeAuditRow.displayName = "VpnNodeAuditRow";
 
 const VpnNodeAuditList = () => {
   const {
@@ -125,9 +152,12 @@ const VpnNodeAuditList = () => {
   const auditsList = data?.data || [];
   const { totalCount, totalPages } = getPaginationTotals(data, pageSize);
 
-  const renderRow = useCallback((audit) => <VpnNodeAuditRow key={audit.id} audit={audit} />, []);
+  const renderRow = useCallback(
+    (audit) => <VpnNodeAuditRow key={audit.id} audit={audit} />,
+    [],
+  );
 
-  usePageTitle('Node Registration Audit');
+  usePageTitle("Node Registration Audit");
 
   return (
     <Container className="py-5">

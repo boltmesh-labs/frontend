@@ -1,9 +1,9 @@
-import { act, renderHook } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { act, renderHook } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { useCopied } from './useCopied';
+import { useCopied } from "./useCopied";
 
-describe('useCopied', () => {
+describe("useCopied", () => {
   beforeEach(() => {
     vi.useFakeTimers();
   });
@@ -12,7 +12,7 @@ describe('useCopied', () => {
     vi.useRealTimers();
   });
 
-  it('flips to copied and resets itself after the default delay', () => {
+  it("flips to copied and resets itself after the default delay", () => {
     const { result } = renderHook(() => useCopied());
     expect(result.current.copied).toBe(false);
 
@@ -23,7 +23,7 @@ describe('useCopied', () => {
     expect(result.current.copied).toBe(false);
   });
 
-  it('honors a custom reset window', () => {
+  it("honors a custom reset window", () => {
     const { result } = renderHook(() => useCopied(500));
 
     act(() => result.current.markCopied());
@@ -34,7 +34,7 @@ describe('useCopied', () => {
     expect(result.current.copied).toBe(false);
   });
 
-  it('collapses stacked clicks into one timer', () => {
+  it("collapses stacked clicks into one timer", () => {
     const { result } = renderHook(() => useCopied());
 
     act(() => result.current.markCopied());
@@ -48,7 +48,7 @@ describe('useCopied', () => {
     expect(result.current.copied).toBe(false);
   });
 
-  it('clears the pending timer on unmount', () => {
+  it("clears the pending timer on unmount", () => {
     const { result, unmount } = renderHook(() => useCopied());
     act(() => result.current.markCopied());
     unmount();

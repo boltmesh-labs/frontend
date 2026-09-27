@@ -1,12 +1,20 @@
-import { Card, Table } from 'react-bootstrap';
+import { Card, Table } from "react-bootstrap";
 
 /**
  * A reusable summary card displaying a header status badge,
  * key-value meta items in a table format, and optional footer slots.
  */
-export const DetailSummary = ({ statusLabel, badge, items = [], children, className = '' }) => {
+export const DetailSummary = ({
+  statusLabel,
+  badge,
+  items = [],
+  children,
+  className = "",
+}) => {
   return (
-    <Card className={`border-0 shadow-sm bg-body-tertiary p-4 h-100 rounded-3 ${className}`}>
+    <Card
+      className={`border-0 shadow-sm bg-body-tertiary p-4 h-100 rounded-3 ${className}`}
+    >
       {/* Header section with status badge */}
       {(statusLabel || badge) && (
         <div className="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
@@ -30,12 +38,15 @@ export const DetailSummary = ({ statusLabel, badge, items = [], children, classN
               const isLast = index === items.length - 1;
 
               return (
-                <tr key={item.label || index} className={isLast ? 'border-bottom' : ''}>
+                <tr
+                  key={item.label || index}
+                  className={isLast ? "border-bottom" : ""}
+                >
                   <td className="text-secondary py-2">{item.label}:</td>
                   <td
-                    className={`text-end font-monospace ${item.className || 'fw-bold text-body'}`}
+                    className={`text-end font-monospace ${item.className || "fw-bold text-body"}`}
                   >
-                    {item.value ?? 'N/A'}
+                    {item.value ?? "N/A"}
                   </td>
                 </tr>
               );

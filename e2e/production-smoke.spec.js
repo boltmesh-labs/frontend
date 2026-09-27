@@ -1,11 +1,15 @@
-import { test, expect } from './fixtures/test';
+import { test, expect } from "./fixtures/test";
 
-test('the production bundle serves the login page', async ({ guestPage: page }) => {
-  await page.goto('/login');
+test("the production bundle serves the login page", async ({
+  guestPage: page,
+}) => {
+  await page.goto("/login");
 
   await expect(page).toHaveURL(/\/login$/);
-  await expect(page.getByRole('heading', { name: 'Sign In' })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Sign In" })).toBeVisible();
   await expect(
-    page.locator('#main-content').getByRole('button', { name: 'Login', exact: true })
+    page
+      .locator("#main-content")
+      .getByRole("button", { name: "Login", exact: true }),
   ).toBeVisible();
 });

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from "react";
 
 /**
  * Counts down toward an ISO date string and fires `onExpire` once the
@@ -10,7 +10,10 @@ import { useEffect, useMemo, useRef, useState } from 'react';
  * @param {Function} [options.onExpire]
  * @returns {{ remainingMs: number, expired: boolean }}
  */
-export const useCountdown = (targetIso, { intervalMs = 1000, onExpire } = {}) => {
+export const useCountdown = (
+  targetIso,
+  { intervalMs = 1000, onExpire } = {},
+) => {
   const targetMs = useMemo(() => {
     if (!targetIso) return null;
     const ms = new Date(targetIso).getTime();
@@ -27,7 +30,7 @@ export const useCountdown = (targetIso, { intervalMs = 1000, onExpire } = {}) =>
 
   const remainingMs = useMemo(
     () => (targetMs == null ? 0 : Math.max(0, targetMs - now)),
-    [targetMs, now]
+    [targetMs, now],
   );
   const expired = targetMs != null && now >= targetMs;
 

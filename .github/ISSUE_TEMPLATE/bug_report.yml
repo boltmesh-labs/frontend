@@ -1,6 +1,6 @@
 name: Bug Report
 description: Report a bug to help us improve
-labels: ['bug']
+labels: ["bug"]
 
 body:
   - type: markdown
@@ -59,7 +59,7 @@ body:
     id: environment
     attributes:
       label: Environment
-      placeholder: 'e.g., Ubuntu 22.04, Python 3.11, Node 18'
+      placeholder: "e.g., Ubuntu 22.04, Python 3.11, Node 18"
     validations:
       required: false
 

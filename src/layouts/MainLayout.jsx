@@ -1,15 +1,34 @@
-import { useEffect, useRef, useState } from 'react';
-import { Alert, Button, Col, Container, Nav, Navbar, Row } from 'react-bootstrap';
-import { FaMoon, FaSignOutAlt, FaSun } from 'react-icons/fa';
-import { FaFacebook, FaGithub, FaShieldHalved, FaXTwitter } from 'react-icons/fa6';
-import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { useEffect, useRef, useState } from "react";
+import {
+  Alert,
+  Button,
+  Col,
+  Container,
+  Nav,
+  Navbar,
+  Row,
+} from "react-bootstrap";
+import { FaMoon, FaSignOutAlt, FaSun } from "react-icons/fa";
+import {
+  FaFacebook,
+  FaGithub,
+  FaShieldHalved,
+  FaXTwitter,
+} from "react-icons/fa6";
+import {
+  Link,
+  NavLink,
+  Outlet,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
 
-import { useAuth } from '@/features/auth/context/AuthContext';
-import { COMPANY_NAME } from '@/utils/config';
-import { USER_ROLES } from '@/constants/roles';
+import { useAuth } from "@/features/auth/context/AuthContext";
+import { COMPANY_NAME } from "@/utils/config";
+import { USER_ROLES } from "@/constants/roles";
 
 const CURRENT_YEAR = new Date().getFullYear();
-const isTheme = (value) => value === 'light' || value === 'dark';
+const isTheme = (value) => value === "light" || value === "dark";
 
 const MainLayout = () => {
   const { accessToken, logout, user } = useAuth();
@@ -28,23 +47,25 @@ const MainLayout = () => {
     }
 
     window.scrollTo(0, 0);
-    document.getElementById('main-content')?.focus({ preventScroll: true });
+    document.getElementById("main-content")?.focus({ preventScroll: true });
   }, [location.pathname]);
 
   const [theme, setTheme] = useState(() => {
-    const savedTheme = localStorage.getItem('theme');
+    const savedTheme = localStorage.getItem("theme");
     if (isTheme(savedTheme)) return savedTheme;
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    return window.matchMedia("(prefers-color-scheme: dark)").matches
+      ? "dark"
+      : "light";
   });
 
   useEffect(() => {
-    document.documentElement.setAttribute('data-bs-theme', theme);
-    document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('theme', theme);
+    document.documentElement.setAttribute("data-bs-theme", theme);
+    document.documentElement.setAttribute("data-theme", theme);
+    localStorage.setItem("theme", theme);
   }, [theme]);
 
   const toggleTheme = () => {
-    setTheme((prevTheme) => (prevTheme === 'light' ? 'dark' : 'light'));
+    setTheme((prevTheme) => (prevTheme === "light" ? "dark" : "light"));
   };
 
   // Logout owns its post-logout destination instead of depending on whichever
@@ -57,7 +78,7 @@ const MainLayout = () => {
     setLogoutError(false);
     try {
       await logout();
-      navigate('/login', { replace: true });
+      navigate("/login", { replace: true });
     } catch {
       setLogoutError(true);
     } finally {
@@ -67,7 +88,10 @@ const MainLayout = () => {
 
   return (
     <div className="d-flex flex-column min-vh-100 bg-body-tertiary">
-      <a href="#main-content" className="visually-hidden-focusable btn btn-primary">
+      <a
+        href="#main-content"
+        className="visually-hidden-focusable btn btn-primary"
+      >
         Skip to content
       </a>
 
@@ -87,10 +111,10 @@ const MainLayout = () => {
                 size="sm"
                 onClick={toggleTheme}
                 className="d-inline-flex align-items-center justify-content-center p-2 rounded-circle me-lg-2 border-0 text-light opacity-75 opacity-100-hover"
-                aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
-                title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+                aria-label={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
+                title={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
               >
-                {theme === 'light' ? (
+                {theme === "light" ? (
                   <FaMoon size={16} />
                 ) : (
                   <FaSun size={16} className="text-warning" />
@@ -170,18 +194,30 @@ const MainLayout = () => {
             </Col>
 
             <Col md={4} className="small d-flex justify-content-center gap-3">
-              <NavLink to="/terms" className="text-light text-decoration-none opacity-75">
+              <NavLink
+                to="/terms"
+                className="text-light text-decoration-none opacity-75"
+              >
                 Terms
               </NavLink>
-              <NavLink to="/privacy-policy" className="text-light text-decoration-none opacity-75">
+              <NavLink
+                to="/privacy-policy"
+                className="text-light text-decoration-none opacity-75"
+              >
                 Privacy
               </NavLink>
-              <NavLink to="/contact" className="text-light text-decoration-none opacity-75">
+              <NavLink
+                to="/contact"
+                className="text-light text-decoration-none opacity-75"
+              >
                 Contact
               </NavLink>
             </Col>
 
-            <Col md={4} className="d-flex justify-content-center justify-content-md-end gap-3">
+            <Col
+              md={4}
+              className="d-flex justify-content-center justify-content-md-end gap-3"
+            >
               <a
                 href="https://x.com"
                 target="_blank"

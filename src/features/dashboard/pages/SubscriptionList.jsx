@@ -1,25 +1,25 @@
-import { useCallback } from 'react';
-import { Button, Card, Col, Row } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
-import { usePageTitle } from '@/hooks/usePageTitle';
-import { useUserSubscriptions } from '@/features/dashboard/hooks/useDashboard';
-import { DashboardContainer } from '@/features/dashboard/components/DashboardContainer';
-import { DashboardHeader } from '@/features/dashboard/components/DashboardHeader';
-import { SubscriptionStatusBadge } from '@/components/SubscriptionStatusBadge';
-import { formatCurrencyAmount } from '@/utils/currencyFormatter';
-import { formatDate } from '@/utils/dateFormatter';
-import { StatusAlert } from '@/components/StatusAlert';
-import { DataTable } from '@/components/DataTable';
-import { MobileRecordCard } from '@/components/MobileRecordCard';
-import { COMPANY_NAME } from '@/utils/config';
+import { useCallback } from "react";
+import { Button, Card, Col, Row } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
+import { usePageTitle } from "@/hooks/usePageTitle";
+import { useUserSubscriptions } from "@/features/dashboard/hooks/useDashboard";
+import { DashboardContainer } from "@/features/dashboard/components/DashboardContainer";
+import { DashboardHeader } from "@/features/dashboard/components/DashboardHeader";
+import { SubscriptionStatusBadge } from "@/components/SubscriptionStatusBadge";
+import { formatCurrencyAmount } from "@/utils/currencyFormatter";
+import { formatDate } from "@/utils/dateFormatter";
+import { StatusAlert } from "@/components/StatusAlert";
+import { DataTable } from "@/components/DataTable";
+import { MobileRecordCard } from "@/components/MobileRecordCard";
+import { COMPANY_NAME } from "@/utils/config";
 
 const TABLE_COLUMNS = [
-  { header: 'Plan' },
-  { header: 'Billing Cycle' },
-  { header: 'Price' },
-  { header: 'Status' },
-  { header: 'Expires On' },
-  { header: '' },
+  { header: "Plan" },
+  { header: "Billing Cycle" },
+  { header: "Price" },
+  { header: "Status" },
+  { header: "Expires On" },
+  { header: "" },
 ];
 
 const SubscriptionList = () => {
@@ -27,7 +27,7 @@ const SubscriptionList = () => {
 
   usePageTitle(
     `My Subscriptions | ${COMPANY_NAME}`,
-    'Manage your active subscriptions and view billing schedules.'
+    "Manage your active subscriptions and view billing schedules.",
   );
 
   const { data, isLoading, isError, error, refetch } = useUserSubscriptions();
@@ -41,12 +41,14 @@ const SubscriptionList = () => {
         <td className="fw-bold text-body">{sub.plan?.name}</td>
         <td className="text-capitalize">{sub.plan?.billing_cycle}</td>
         <td className="font-monospace fw-bold">
-          {formatCurrencyAmount(sub.plan?.price_usd, 'USD')}
+          {formatCurrencyAmount(sub.plan?.price_usd, "USD")}
         </td>
         <td>
           <SubscriptionStatusBadge status={sub.status} />
         </td>
-        <td className="text-muted font-monospace">{formatDate(sub.expires_at)}</td>
+        <td className="text-muted font-monospace">
+          {formatDate(sub.expires_at)}
+        </td>
         <td>
           <Button
             variant="outline-primary"
@@ -59,7 +61,7 @@ const SubscriptionList = () => {
         </td>
       </tr>
     ),
-    [navigate]
+    [navigate],
   );
 
   const renderMobileItem = useCallback(
@@ -68,12 +70,20 @@ const SubscriptionList = () => {
         title={sub.plan?.name}
         items={[
           {
-            label: 'Billing cycle',
-            value: <span className="text-capitalize">{sub.plan?.billing_cycle}</span>,
+            label: "Billing cycle",
+            value: (
+              <span className="text-capitalize">{sub.plan?.billing_cycle}</span>
+            ),
           },
-          { label: 'Price', value: formatCurrencyAmount(sub.plan?.price_usd, 'USD') },
-          { label: 'Status', value: <SubscriptionStatusBadge status={sub.status} /> },
-          { label: 'Expires on', value: formatDate(sub.expires_at) },
+          {
+            label: "Price",
+            value: formatCurrencyAmount(sub.plan?.price_usd, "USD"),
+          },
+          {
+            label: "Status",
+            value: <SubscriptionStatusBadge status={sub.status} />,
+          },
+          { label: "Expires on", value: formatDate(sub.expires_at) },
         ]}
         actions={
           <Button
@@ -87,7 +97,7 @@ const SubscriptionList = () => {
         }
       />
     ),
-    [navigate]
+    [navigate],
   );
 
   if (isLoading) {
@@ -101,7 +111,7 @@ const SubscriptionList = () => {
   }
 
   const activeSubscriptionsCount = subscriptions.filter((s) =>
-    ['active', 'trialing'].includes(s.status?.toLowerCase())
+    ["active", "trialing"].includes(s.status?.toLowerCase()),
   ).length;
 
   return (
@@ -114,7 +124,7 @@ const SubscriptionList = () => {
             variant="outline-primary"
             size="sm"
             className="fw-bold px-3 py-2 text-nowrap"
-            onClick={() => navigate('/buy-plan')}
+            onClick={() => navigate("/buy-plan")}
           >
             + New Subscription
           </Button>
@@ -126,14 +136,20 @@ const SubscriptionList = () => {
       <Row className="g-3 mb-4">
         <Col md={4}>
           <Card className="border-0 shadow-sm rounded-3 p-3">
-            <span className="text-muted small fw-bold text-uppercase">Total Subscriptions</span>
+            <span className="text-muted small fw-bold text-uppercase">
+              Total Subscriptions
+            </span>
             <h3 className="fw-bold mt-1 mb-0">{subscriptions.length}</h3>
           </Card>
         </Col>
         <Col md={4}>
           <Card className="border-0 shadow-sm rounded-3 p-3">
-            <span className="text-muted small fw-bold text-uppercase">Active Plans</span>
-            <h3 className="fw-bold text-success mt-1 mb-0">{activeSubscriptionsCount}</h3>
+            <span className="text-muted small fw-bold text-uppercase">
+              Active Plans
+            </span>
+            <h3 className="fw-bold text-success mt-1 mb-0">
+              {activeSubscriptionsCount}
+            </h3>
           </Card>
         </Col>
       </Row>

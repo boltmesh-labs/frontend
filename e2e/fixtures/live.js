@@ -1,9 +1,9 @@
-import { createHash } from 'node:crypto';
-import { readFileSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { createHash } from "node:crypto";
+import { readFileSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 
-import { test as base, expect } from '@playwright/test';
+import { test as base, expect } from "@playwright/test";
 
 // The live specs talk to a real API on purpose, so the mocked suite's
 // unmocked-request guard (see ./test.js) does not apply to them: every request
@@ -13,12 +13,14 @@ export const test = base.extend({
   page: async ({ page }, run) => {
     const pageErrors = [];
     const onPageError = (error) => pageErrors.push(error);
-    page.on('pageerror', onPageError);
+    page.on("pageerror", onPageError);
 
     await run(page);
 
-    page.off('pageerror', onPageError);
-    expect(pageErrors, 'The page emitted uncaught JavaScript errors').toEqual([]);
+    page.off("pageerror", onPageError);
+    expect(pageErrors, "The page emitted uncaught JavaScript errors").toEqual(
+      [],
+    );
   },
 });
 
@@ -37,15 +39,15 @@ const LOGIN_LIMIT_PER_MINUTE = 9;
 const WINDOW_MS = 60_000;
 const LEDGER_PATH = join(
   tmpdir(),
-  `boltmesh-e2e-logins-${createHash('sha256')
-    .update(process.env.E2E_API_URL || 'default')
-    .digest('hex')
-    .slice(0, 12)}.json`
+  `boltmesh-e2e-logins-${createHash("sha256")
+    .update(process.env.E2E_API_URL || "default")
+    .digest("hex")
+    .slice(0, 12)}.json`,
 );
 
 const readLedger = () => {
   try {
-    return JSON.parse(readFileSync(LEDGER_PATH, 'utf8'));
+    return JSON.parse(readFileSync(LEDGER_PATH, "utf8"));
   } catch {
     return [];
   }

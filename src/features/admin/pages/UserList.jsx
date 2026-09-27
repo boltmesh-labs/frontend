@@ -1,53 +1,53 @@
-import React, { useCallback } from 'react';
-import { Container } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
-import { AsyncButton } from '@/components/AsyncButton';
-import { useTableQuery } from '@/hooks/useTableQuery';
-import { usePageTitle } from '@/hooks/usePageTitle';
-import { getPaginationTotals } from '@/utils/pagination';
-import { useConfirm } from '@/hooks/useConfirm';
-import { useUsers, useToggleUserStatus } from '@/features/admin/hooks/useUsers';
-import { DataTable } from '@/components/DataTable';
-import { DefaultPagination } from '@/components/DefaultPagination';
-import { StatusAlert } from '@/components/StatusAlert';
-import { TableFiltersBar } from '@/components/TableFiltersBar';
-import { UserRoleBadge, UserStateBadge } from '@/components/UserBadges';
-import { PageHeader } from '../components/ListHeader';
-import { COMPANY_NAME } from '@/utils/config';
-import { USER_ROLES } from '@/constants/roles';
+import React, { useCallback } from "react";
+import { Container } from "react-bootstrap";
+import { Link } from "react-router-dom";
+import { AsyncButton } from "@/components/AsyncButton";
+import { useTableQuery } from "@/hooks/useTableQuery";
+import { usePageTitle } from "@/hooks/usePageTitle";
+import { getPaginationTotals } from "@/utils/pagination";
+import { useConfirm } from "@/hooks/useConfirm";
+import { useUsers, useToggleUserStatus } from "@/features/admin/hooks/useUsers";
+import { DataTable } from "@/components/DataTable";
+import { DefaultPagination } from "@/components/DefaultPagination";
+import { StatusAlert } from "@/components/StatusAlert";
+import { TableFiltersBar } from "@/components/TableFiltersBar";
+import { UserRoleBadge, UserStateBadge } from "@/components/UserBadges";
+import { PageHeader } from "../components/ListHeader";
+import { COMPANY_NAME } from "@/utils/config";
+import { USER_ROLES } from "@/constants/roles";
 
 const TABLE_COLUMNS = [
-  { header: 'Username' },
-  { header: 'Email' },
-  { header: 'Access State' },
-  { header: 'Assigned Role' },
-  { header: 'Actions', className: 'text-center' },
+  { header: "Username" },
+  { header: "Email" },
+  { header: "Access State" },
+  { header: "Assigned Role" },
+  { header: "Actions", className: "text-center" },
 ];
 
 const ROLE_OPTIONS = [
-  { value: '', label: 'All Roles' },
-  { value: USER_ROLES.user, label: 'User' },
-  { value: USER_ROLES.admin, label: 'Admin' },
+  { value: "", label: "All Roles" },
+  { value: USER_ROLES.user, label: "User" },
+  { value: USER_ROLES.admin, label: "Admin" },
 ];
 
 const STATUS_OPTIONS = [
-  { value: '', label: 'All Statuses' },
-  { value: 'true', label: 'Active' },
-  { value: 'false', label: 'Inactive' },
+  { value: "", label: "All Statuses" },
+  { value: "true", label: "Active" },
+  { value: "false", label: "Inactive" },
 ];
 
 const FILTERS = [
   {
-    key: 'status',
+    key: "status",
     options: STATUS_OPTIONS,
-    ariaLabel: 'Filter by user status',
-    paramKey: 'is_active',
-    paramValue: (v) => v === 'true',
+    ariaLabel: "Filter by user status",
+    paramKey: "is_active",
+    paramValue: (v) => v === "true",
   },
   {
-    key: 'role',
+    key: "role",
     options: ROLE_OPTIONS,
-    ariaLabel: 'Filter by user role',
+    ariaLabel: "Filter by user role",
   },
 ];
 
@@ -55,7 +55,10 @@ const UserRow = React.memo(({ user, isProcessing, toggle }) => {
   return (
     <tr>
       <td className="fw-bold">
-        <Link to={`/admin/users/${user.id}`} className="text-decoration-none text-primary">
+        <Link
+          to={`/admin/users/${user.id}`}
+          className="text-decoration-none text-primary"
+        >
           {user.username}
         </Link>
       </td>
@@ -68,29 +71,29 @@ const UserRow = React.memo(({ user, isProcessing, toggle }) => {
       </td>
       <td className="text-end">
         <AsyncButton
-          variant={user.is_active ? 'outline-warning' : 'outline-success'}
+          variant={user.is_active ? "outline-warning" : "outline-success"}
           size="sm"
           className="px-3 fw-bold shadow-sm"
           loading={isProcessing}
-          loadingLabel={user.is_active ? 'Deactivating...' : 'Activating...'}
-          aria-label={`${user.is_active ? 'Deactivate' : 'Activate'} account for ${user.username}`}
+          loadingLabel={user.is_active ? "Deactivating..." : "Activating..."}
+          aria-label={`${user.is_active ? "Deactivate" : "Activate"} account for ${user.username}`}
           onClick={() => toggle(user.id, user.is_active)}
         >
-          {user.is_active ? 'Deactivate' : 'Activate'}
+          {user.is_active ? "Deactivate" : "Activate"}
         </AsyncButton>
       </td>
     </tr>
   );
 });
 
-UserRow.displayName = 'UserRow';
+UserRow.displayName = "UserRow";
 
 const UserList = () => {
   const { confirm, confirmDialog } = useConfirm();
 
   usePageTitle(
     `User Management | ${COMPANY_NAME}`,
-    `Manage user accounts, privileges, roles, and access status flags for ${COMPANY_NAME}.`
+    `Manage user accounts, privileges, roles, and access status flags for ${COMPANY_NAME}.`,
   );
 
   const {
@@ -118,21 +121,22 @@ const UserList = () => {
 
   const handleToggle = useCallback(
     async (id, currentStatus) => {
-      const actionLabel = currentStatus ? 'deactivate' : 'activate';
-      const capitalizedLabel = actionLabel.charAt(0).toUpperCase() + actionLabel.slice(1);
+      const actionLabel = currentStatus ? "deactivate" : "activate";
+      const capitalizedLabel =
+        actionLabel.charAt(0).toUpperCase() + actionLabel.slice(1);
 
       const isConfirmed = await confirm({
         title: `${capitalizedLabel} Account`,
         message: `Are you sure you want to ${actionLabel} this user account?`,
         confirmText: capitalizedLabel,
-        confirmVariant: currentStatus ? 'danger' : 'primary',
+        confirmVariant: currentStatus ? "danger" : "primary",
       });
 
       if (!isConfirmed) return;
 
       toggleUserStatus({ id, isActive: currentStatus });
     },
-    [confirm, toggleUserStatus]
+    [confirm, toggleUserStatus],
   );
 
   const renderRow = useCallback(
@@ -146,7 +150,7 @@ const UserList = () => {
         toggle={handleToggle}
       />
     ),
-    [handleToggle, isToggling, toggleVariables]
+    [handleToggle, isToggling, toggleVariables],
   );
 
   return (
@@ -168,7 +172,12 @@ const UserList = () => {
 
       {isError && <StatusAlert message={error} onRetry={refetch} />}
 
-      <DataTable columns={TABLE_COLUMNS} data={users} loading={isLoading} renderRow={renderRow} />
+      <DataTable
+        columns={TABLE_COLUMNS}
+        data={users}
+        loading={isLoading}
+        renderRow={renderRow}
+      />
 
       <DefaultPagination
         currentPage={currentPage}

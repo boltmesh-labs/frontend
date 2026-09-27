@@ -1,5 +1,5 @@
-import { StatusBadge } from '@/components/StatusBadge';
-import { serverStatusVariant } from '@/utils/badgeVariants';
+import { StatusBadge } from "@/components/StatusBadge";
+import { serverStatusVariant } from "@/utils/badgeVariants";
 
 /**
  * Server status badge: a thin specialization of the generic `StatusBadge`

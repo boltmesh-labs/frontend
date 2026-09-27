@@ -1,5 +1,5 @@
-import { Badge } from 'react-bootstrap';
-import { badgeClassName, getStatusVariant } from '@/utils/badgeVariants';
+import { Badge } from "react-bootstrap";
+import { badgeClassName, getStatusVariant } from "@/utils/badgeVariants";
 
 /**
  * Generic status badge driven by a variant map. Renders the lowercase status
@@ -10,7 +10,7 @@ export const StatusBadge = ({ status, variantMap }) => {
 
   return (
     <Badge bg={variant} role="status" className={badgeClassName(variant)}>
-      {String(status ?? '').replaceAll('_', ' ')}
+      {String(status ?? "").replaceAll("_", " ")}
     </Badge>
   );
 };

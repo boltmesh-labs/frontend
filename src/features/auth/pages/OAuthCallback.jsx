@@ -1,26 +1,26 @@
-import { useEffect, useRef, useState } from 'react';
-import { Alert, Spinner } from 'react-bootstrap';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useEffect, useRef, useState } from "react";
+import { Alert, Spinner } from "react-bootstrap";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
-import { apiClient } from '@/api/client';
-import { AuthContainer } from '@/features/auth/components/AuthContainer';
-import { useAuth } from '@/features/auth/context/AuthContext';
-import { OAUTH_REDIRECT_FROM_KEY, sanitizeRedirectPath } from '@/utils/config';
+import { apiClient } from "@/api/client";
+import { AuthContainer } from "@/features/auth/components/AuthContainer";
+import { useAuth } from "@/features/auth/context/AuthContext";
+import { OAUTH_REDIRECT_FROM_KEY, sanitizeRedirectPath } from "@/utils/config";
 
 const getOAuthErrorMessage = (value) => {
-  if (!value) return 'OAuth sign-in failed.';
+  if (!value) return "OAuth sign-in failed.";
 
   try {
     const decoded = decodeURIComponent(value);
-    return decoded.length > 300 ? 'OAuth sign-in failed.' : decoded;
+    return decoded.length > 300 ? "OAuth sign-in failed." : decoded;
   } catch {
-    return 'OAuth sign-in failed.';
+    return "OAuth sign-in failed.";
   }
 };
 
 const OAuthCallback = () => {
   const [searchParams] = useSearchParams();
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const navigate = useNavigate();
   const { setAccessToken } = useAuth();
   // Token consumption must happen exactly once per page load. This guard keeps
@@ -38,7 +38,7 @@ const OAuthCallback = () => {
       // access token with a silent refresh. No credential is accepted from
       // the URL: ?token= / ?access_token= would reintroduce server/proxy/
       // Referer leak vectors, and #token= fragments are no longer emitted.
-      const errDetail = searchParams.get('error');
+      const errDetail = searchParams.get("error");
 
       if (errDetail) {
         setError(getOAuthErrorMessage(errDetail));
@@ -48,7 +48,9 @@ const OAuthCallback = () => {
       // Written by Login before the provider redirect; passed through
       // sanitizeRedirectPath because sessionStorage contents should never be
       // trusted blindly as a navigation target.
-      const targetPath = sanitizeRedirectPath(sessionStorage.getItem(OAUTH_REDIRECT_FROM_KEY));
+      const targetPath = sanitizeRedirectPath(
+        sessionStorage.getItem(OAUTH_REDIRECT_FROM_KEY),
+      );
 
       const finish = (token) => {
         // Clean temporary oauth session keys
@@ -59,20 +61,24 @@ const OAuthCallback = () => {
         setAccessToken(token);
 
         // Sanitize URL by removing query string
-        window.history.replaceState({}, document.title, window.location.pathname);
+        window.history.replaceState(
+          {},
+          document.title,
+          window.location.pathname,
+        );
 
         navigate(targetPath, { replace: true });
       };
 
       try {
-        const { data } = await apiClient.authApi.post('/auth/refresh-token');
+        const { data } = await apiClient.authApi.post("/auth/refresh-token");
         if (!data?.access_token) {
-          setError('Authentication failed. No access token was received.');
+          setError("Authentication failed. No access token was received.");
           return;
         }
         finish(data.access_token);
       } catch {
-        setError('Authentication failed. No access token was received.');
+        setError("Authentication failed. No access token was received.");
       }
     };
 
@@ -90,7 +96,7 @@ const OAuthCallback = () => {
             <button
               type="button"
               className="btn btn-primary btn-sm"
-              onClick={() => navigate('/login', { replace: true })}
+              onClick={() => navigate("/login", { replace: true })}
             >
               Return to Login
             </button>
