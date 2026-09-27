@@ -35,6 +35,11 @@ repos:
       # --- Prettier ---
       - id: prettier
         name: prettier
+        # Left unpinned in the entry on purpose: this repo declares prettier as a
+        # devDependency and pins its formatting in `.prettierrc`, so `npx`
+        # resolving the local `node_modules/.bin/prettier` is already the pinned
+        # version. Run `npm ci` first, or `npx` will silently fall back to
+        # fetching the latest release instead.
         entry: npx prettier --write
         language: system
         types_or: [css, javascript, jsx, ts, tsx, json, yaml, html]
@@ -42,6 +47,10 @@ repos:
       # --- Markdown Lint ---
       - id: markdownlint
         name: markdownlint
-        entry: npx markdownlint-cli --fix
+        # Unlike prettier, markdownlint-cli is not a devDependency here, so
+        # nothing else pins it: without a version in the entry the hook's
+        # behavior depends on whatever npm served that hour. Pinned to match
+        # the other boltmesh repos.
+        entry: npx --yes markdownlint-cli@0.49.1 --fix
         language: system
         types: [markdown]
