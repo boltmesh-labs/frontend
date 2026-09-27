@@ -36,6 +36,17 @@ updates:
 
   # The Dockerfile pins its base image by tag; `docker` is the ecosystem that
   # tracks that, and it is the only thing that will move it.
+  #
+  # `node` is ignored on the odd-numbered release lines because Dependabot has no
+  # notion of Node's LTS schedule and steps majors one at a time, so it always
+  # lands on the newest line rather than the best one. Node alternates LTS
+  # (even) and Current (odd); the Current lines have no LTS backing and would
+  # mean re-pinning again at the next rollover. The Dockerfile tracks 24
+  # ("Krypton"). Docker's `versions` uses Bundler syntax, hence `~>`.
+  #
+  # MAINTENANCE: drop a line here once that release gains LTS backing, or when
+  # the Dockerfile moves off 24 to a newer LTS line. 26 is expected to become LTS
+  # in October 2026; at that point drop `~> 26` and bump the Dockerfile to 26.
   - package-ecosystem: "docker"
     directory: "/"
     schedule:
@@ -46,6 +57,11 @@ updates:
     labels:
       - "dependencies"
       - "docker"
+    ignore:
+      - dependency-name: "library/node"
+        versions:
+          - "~> 25"
+          - "~> 26"
     groups:
       docker-minor-patch:
         patterns:
