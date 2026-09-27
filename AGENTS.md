@@ -8,7 +8,7 @@ BoltMesh VPN: React/Vite frontend in plain JS.
 
 ## Conventions & gotchas
 
-- **Pre-commit** (`.pre-commit-config.yaml`): eslint, prettier, markdownlint.
+- **Pre-commit** (`.pre-commit-config.yaml`): eslint, prettier, markdownlint, `actionlint` on the workflows, `gitleaks` for committed secrets, plus the standard hygiene guards (whitespace, EOF, YAML, large files, merge/case conflicts, line endings, shebangs). Hooks are local-only here; CI's `validate` job runs the equivalent commands directly.
 - Do not implement backward compatibility, there is no production servers yet.
 - Try to not overengineer, keep it lean, guard only real edge cases, no redundant checks.
 - Other boltmesh repos live in parent directory (backend, frontend, agent, client, infra)
