@@ -1,3 +1,17 @@
-node_modules
-dist
-coverage
+# Vendored and generated trees, ignored so a whole-tree run
+# (`prettier --write .`) behaves the same in every boltmesh repo. The
+# pre-commit hooks are file-scoped and would not reach most of these
+# anyway; this matters for the ad-hoc whole-tree runs.
+#
+# The first block is identical across the repos; anything below it is
+# specific to this one.
+node_modules/
+dist/
+build/
+coverage/
+
+# frontend-specific generated trees
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
