@@ -11,9 +11,9 @@ const Probe = () => {
 describe("useAuth", () => {
   it("exposes the context value inside a provider", () => {
     render(
-      <AuthContext.Provider value={{ user: { role: "admin" } }}>
+      <AuthContext value={{ user: { role: "admin" } }}>
         <Probe />
-      </AuthContext.Provider>,
+      </AuthContext>,
     );
     expect(screen.getByText("role: admin")).toBeInTheDocument();
   });

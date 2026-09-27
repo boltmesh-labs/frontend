@@ -13,11 +13,11 @@ vi.mock("@/features/auth/hooks/useAuthMutations", () => ({
 
 const renderRegister = () =>
   render(
-    <AuthContext.Provider value={{ accessToken: null }}>
+    <AuthContext value={{ accessToken: null }}>
       <MemoryRouter>
         <Register />
       </MemoryRouter>
-    </AuthContext.Provider>,
+    </AuthContext>,
   );
 
 const fillValidForm = async (user, overrides = {}) => {

@@ -1,7 +1,6 @@
 import js from "@eslint/js";
 import globals from "globals";
-import reactPlugin from "eslint-plugin-react";
-import reactHooks from "eslint-plugin-react-hooks";
+import eslintReact from "@eslint-react/eslint-plugin";
 import reactRefresh from "eslint-plugin-react-refresh";
 
 export default [
@@ -24,26 +23,35 @@ export default [
       },
     },
     plugins: {
-      react: reactPlugin,
-      "react-hooks": reactHooks,
+      ...eslintReact.configs.recommended.plugins,
       "react-refresh": reactRefresh,
     },
     settings: {
-      react: { version: "detect" },
+      ...eslintReact.configs.recommended.settings,
     },
     rules: {
       // Base JavaScript recommended rules
       ...js.configs.recommended.rules,
 
-      // React Plugin Rules
-      ...reactPlugin.configs.recommended.rules,
-      ...reactPlugin.configs["jsx-runtime"].rules, // Automatically turns off 'react/react-in-jsx-scope'
+      // React rules (@eslint-react replaces eslint-plugin-react and
+      // eslint-plugin-react-hooks; the latter's `rules-of-hooks` and
+      // `exhaustive-deps` are part of this preset already).
+      ...eslintReact.configs.recommended.rules,
 
-      // React Hooks Rules
-      ...reactHooks.configs.recommended.rules,
+      // Not in the preset, but they are the replacements for the
+      // `eslint-plugin-react` rules that the preset does not carry over.
+      "@eslint-react/no-missing-component-display-name": "error", // was react/display-name
+      "@eslint-react/dom-no-unknown-property": "error", // was react/jsx-no-unknown-property
+      "@eslint-react/dom-no-unsafe-target-blank": "error", // was react/jsx-no-target-blank
+
+      // Off: every list keyed by index in this codebase is either static
+      // (a plan's feature strings, which never reorder) or a row of identical
+      // stateless elements (the device-limit meter). The `item.id ?? index`
+      // cases already prefer a real id. The rule's actual hazard -- a stateful
+      // child in a list that reorders -- does not occur here.
+      "@eslint-react/no-array-index-key": "off",
 
       // Custom Adjustments
-      "react/prop-types": "off",
       "react-refresh/only-export-components": [
         "warn",
         { allowConstantExport: true },

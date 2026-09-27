@@ -12,14 +12,14 @@ vi.mock("@/features/auth/hooks/useAuthMutations", () => ({
 
 const renderAt = (search = "") =>
   render(
-    <AuthContext.Provider value={{ setAccessToken: vi.fn() }}>
+    <AuthContext value={{ setAccessToken: vi.fn() }}>
       <MemoryRouter initialEntries={[`/verify-email${search}`]}>
         <Routes>
           <Route path="/verify-email" element={<ActivateAccount />} />
           <Route path="/dashboard" element={<div>Dashboard page</div>} />
         </Routes>
       </MemoryRouter>
-    </AuthContext.Provider>,
+    </AuthContext>,
   );
 
 describe("ActivateAccount", () => {
@@ -55,14 +55,14 @@ describe("ActivateAccount", () => {
   it("activates, stores the session token and redirects to the dashboard", async () => {
     const setAccessToken = vi.fn();
     const view = render(
-      <AuthContext.Provider value={{ setAccessToken }}>
+      <AuthContext value={{ setAccessToken }}>
         <MemoryRouter initialEntries={["/verify-email?token=tok"]}>
           <Routes>
             <Route path="/verify-email" element={<ActivateAccount />} />
             <Route path="/dashboard" element={<div>Dashboard page</div>} />
           </Routes>
         </MemoryRouter>
-      </AuthContext.Provider>,
+      </AuthContext>,
     );
 
     // The mutation fires on mount with the bare token.
@@ -88,14 +88,14 @@ describe("ActivateAccount", () => {
     "surfaces %s failures before bouncing back to the dashboard",
     async (status, expected) => {
       render(
-        <AuthContext.Provider value={{ setAccessToken: vi.fn() }}>
+        <AuthContext value={{ setAccessToken: vi.fn() }}>
           <MemoryRouter initialEntries={["/verify-email?token=bad"]}>
             <Routes>
               <Route path="/verify-email" element={<ActivateAccount />} />
               <Route path="/dashboard" element={<div>Dashboard page</div>} />
             </Routes>
           </MemoryRouter>
-        </AuthContext.Provider>,
+        </AuthContext>,
       );
 
       await act(async () => {

@@ -32,6 +32,10 @@ const parseUser = (token) => {
 };
 
 export const AuthProvider = ({ children }) => {
+  // `setAccessTokenState`, not `setAccessToken`: the latter is this provider's
+  // public context API (it writes through to apiClient as well as React state),
+  // so the raw useState setter is deliberately named to avoid shadowing it.
+  // eslint-disable-next-line @eslint-react/use-state
   const [accessToken, setAccessTokenState] = useState(null);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -112,5 +116,5 @@ export const AuthProvider = ({ children }) => {
     [accessToken, updateAuthState, user, loading, logout, updateUser],
   );
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return <AuthContext value={value}>{children}</AuthContext>;
 };
