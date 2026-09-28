@@ -17,6 +17,46 @@ permissions:
   security-events: write
 
 jobs:
+  # The hooks in `.pre-commit-config.yaml` are the repo's documented local
+  # gate, and the tool-free ones run here so a hook added to that file is
+  # enforced in CI without editing this workflow. eslint and prettier resolve
+  # the *local* devDependencies, so they need an `npm ci` this job deliberately
+  # does not run -- `validate` checks both through the locked `npm run` scripts
+  # instead. markdownlint is `npx --yes` against a pinned version, so it is
+  # self-contained and does run here.
+  pre-commit:
+    name: "Pre-commit hooks"
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      # The upstream `actionlint` and `gitleaks` hooks are `language: golang`,
+      # so pre-commit compiles them and needs a toolchain to do so. Pinning it
+      # keeps that build reproducible.
+      - name: Set up Go
+        uses: actions/setup-go@v7
+        with:
+          go-version: "1.26"
+          cache: false
+
+      - name: Run pre-commit on all files
+        uses: pre-commit/action@v3.0.1
+        # Everything skipped here is enforced by the `validate` job running the
+        # same command (`npm run lint`, `npm run format:check`), so this job
+        # stays a fast gate:
+        #   eslint, prettier
+        # What remains runs against no repo toolchain at all: the
+        # pre-commit-hooks hygiene guards, actionlint, gitleaks and
+        # markdownlint. node (for the npx hook) comes from the ubuntu-latest
+        # image.
+        env:
+          SKIP: >-
+            eslint,prettier
+
   validate:
     runs-on: ubuntu-latest
     steps:

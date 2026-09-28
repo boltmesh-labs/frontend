@@ -52,6 +52,12 @@ repos:
         # behavior depends on whatever npm served that hour. Pinned to match
         # the other boltmesh repos, which share this version because they also
         # share the engine (markdownlint 0.41.1) and .markdownlint.json.
+        #
+        # Both formatters deliberately cover the `.md` files in this repo:
+        # prettier is the only *formatter* (it rewraps, via `npm run format`),
+        # markdownlint the only *linter* (it reports MD rules prettier cannot
+        # fix, e.g. MD033). The `pre-commit` CI job runs this one; `validate`
+        # runs prettier through the locked `npm run format:check`.
         entry: npx --yes markdownlint-cli2@0.23.3 --fix
         language: system
         types: [markdown]
