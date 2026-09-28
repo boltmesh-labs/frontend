@@ -509,7 +509,7 @@ const VpnServerForm = ({ initialData, isNew, refetchData }) => {
                 <Row className="g-3 small">
                   <Col md={12}>
                     <CopyableField
-                      label="WireGuard Public Key"
+                      label="Public Key"
                       value={formData.wg_public_key}
                       toastLabel="Public key"
                     />

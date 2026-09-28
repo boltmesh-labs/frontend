@@ -68,7 +68,7 @@ const DeviceList = () => {
 
   usePageTitle(
     `VPN Devices | ${COMPANY_NAME}`,
-    `View and manage your WireGuard VPN devices.`,
+    `View and manage your VPN devices.`,
   );
 
   const {

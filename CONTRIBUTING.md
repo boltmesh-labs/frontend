@@ -82,7 +82,7 @@ Example:
 ```text
 Add peer cleanup on subscription expiry
 
-- Deactivate WireGuard peers for expired subscriptions
+- Deactivate peers for expired subscriptions
 - Reconcile active peer counts on VPN servers
 
 Fixes #123

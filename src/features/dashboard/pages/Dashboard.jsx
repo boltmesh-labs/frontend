@@ -316,7 +316,7 @@ const Dashboard = () => {
                     </h6>
                     <p className="text-body-secondary small mb-0">
                       {activeSubscription?.plan
-                        ? "Manage your connected devices, QR codes, and WireGuard keys."
+                        ? "Manage your connected devices."
                         : "Requires an active VPN subscription plan."}
                     </p>
                   </div>
@@ -380,12 +380,12 @@ const Dashboard = () => {
           <div className="border-top my-4"></div>
           <div className="small text-end">
             <a
-              href="https://www.wireguard.com/install/"
+              href="https://github.com/boltmesh-labs/client"
               target="_blank"
               rel="noopener noreferrer"
               className="text-primary text-decoration-none fw-medium"
             >
-              Download WireGuard Client
+              Download BoltMesh Client
             </a>
           </div>
         </>
