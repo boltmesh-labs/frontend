@@ -40,6 +40,25 @@ Enhancement suggestions are tracked as GitHub issues. When creating an enhanceme
 - Update documentation as needed (README.md, DEPLOYMENT.md)
 - End all files with a newline
 
+## Local Hooks
+
+Install the git hook once after cloning. It runs the same checks CI does, so a
+violation is caught before you push:
+
+```bash
+npm ci                         # the eslint/prettier hooks use the local install
+pre-commit install
+pre-commit run --all-files     # optional: the whole tree, not just staged files
+```
+
+The ESLint and Prettier hooks resolve the local devDependencies, so they need
+that install. To run everything else, skip them by id — the same escape hatch
+the CI `pre-commit` job uses:
+
+```bash
+SKIP=eslint,prettier pre-commit run --all-files
+```
+
 ## Style Guides
 
 ### JavaScript/React Style Guide
