@@ -38,8 +38,15 @@ beforeEach(() => {
   sessionStorage.clear();
 });
 
-afterEach(() => {
-  if (hasDom) cleanup();
+afterEach(async () => {
+  if (hasDom) {
+    cleanup();
+    // react-bootstrap's modal fade schedules a transitionend timer that
+    // react-transition-group never cancels, so it can outlive jsdom and blow
+    // up as an unhandled "document is not defined" after teardown. Drain it
+    // while the environment is still alive.
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  }
   // Workers are reused when isolate=false; clear spies and the module cache so
   // mocks and imported singleton state cannot leak into the next test file.
   vi.restoreAllMocks();
