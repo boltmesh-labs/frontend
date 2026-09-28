@@ -58,6 +58,24 @@ repos:
         # markdownlint the only *linter* (it reports MD rules prettier cannot
         # fix, e.g. MD033). The `pre-commit` CI job runs this one; `validate`
         # runs prettier through the locked `npm run format:check`.
-        entry: npx --yes markdownlint-cli2@0.23.3 --fix
-        language: system
+        #
+        # `language: node` with the pin in `additional_dependencies`, not an
+        # `npx` entry. The version is still pinned to 0.23.3 and still resolves
+        # the same tree, so the rules and .markdownlint.json are unchanged. The
+        # difference is where that tree lives: `npx --yes` re-resolved and
+        # re-downloaded all ~80 packages into `~/.npm/_npx` on every run, on
+        # every machine, including CI, where nothing caches that directory. A
+        # truncated extraction there (observed as a half-written
+        # `katex/dist/katex.mjs`, which markdownlint pulls in via
+        # micromark-extension-math) killed the hook with a bare ESM SyntaxError
+        # before it read a file. pre-commit installs this tree once into
+        # `~/.cache/pre-commit`, which the `pre-commit` CI job already caches
+        # and restores, so the download happens on a cache miss rather than on
+        # every run. This stays distinct from the devDependency-backed prettier
+        # above: the point of `language: node` is the same isolation prettier
+        # already gets from `node_modules`, without adding markdownlint-cli2 to
+        # this repo's lockfile and the `format:check` chain that would follow.
+        entry: markdownlint-cli2 --fix
+        language: node
+        additional_dependencies: ["markdownlint-cli2@0.23.3"]
         types: [markdown]

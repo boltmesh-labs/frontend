@@ -22,8 +22,8 @@ jobs:
   # enforced in CI without editing this workflow. eslint and prettier resolve
   # the *local* devDependencies, so they need an `npm ci` this job deliberately
   # does not run -- `validate` checks both through the locked `npm run` scripts
-  # instead. markdownlint is `npx --yes` against a pinned version, so it is
-  # self-contained and does run here.
+  # instead. markdownlint is `language: node` against a pinned version, so
+  # pre-commit builds its own env for it and it needs no `npm ci` here either.
   pre-commit:
     name: "Pre-commit hooks"
     runs-on: ubuntu-latest
@@ -51,8 +51,9 @@ jobs:
         #   eslint, prettier
         # What remains runs against no repo toolchain at all: the
         # pre-commit-hooks hygiene guards, actionlint, gitleaks and
-        # markdownlint. node (for the npx hook) comes from the ubuntu-latest
-        # image.
+        # markdownlint. node (for prettier's `npx` entry, and for pre-commit to
+        # build markdownlint's `language: node` env) comes from the
+        # ubuntu-latest image.
         env:
           SKIP: >-
             eslint,prettier
