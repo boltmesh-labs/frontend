@@ -28,7 +28,7 @@ const VpnPeerDetail = () => {
 
   usePageTitle(
     `Peer ${id || ""} Detail | ${COMPANY_NAME}`,
-    `Details of active VPN peer tunnel, network assignments, and peer status.`,
+    `Details of VPN peer tunnel, network assignments, and traffic.`,
   );
 
   const handleBack = useCallback(() => {
@@ -102,20 +102,7 @@ const VpnPeerDetail = () => {
 
         <Row className="g-4">
           <Col lg={8}>
-            <DetailSummary
-              statusLabel="Peer Status"
-              badge={
-                <div className="d-flex align-items-center gap-2 fs-6 fw-bold">
-                  <span
-                    className={`d-inline-block rounded-circle ${peer?.is_active ? "bg-success" : "bg-danger"}`}
-                    style={{ width: "8px", height: "8px" }}
-                    aria-hidden="true"
-                  />
-                  <span>{peer?.is_active ? "Active" : "Inactive"}</span>
-                </div>
-              }
-              items={summaryItems}
-            >
+            <DetailSummary items={summaryItems}>
               {peer?.public_key && (
                 <CopyableField
                   label="WireGuard Public Key"

@@ -27,7 +27,6 @@ const PEER_TABLE_COLUMNS = [
   { header: "Public Key" },
   { header: "IP Address" },
   { header: "Server" },
-  { header: "Status" },
   { header: "Connected" },
   { header: "Last Active" },
   { header: "Created" },
@@ -96,9 +95,6 @@ const PeerRow = React.memo(({ peer }) => {
         ) : (
           <span className="font-monospace text-muted">—</span>
         )}
-      </td>
-      <td>
-        <VpnDeviceStateBadge isActive={peer?.is_active} />
       </td>
       <td className="text-muted">
         <span className="d-inline-flex align-items-center gap-2">

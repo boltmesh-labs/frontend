@@ -11,7 +11,6 @@ vi.mock("@/features/admin/hooks/useVpnPeers", () => ({
 
 const peer = {
   id: "peer1",
-  is_active: true,
   is_connected: true,
   assigned_ip: "10.7.0.2",
   public_key: "peer-pubkey=",
@@ -35,7 +34,7 @@ describe("VpnPeerDetail (admin)", () => {
     vi.clearAllMocks();
   });
 
-  it("renders peer status, traffic and linked device details", async () => {
+  it("renders connection state, traffic and linked device details", async () => {
     vi.mocked(useVpnPeerDetail).mockReturnValue({
       data: peer,
       isLoading: false,
