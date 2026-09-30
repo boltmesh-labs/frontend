@@ -25,8 +25,8 @@
 # window lives in Redis, so it outlives the run. Reruns need a minute's wait or
 # the later tests fail on their own throttle.
 #
-# Against staging, expect 14 passed and 1 failed: the refresh cookie is served
-# without `Secure`, which the suite asserts. See README.md.
+# Expect 15 passing. One of them asserts the refresh cookie is Secure, which the
+# backend only sets on staging and prod; see README.md.
 #
 # Values come from `--env-file .env.e2e` (gitignored, credentials for the
 # deployed environment); note it must precede the subcommand. Without it the
