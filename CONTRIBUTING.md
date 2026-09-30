@@ -106,9 +106,10 @@ podman compose up                     # unit, mocked, cross-browser, production
 ```
 
 Use this when a failure may depend on the local environment rather than on the code. Reports and failure
-artifacts land in `./artifacts/<tier>/`. The live tiers live behind `--profile live` and
-`--profile writes` and need `--env-file .env.e2e`, so they never run as part of `up`. See the README for
-details and for the version pin between `Dockerfile.playwright` and `@playwright/test`.
+artifacts land in `./artifacts/<tier>/`. The live tiers live behind `--profile live`, `--profile local`, and
+`--profile writes`, so they never run as part of `up`; the `local` profile additionally needs the infra
+stack running and port 5173 free. See the README for details and for the version pin between
+`Dockerfile.playwright` and `@playwright/test`.
 
 ### Writing Tests
 

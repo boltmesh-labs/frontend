@@ -162,9 +162,38 @@ subdirectory because `up` runs them in parallel. Two things to know when driving
 takes a single service (naming several passes the extras as arguments to the first, not as services to
 run), and plain `up` exits 0 whether or not the tests passed, so read the output rather than the exit code.
 
-The live tiers need real credentials and network access to a deployed environment, so they sit behind
-profiles and stay out of a plain `up`. `--env-file` must come before the subcommand, and the live specs
-skip rather than fail when it is absent, so an unconfigured run cannot be mistaken for a pass:
+### Live tests against the local stack
+
+The `local` profile runs the live tier against the backend and seeded `e2e-user` / `e2e-admin` accounts from
+the infra repo's stack (`podman-compose up -d` there, then `podman/uv run python -m
+scripts.seed_e2e_users` in the backend repo). Start its own Vite server inside the container so the bundle
+targets the local API instead of the deployed one:
+
+```bash
+podman stop boltmesh-frontend-prod      # frees port 5173, which this profile needs
+podman compose --profile local run --rm e2e-live-local
+```
+
+Three local-stack constraints are worth knowing, since each fails in a way that points somewhere unhelpful:
+
+- **Host networking, and `localhost` on both sides.** `localhost` and `127.0.0.1` are different _sites_ to a
+  browser, and the backend's `COOKIE_SAMESITE=lax` default drops the refresh cookie when the frontend and API
+  disagree on hostname. The suite then fails with `Refresh endpoint returned HTTP 401` on the tests that
+  fetch an access token. Reaching the API via `host.containers.internal` fails identically.
+- **Port 5173 exactly.** The backend's `CORS_ALLOW_ORIGINS` admits only `localhost:5173` and
+  `127.0.0.1:5173`. On any other port the browser blocks the login POST and the suite fails with a
+  `waitForResponse` timeout rather than a CORS error.
+- **One worker, and a minute between runs.** The suite signs in about fifteen times against a backend that
+  caps logins at 10/min. The window lives in Redis and outlives the container, so a run that hits the cap
+  leaves the next one failing until the window clears.
+
+The last test (`a real session keeps credentials out of browser storage`) skips here: it requires an HTTPS
+API, which a local stack is not.
+
+The live tiers that target a deployed environment need real credentials and network access to it, so they
+sit behind their own profiles and stay out of a plain `up`. `--env-file` must come before the subcommand,
+and the live specs skip rather than fail when it is absent, so an unconfigured run cannot be mistaken for a
+pass:
 
 ```bash
 podman compose --env-file .env.e2e --profile live run --rm e2e-live
