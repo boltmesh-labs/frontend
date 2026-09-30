@@ -19,6 +19,15 @@
 #   podman compose --env-file .env.e2e --profile live run --rm e2e-live
 #   podman compose --env-file .env.e2e --profile writes run --rm e2e-live-write
 #
+# Both run against the deployed environment named in .env.e2e and need outbound
+# access to it. PLAYWRIGHT_WORKERS=1 from that file is load-bearing: the suite
+# signs in ~15 times against a backend that caps logins at 10/min, and the
+# window lives in Redis, so it outlives the run. Reruns need a minute's wait or
+# the later tests fail on their own throttle.
+#
+# Against staging, expect 14 passed and 1 failed: the refresh cookie is served
+# without `Secure`, which the suite asserts. See README.md.
+#
 # Values come from `--env-file .env.e2e` (gitignored, credentials for the
 # deployed environment); note it must precede the subcommand. Without it the
 # live specs self-skip rather than fail, which is deliberate: an unconfigured

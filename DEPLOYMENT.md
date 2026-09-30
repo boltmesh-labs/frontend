@@ -101,6 +101,8 @@ Add a Content Security Policy that allows the configured API and OAuth origins. 
 
 The API and CDN layers must also use HTTPS. The frontend sends refresh cookies with credentialed requests, so the API's CORS and cookie settings must include the exact deployed frontend origin.
 
+The refresh cookie must carry `Secure` on any environment served over HTTPS, including staging. The backend derives that flag from `APP_ENV` and only sets it for `prod`, so a staging deployment serves `refresh_token` without it unless `COOKIE_SECURE=true` is set explicitly in the task-definition environment (`infra/aws/terraform/modules/backend/locals.tf`). The live E2E suite asserts this flag, so the omission shows up there as a failure of `a real session keeps credentials out of browser storage`. Set the variable rather than relaxing the assertion.
+
 ## Smoke test after deployment
 
 1. Load `/` and confirm the app redirects to `/login`.

@@ -127,6 +127,27 @@ npm run test:e2e:live
 
 The live suite verifies invalid-credential handling, login, refresh-cookie session restoration and logout revocation, backend-enforced admin authorization, authenticated user and admin list/detail pages, real 404 error states, deployed metadata, and browser credential-storage/cookie security. Detail coverage dynamically uses the first available record of each type and records a coverage annotation when the backend has none. It is run manually rather than in GitHub Actions because it requires seeded users and a compatible real backend.
 
+### Known staging failure: the refresh cookie is not `Secure`
+
+`a real session keeps credentials out of browser storage` currently fails against staging with
+`expect(refreshCookie.secure).toBe(true)`. Staging's login response sets the cookie without the flag:
+
+```text
+set-cookie: refresh_token=…; HttpOnly; Path=/; SameSite=Lax
+```
+
+That is a backend configuration gap, not a test bug, so the assertion is left in place rather than
+weakened. The backend derives the flag from `APP_ENV` (`backend/app/core/config.py`: `cookie_secure` is
+true only for `prod`), and staging runs `APP_ENV=staging`. Neither `COOKIE_SECURE` nor `COOKIE_SAMESITE`
+is set in the infra module's task-definition environment, so both fall back to that derivation. Fixing it
+means setting `COOKIE_SECURE=true` for staging in `infra/aws/terraform/modules/backend/locals.tf`, after
+which the test should pass unchanged. Until then, treat this single failure as the known baseline rather
+than a regression — the other 14 pass.
+
+Also note the login budget: the suite signs in about fifteen times against a backend that caps logins at
+10/min. The window lives in Redis and outlives the run, so leave a minute between attempts or later tests
+fail on their own throttle. `.env.e2e` sets `PLAYWRIGHT_WORKERS=1` for this reason.
+
 The write suite is a separate command because it creates and deletes real data. It is skipped unless both
 `E2E_ALLOW_WRITES=1` and a safe `E2E_WRITE_ENVIRONMENT` are set. `local` only accepts localhost API
 hosts; `staging` is required for remote environments and rejects the known production hosts. The suite
