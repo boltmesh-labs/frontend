@@ -104,63 +104,6 @@ services:
       <<: *test-env
       PLAYWRIGHT_HTML_OUTPUT_DIR: /app/artifacts/production/report
 
-  # ---------- e2e against the local dev stack (read-mostly) ----------
-  # Runs against the backend and seeded users from the infra repo's
-  # `podman-compose up -d`. Starts its own Vite server inside the container so
-  # the bundle targets the local API, rather than testing the deployed bundle.
-  #
-  # Two origin constraints, both of which cost real debugging time if violated:
-  #
-  # It needs host networking, because `localhost` and `127.0.0.1` are different
-  # *sites* to a browser and `SameSite=lax` (the backend's non-prod default)
-  # drops the refresh cookie when the frontend and API disagree on hostname.
-  # Reaching the API via host.containers.internal instead fails the same way.
-  #
-  # Port 5173 specifically, because the backend's CORS_ALLOW_ORIGINS admits
-  # only localhost:5173 and 127.0.0.1:5173. On any other port the browser blocks
-  # the login POST and the suite fails with a missing-response timeout rather
-  # than a CORS error. The infra stack's frontend-prod already holds that port,
-  # so stop it first: `podman stop boltmesh-frontend-prod`.
-  #
-  # One worker, because the suite signs in ~15 times against a backend that
-  # caps logins at 10/min. PLAYWRIGHT_WORKERS=1 is what .env.e2e sets for the
-  # same reason; the window lives in Redis and outlives the container, so a
-  # failed run must be followed by a minute's wait before the next one.
-  e2e-live-local:
-    <<: *test-base
-    profiles: ["local"]
-    network_mode: host
-    entrypoint:
-      - sh
-      - -c
-      - |
-        VITE_API_URL="$$E2E_API_URL" npx vite --host localhost --port 5173 &
-        for i in $$(seq 1 60); do
-          curl -sf -o /dev/null http://localhost:5173/login && break
-          sleep 1
-        done
-        npx playwright test --config=playwright.live.config.js \
-          --output /app/artifacts/live-local/test-results
-    environment:
-      <<: *test-env
-      PLAYWRIGHT_HTML_OUTPUT_DIR: /app/artifacts/live-local/report
-      # Left unset: setting E2E_BASE_URL is what tells the config to skip its
-      # own dev server, and the server started above is that dev server.
-      E2E_API_URL: "http://localhost:8000/v1"
-      # Must be set, not left empty: the config treats any non-empty
-      # E2E_BASE_URL as "the frontend already runs elsewhere" and skips its own
-      # dev server. An empty string is still unset to `Boolean("")`, so the
-      # config would start a second Vite on 5173 and time out against the one
-      # this entrypoint already launched.
-      E2E_BASE_URL: "http://localhost:5173"
-      VITE_APP_COMPANY_NAME: "${VITE_APP_COMPANY_NAME:-BoltMesh VPN}"
-      E2E_LIVE: "${E2E_LIVE:-1}"
-      PLAYWRIGHT_WORKERS: "1"
-      E2E_USERNAME: "${E2E_USERNAME:-e2e-user}"
-      E2E_PASSWORD: "${E2E_PASSWORD:-E2ePassword123}"
-      E2E_ADMIN_USERNAME: "${E2E_ADMIN_USERNAME:-e2e-admin}"
-      E2E_ADMIN_PASSWORD: "${E2E_ADMIN_PASSWORD:-E2eAdminPassword123}"
-
   # ---------- e2e against a deployed backend (read-mostly) ----------
   # Needs E2E_LIVE, E2E_BASE_URL, E2E_API_URL and the e2e credentials from
   # .env.e2e, and outbound access to that environment. E2E_BASE_URL is set, so
