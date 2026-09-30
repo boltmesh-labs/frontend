@@ -24,6 +24,8 @@ const servers = [
     tunnel_ip: "10.1.0.1/16",
     wg_port: 51820,
     wg_public_key: "c3VjaC1hLXZhbGlkLXdpcmVndWFyZC1wdWJsaWMta2V5",
+    active_peers: 3,
+    total_peers: 12,
     region: { id: "fra", name: "Frankfurt" },
   },
   {
@@ -90,6 +92,11 @@ describe("VpnServerList (admin)", () => {
 
     await user.click(screen.getAllByRole("button", { name: "View Config" })[0]);
     expect(await screen.findAllByText(/active peers/i)).toBeTruthy();
+    // Peer load: the agent-reported live gauge next to the total provisioned
+    // peer count the backend aggregates from vpn_peers.
+    expect(await screen.findByText("Total Peers")).toBeInTheDocument();
+    expect(await screen.findByText("3")).toBeInTheDocument();
+    expect(await screen.findByText("12")).toBeInTheDocument();
     expect(await screen.findByText("10.1.0.1/16")).toBeInTheDocument();
     expect(await screen.findByText("Public Key")).toBeInTheDocument();
   });

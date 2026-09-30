@@ -324,6 +324,15 @@ const VpnServerList = () => {
               </Col>
 
               <Col md={3}>
+                <span className="text-secondary small d-block">
+                  Total Peers
+                </span>
+                <span className="font-monospace fw-bold px-2 py-1 rounded border d-block mt-1 text-body">
+                  {selectedServer.total_peers ?? "—"}
+                </span>
+              </Col>
+
+              <Col md={3}>
                 <span className="text-secondary small d-block">Sent</span>
                 <span className="font-monospace fw-bold px-2 py-1 rounded border d-block mt-1 text-body">
                   {formatBytes(selectedServer.tx_bytes)}
