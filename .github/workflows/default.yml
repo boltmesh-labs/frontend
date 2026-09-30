@@ -27,6 +27,19 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      # The container, not the `actionlint` pre-commit hook: the hook is
+      # `language: golang`, so running it needs a Go toolchain. Pinned to the same
+      # v1.7.12 as the hook rev. `GIT_CONFIG_COUNT` marks the workspace safe
+      # because the container runs as root while the workspace belongs to the
+      # runner user; actionlint walks up looking for the git root and without
+      # this it reports "no project was found" and checks nothing.
+      - name: Lint GitHub Actions workflows
+        uses: docker://rhysd/actionlint:1.7.12
+        env:
+          GIT_CONFIG_COUNT: 1
+          GIT_CONFIG_KEY_0: safe.directory
+          GIT_CONFIG_VALUE_0: "*"
+
       - name: Set up Node
         uses: actions/setup-node@v7
         with:
