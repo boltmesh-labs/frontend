@@ -42,7 +42,7 @@ Enhancement suggestions are tracked as GitHub issues. When creating an enhanceme
 
 ## Local Hooks
 
-Install the git hook once after cloning. It runs the same checks CI does, so a
+Install the git hook once after cloning. It runs the checks CI does not, so a
 violation is caught before you push:
 
 ```bash
@@ -52,8 +52,7 @@ pre-commit run --all-files     # optional: the whole tree, not just staged files
 ```
 
 The ESLint and Prettier hooks resolve the local devDependencies, so they need
-that install. To run everything else, skip them by id — the same escape hatch
-the CI `pre-commit` job uses:
+that install. To run everything else, skip them by id:
 
 ```bash
 SKIP=eslint,prettier pre-commit run --all-files
