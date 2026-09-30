@@ -95,6 +95,21 @@ Fixes #123
 npm test
 ```
 
+### Running Tests in Containers
+
+Every tier also runs against the browser builds CI uses, via `compose.yaml`:
+
+```bash
+podman compose build
+podman compose run --rm e2e-mocked    # one tier
+podman compose up                     # unit, mocked, cross-browser, production
+```
+
+Use this when a failure may depend on the local environment rather than on the code. Reports and failure
+artifacts land in `./artifacts/<tier>/`. The live tiers live behind `--profile live` and
+`--profile writes` and need `--env-file .env.e2e`, so they never run as part of `up`. See the README for
+details and for the version pin between `Dockerfile.playwright` and `@playwright/test`.
+
 ### Writing Tests
 
 - Write tests for all new features

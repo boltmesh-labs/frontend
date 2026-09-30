@@ -79,6 +79,8 @@ playwright-report/
 test-results/
 blob-report/
 .playwright/
+# Test artifacts written into the mounted volume by compose.yaml.
+artifacts/
 
 # Unit test / coverage reports
 htmlcov/

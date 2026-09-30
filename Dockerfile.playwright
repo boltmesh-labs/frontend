@@ -1,0 +1,34 @@
+# Dockerfile.playwright
+# Runs the Playwright suite in a container that already has the browsers
+# installed, so the suite behaves the same as CI.
+#
+# The image tag MUST match the @playwright/test version in package.json:
+# the runner looks for browser builds at its own pinned revisions, so a
+# mismatched tag fails with "Executable doesn't exist". Bump both together.
+#
+#   podman build -t boltmesh-e2e -f Dockerfile.playwright .
+#   podman run --rm \
+#     -v ./test-results:/app/test-results:Z \
+#     -v ./playwright-report:/app/playwright-report:Z boltmesh-e2e
+#
+# The runner is the entrypoint, so extra Playwright flags can be appended
+# directly. For anything else, replace the entrypoint, e.g.
+#   ... boltmesh-e2e --entrypoint bash
+#
+# No port is published: the config's webServer runs Vite on 127.0.0.1:5173
+# inside this container and Playwright connects to it from the same process.
+FROM mcr.microsoft.com/playwright:v1.63.0-noble
+
+WORKDIR /app
+
+# Outside CI the html reporter opens on failure, which blocks forever in a
+# headless container. Never open it; read the mounted report instead.
+ENV PLAYWRIGHT_HTML_OPEN=never
+
+COPY package*.json ./
+RUN npm ci --no-audit --no-fund
+
+COPY . .
+
+# Live specs self-skip without E2E_LIVE=1, so the default run is fully mocked.
+ENTRYPOINT ["npx", "playwright", "test"]

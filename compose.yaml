@@ -1,0 +1,158 @@
+# compose.yaml
+# Every test tier in package.json, as a container. All of them run the suite
+# from the same image CI uses, so a failure here is a real failure rather than
+# a local-environment artefact.
+#
+#   podman compose build
+#   podman compose run --rm e2e-mocked    # one tier; reports into ./artifacts
+#   podman compose up                     # every default tier, in parallel
+#
+# Note that `podman compose run` takes one service. Naming several appends the
+# extras as arguments to the first one rather than running each, so `run unit
+# e2e-mocked` runs vitest with "e2e-mocked" as a file filter. Use `up` to run
+# several. Plain `up` also returns 0 whenever the tiers pass; it does not fail
+# the command on a test failure, so read the output rather than the exit code.
+#
+# The live tiers are behind profiles and need real credentials plus network
+# egress to a deployed environment, so they are excluded from a plain `up`:
+#
+#   podman compose --env-file .env.e2e --profile live run --rm e2e-live
+#   podman compose --env-file .env.e2e --profile writes run --rm e2e-live-write
+#
+# Values come from `--env-file .env.e2e` (gitignored, credentials for the
+# deployed environment); note it must precede the subcommand. Without it the
+# live specs self-skip rather than fail, which is deliberate: an unconfigured
+# live run must not look like a pass.
+
+x-test-base: &test-base
+  build:
+    context: .
+    dockerfile: Dockerfile.playwright
+  image: localhost/boltmesh-e2e
+  # Per-tier artifact directories. A plain `up` runs services in parallel, so
+  # they would otherwise share ./test-results and clobber each other's traces
+  # and screenshots; each tier gets its own subtree under the single mount.
+  # The report has an env var; outputDir (traces, screenshots, videos) does
+  # not, so each service passes --output through its npm script instead.
+  #
+  # `:z`, not `:Z`: the tiers share one host directory, and `:Z` gives each
+  # container a private SELinux label. Under `up`, which runs them in parallel,
+  # they would relabel the directory out from under each other and every tier
+  # but one would fail with EACCES. `:z` is the shared label meant for this.
+  volumes:
+    - ./artifacts:/app/artifacts:z
+  environment: &test-env
+    PLAYWRIGHT_HTML_OUTPUT_DIR: /app/artifacts/report
+    PLAYWRIGHT_LAST_RUN_OUTPUT_FILE: /app/artifacts/last-run.json
+    CI: "true"
+
+services:
+  # ---------- unit ----------
+  # vitest, no browser needed. Fast enough to run first.
+  unit:
+    <<: *test-base
+    # The image's entrypoint is the Playwright runner, so every service has to
+    # replace it rather than just pass a `command`. `command` alone would be
+    # appended to `npx playwright test` and fail.
+    entrypoint: ["npm", "run", "test"]
+    environment:
+      <<: *test-env
+      PLAYWRIGHT_HTML_OUTPUT_DIR: /app/artifacts/unit/report
+
+  # ---------- e2e, fully mocked ----------
+  # No backend: the fixtures intercept every API call. Chromium and mobile.
+  e2e-mocked:
+    <<: *test-base
+    entrypoint:
+      - npm
+      - run
+      - test:e2e:mocked
+      - --
+      - --output
+      - /app/artifacts/mocked/test-results
+    environment:
+      <<: *test-env
+      PLAYWRIGHT_HTML_OUTPUT_DIR: /app/artifacts/mocked/report
+
+  # ---------- e2e, mocked across all four engines ----------
+  e2e-cross-browser:
+    <<: *test-base
+    entrypoint:
+      - npm
+      - run
+      - test:e2e:cross-browser
+      - --
+      - --output
+      - /app/artifacts/cross-browser/test-results
+    environment:
+      <<: *test-env
+      PLAYWRIGHT_HTML_OUTPUT_DIR: /app/artifacts/cross-browser/report
+
+  # ---------- e2e against the real production bundle ----------
+  # Builds and previews on 127.0.0.1:4173, so it catches bundling problems the
+  # dev-server tiers cannot. The API is still mocked.
+  e2e-production:
+    <<: *test-base
+    entrypoint:
+      - npm
+      - run
+      - test:e2e:production
+      - --
+      - --output
+      - /app/artifacts/production/test-results
+    environment:
+      <<: *test-env
+      PLAYWRIGHT_HTML_OUTPUT_DIR: /app/artifacts/production/report
+
+  # ---------- e2e against a deployed backend (read-mostly) ----------
+  # Needs E2E_LIVE, E2E_BASE_URL, E2E_API_URL and the e2e credentials from
+  # .env.e2e, and outbound access to that environment. E2E_BASE_URL is set, so
+  # the config skips its dev server and drives the deployed frontend instead.
+  e2e-live:
+    <<: *test-base
+    profiles: ["live"]
+    entrypoint:
+      - npm
+      - run
+      - test:e2e:live
+      - --
+      - --output
+      - /app/artifacts/live/test-results
+    environment:
+      <<: *test-env
+      PLAYWRIGHT_HTML_OUTPUT_DIR: /app/artifacts/live/report
+      E2E_LIVE: "${E2E_LIVE:-1}"
+      E2E_BASE_URL: "${E2E_BASE_URL:-}"
+      E2E_API_URL: "${E2E_API_URL:-}"
+      E2E_USERNAME: "${E2E_USERNAME:-}"
+      E2E_PASSWORD: "${E2E_PASSWORD:-}"
+      E2E_ADMIN_USERNAME: "${E2E_ADMIN_USERNAME:-}"
+      E2E_ADMIN_PASSWORD: "${E2E_ADMIN_PASSWORD:-}"
+
+  # ---------- e2e writes against a deployed backend ----------
+  # Separate profile from the read-mostly tier: this one creates and deletes
+  # real accounts, subscriptions and invoices. The spec double-checks
+  # E2E_ALLOW_WRITES and refuses hosts outside the declared environment, but
+  # keep it behind its own profile so it never runs as a side effect.
+  e2e-live-write:
+    <<: *test-base
+    profiles: ["writes"]
+    entrypoint:
+      - npm
+      - run
+      - test:e2e:live:write
+      - --
+      - --output
+      - /app/artifacts/live-write/test-results
+    environment:
+      <<: *test-env
+      PLAYWRIGHT_HTML_OUTPUT_DIR: /app/artifacts/live-write/report
+      E2E_LIVE: "${E2E_LIVE:-1}"
+      E2E_BASE_URL: "${E2E_BASE_URL:-}"
+      E2E_API_URL: "${E2E_API_URL:-}"
+      E2E_USERNAME: "${E2E_USERNAME:-}"
+      E2E_PASSWORD: "${E2E_PASSWORD:-}"
+      E2E_ADMIN_USERNAME: "${E2E_ADMIN_USERNAME:-}"
+      E2E_ADMIN_PASSWORD: "${E2E_ADMIN_PASSWORD:-}"
+      E2E_ALLOW_WRITES: "${E2E_ALLOW_WRITES:-}"
+      E2E_WRITE_ENVIRONMENT: "${E2E_WRITE_ENVIRONMENT:-}"

@@ -34,6 +34,7 @@ The Vite development server runs on `http://localhost:5173` by default. Configur
 | `npm run test:e2e:cross-browser` | Run mocked tests on Chromium, Firefox, WebKit, and mobile Chromium |
 | `npm run test:e2e:ui`            | Open the Playwright test UI                                        |
 | `npm run test:e2e:headed`        | Run browser tests in headed mode                                   |
+| `podman compose up`              | Run the unit and mocked browser tiers in containers                |
 | `npm run lint`                   | Run ESLint                                                         |
 | `npm run format:check`           | Check Prettier formatting                                          |
 | `npm run format`                 | Format source and configuration files                              |
@@ -142,5 +143,32 @@ npm run test:e2e:live:write
 
 Never point the write suite at production. Backend strict endpoints share a small per-minute request
 budget, so the suite reserves that budget instead of throttling its own cleanup operations.
+
+### Running the suites in containers
+
+The same tiers run in containers via `Dockerfile.playwright` and `compose.yaml`, so a failure reproduces
+against the same browser builds CI uses instead of whatever is installed locally. `Dockerfile.playwright`
+pins its Playwright image tag to the `@playwright/test` version in `package.json`; bump both together, or
+the container fails looking for browser builds the runner expects but the image does not have.
+
+```bash
+podman compose build
+podman compose run --rm e2e-mocked    # one tier
+podman compose up                     # unit, mocked, cross-browser, production
+```
+
+Reports, traces, and screenshots land in `./artifacts/<tier>/`, gitignored. Each tier writes its own
+subdirectory because `up` runs them in parallel. Two things to know when driving it: `podman compose run`
+takes a single service (naming several passes the extras as arguments to the first, not as services to
+run), and plain `up` exits 0 whether or not the tests passed, so read the output rather than the exit code.
+
+The live tiers need real credentials and network access to a deployed environment, so they sit behind
+profiles and stay out of a plain `up`. `--env-file` must come before the subcommand, and the live specs
+skip rather than fail when it is absent, so an unconfigured run cannot be mistaken for a pass:
+
+```bash
+podman compose --env-file .env.e2e --profile live run --rm e2e-live
+podman compose --env-file .env.e2e --profile writes run --rm e2e-live-write
+```
 
 See [DEPLOYMENT.md](DEPLOYMENT.md) for production builds, SPA routing, caching, security headers, smoke tests, and rollback guidance.

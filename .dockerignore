@@ -4,6 +4,14 @@
 node_modules
 dist
 coverage
+# Playwright's own output: copied into the image by `COPY . .`, which ships
+# whatever the last local run left behind and makes it easy to mistake a stale
+# report for a fresh one. Mount these as volumes instead (see
+# Dockerfile.playwright).
+playwright-report
+test-results
+blob-report
+artifacts
 .git
 .env
 .env.*
