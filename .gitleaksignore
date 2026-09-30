@@ -1,0 +1,17 @@
+# Findings grandfathered in two commits, all `generic-api-key` false positives:
+#
+#   abb86a02  Synthetic JWTs in the e2e specs. The rule matches the three-part
+#             dot shape; the payload decodes to {"sub":"user-1","role":"user"}
+#             and the signature is the literal word "signature". The line in
+#             e2e/oauth.spec.js now carries a `// gitleaks:allow` comment, which
+#             covers it going forward but does not reach back into this commit.
+#   1d1c2919  e2e placeholder values (SECRET_KEY / BOOTSTRAP_SECRET_PEPPER) in
+#             a since-removed block of default.yml. Not present at HEAD.
+#
+# Fingerprint-per-line, not a path allowlist: a real secret added to these files
+# later still fails. Regenerate with:
+#   gitleaks git --report-format json --report-path r.json && jq -r '.[].Fingerprint' r.json
+abb86a022beb9bec6221f3d7767efd4e40301083:e2e/account-lifecycle.spec.js:generic-api-key:13
+abb86a022beb9bec6221f3d7767efd4e40301083:e2e/oauth.spec.js:generic-api-key:16
+1d1c2919f7a766a04069a94a550094baa3254480:.github/workflows/default.yml:generic-api-key:133
+1d1c2919f7a766a04069a94a550094baa3254480:.github/workflows/default.yml:generic-api-key:136

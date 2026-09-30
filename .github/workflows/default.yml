@@ -94,12 +94,21 @@ jobs:
       # structurally cannot see that case, because it only ever looks at staged
       # files. `version` matches the pinned hook rev. Runs before Trivy so a leak
       # fails the job without also paying for the filesystem scan.
+      # The OSS container, not `gitleaks/gitleaks-action`: v3 requires a paid
+      # GITLEAKS_LICENSE for organisation-owned repos, and v2 runs on Node 20,
+      # which GitHub removed from hosted runners on 2026-09-16. The container is
+      # the same v8.30.1 binary the local hook pins, so the two agree.
+      #
+      # `git` scans commit history, which is the point -- a secret committed and
+      # later deleted is still caught, and the local hook cannot see that case
+      # because it runs `--staged`. `.gitleaksignore` grandfathers four
+      # `generic-api-key` false positives (synthetic e2e JWTs and since-removed
+      # e2e placeholders), fingerprint by fingerprint, so a real secret added
+      # there later still fails.
       - name: Scan for committed secrets
-        uses: gitleaks/gitleaks-action@v3
+        uses: docker://zricethezav/gitleaks:v8.30.1
         with:
-          version: v8.30.1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          args: git --redact --no-banner --verbose --exit-code 1 .
 
       - name: Run Trivy Filesystem Vulnerability Scanner
         uses: aquasecurity/trivy-action@v0.36.0
