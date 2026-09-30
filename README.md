@@ -127,32 +127,6 @@ npm run test:e2e:live
 
 The live suite verifies invalid-credential handling, login, refresh-cookie session restoration and logout revocation, backend-enforced admin authorization, authenticated user and admin list/detail pages, real 404 error states, deployed metadata, and browser credential-storage/cookie security. Detail coverage dynamically uses the first available record of each type and records a coverage annotation when the backend has none. It is run manually rather than in GitHub Actions because it requires seeded users and a compatible real backend.
 
-### Staging refresh cookie now carries `Secure`
-
-`a real session keeps credentials out of browser storage` failed against staging because
-`expect(refreshCookie.secure).toBe(true)` saw staging's login response set the cookie without the flag:
-
-```text
-set-cookie: refresh_token=…; HttpOnly; Path=/; SameSite=Lax
-```
-
-That was a backend configuration gap, not a test bug, so the assertion stayed in place. The backend
-derives the flag from `APP_ENV` (`backend/app/core/config.py`: `cookie_secure` is true for
-`staging`/`prod`, false for `dev`/`test`), so staging's `APP_ENV=staging` now yields
-`SameSite=Lax; Secure` with no infra change. The test passes unchanged. `COOKIE_SECURE` and
-`COOKIE_SAMESITE` remain unset in the infra module's task-definition environment and still fall back
-to that derivation.
-
-Also note the login budget: the suite signs in about fifteen times against a backend that caps logins at
-10/min. The window lives in Redis and outlives the run, so leave a minute between attempts or later tests
-fail on their own throttle. `.env.e2e` sets `PLAYWRIGHT_WORKERS=1` for this reason.
-
-The write suite is a separate command because it creates and deletes real data. It is skipped unless both
-`E2E_ALLOW_WRITES=1` and a safe `E2E_WRITE_ENVIRONMENT` are set. `local` only accepts localhost API
-hosts; `staging` is required for remote environments and rejects the known production hosts. The suite
-exercises disposable subscription-plan and VPN-region lifecycles and restores the seeded user's original
-profile in cleanup paths.
-
 ```bash
 E2E_ALLOW_WRITES=1 \
 E2E_WRITE_ENVIRONMENT=local \

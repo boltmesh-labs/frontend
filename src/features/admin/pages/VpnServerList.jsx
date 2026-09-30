@@ -307,14 +307,14 @@ const VpnServerList = () => {
                 </span>
               </Col>
 
-              <Col md={3}>
+              <Col md={2}>
                 <span className="text-secondary small d-block">Uptime</span>
                 <span className="font-monospace fw-bold px-2 py-1 rounded border d-block mt-1 text-body">
                   {formatUptime(selectedServer.uptime_seconds)}
                 </span>
               </Col>
 
-              <Col md={3}>
+              <Col md={2}>
                 <span className="text-secondary small d-block">
                   Active Peers
                 </span>
@@ -323,7 +323,7 @@ const VpnServerList = () => {
                 </span>
               </Col>
 
-              <Col md={3}>
+              <Col md={2}>
                 <span className="text-secondary small d-block">
                   Total Peers
                 </span>
@@ -332,14 +332,14 @@ const VpnServerList = () => {
                 </span>
               </Col>
 
-              <Col md={3}>
+              <Col md={2}>
                 <span className="text-secondary small d-block">Sent</span>
                 <span className="font-monospace fw-bold px-2 py-1 rounded border d-block mt-1 text-body">
                   {formatBytes(selectedServer.tx_bytes)}
                 </span>
               </Col>
 
-              <Col md={3}>
+              <Col md={2}>
                 <span className="text-secondary small d-block">Received</span>
                 <span className="font-monospace fw-bold px-2 py-1 rounded border d-block mt-1 text-body">
                   {formatBytes(selectedServer.rx_bytes)}
