@@ -40,6 +40,9 @@ const mapServerToForm = (server, isNew = false) => ({
   tunnel_ip: server?.tunnel_ip || "",
   wg_port: server?.wg_port ?? "",
   stream_listen_port: server?.stream_listen_port ?? (isNew ? 443 : ""),
+  // Never defaulted from `endpoint`, matching the API: an operator must choose
+  // the SNI deliberately, and blank withholds the stream rung.
+  stream_sni: server?.stream_sni ?? "",
   // Read-only display: client DNS is always the tunnel host address
   // (derived server-side), never an editable field.
   wg_public_key: server?.wg_public_key || "",
@@ -159,6 +162,12 @@ const VpnServerForm = ({ initialData, isNew, refetchData }) => {
       payload.stream_listen_port = Number.isNaN(parsedStreamPort)
         ? null
         : parsedStreamPort;
+      // The SNI is a hostname the handshake *claims*, not a dial target, so it is
+      // never derived from the endpoint — see the API's stream_sni. Blank clears it
+      // to null, which withholds the rung. Like the port it is node-bound: the node
+      // mints its certificate for this name at registration, so the API refuses a
+      // change while the row is online.
+      payload.stream_sni = formData.stream_sni.trim() || null;
     }
 
     try {
@@ -556,6 +565,32 @@ const VpnServerForm = ({ initialData, isNew, refetchData }) => {
                     <Form.Text className="text-muted">
                       Public TLS port for the obfuscated stream rung. Leave
                       blank to disable it for this node.
+                    </Form.Text>
+                  </Form.Group>
+                </Col>
+                <Col md={8}>
+                  <Form.Group className="mb-3">
+                    <Form.Label className="text-secondary fw-semibold">
+                      Stream SNI
+                    </Form.Label>
+                    <Form.Control
+                      type="text"
+                      name="stream_sni"
+                      className="font-monospace"
+                      value={formData.stream_sni}
+                      onChange={handleInputChange}
+                      disabled={!isEditing || saving || isTopologyLocked}
+                      placeholder="www.example.com"
+                    />
+                    <Form.Text className="text-muted">
+                      Hostname this node&apos;s TLS certificate is issued for,
+                      and that clients send as SNI. Must be a hostname, never an
+                      IP address — an address produces a handshake with no SNI
+                      at all. This is <em>not</em> the dial address, and it is
+                      not defaulted from the endpoint: a name under your own
+                      control is on no allowlist and names nothing a user
+                      browses to. Pick a name the network permits. Blank
+                      disables the stream rung.
                     </Form.Text>
                   </Form.Group>
                 </Col>
