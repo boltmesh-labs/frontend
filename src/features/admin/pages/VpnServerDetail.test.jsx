@@ -41,6 +41,7 @@ const server = {
   endpoint: "node-1.us-east-1.vpn.example.com",
   tunnel_ip: "10.1.0.1/16",
   wg_port: 51820,
+  stream_listen_port: 443,
   wg_public_key: "c3VjaC1hLXZhbGlkLXdpcmVndWFyZC1wdWJsaWMta2V5",
   os: "ubuntu",
   status: "online",
@@ -138,6 +139,71 @@ describe("VpnServerDetail (admin)", () => {
 
     expect(await screen.findByText("Bootstrap Command")).toBeInTheDocument();
     expect(screen.getByText("curl -sSL https://x | sh")).toBeInTheDocument();
+  });
+
+  it("pre-fills the stream port for a new server and submits it", async () => {
+    const user = userEvent.setup();
+    const create = vi.fn().mockResolvedValue({
+      ...server,
+      id: "srv9",
+      bootstrap_command: "curl -sSL https://x | sh",
+    });
+    vi.mocked(useCreateVpnServer).mockReturnValue({
+      mutateAsync: create,
+      isPending: false,
+    });
+    renderAt("new");
+
+    // The rung is on out of the box at 443, with no manual input needed.
+    expect(screen.getByPlaceholderText("443")).toHaveValue(443);
+
+    await user.type(
+      screen.getByPlaceholderText("e.g. Us-East-01"),
+      "Eu-West-02",
+    );
+    await user.selectOptions(
+      screen.getAllByRole("combobox")[0],
+      screen.getByRole("option", { name: /Frankfurt/ }),
+    );
+    await user.type(
+      screen.getByPlaceholderText("e.g. 198.51.100.1"),
+      "198.51.100.99",
+    );
+    await user.type(
+      screen.getByPlaceholderText("e.g. 10.1.0.1/16"),
+      "10.2.0.1/16",
+    );
+    await user.click(screen.getByRole("button", { name: /create server/i }));
+
+    await waitFor(() => expect(create).toHaveBeenCalled());
+    expect(create.mock.calls[0][0].stream_listen_port).toBe(443);
+  });
+
+  it("clears the stream port to null to disable the rung", async () => {
+    const manualServer = { ...server, status: "online", is_manual: true };
+    const update = vi
+      .fn()
+      .mockResolvedValue({ ...manualServer, stream_listen_port: null });
+    vi.mocked(useVpnServerDetail).mockReturnValue({
+      data: manualServer,
+      isLoading: false,
+      isError: false,
+      error: null,
+      refetch: vi.fn(),
+    });
+    vi.mocked(useUpdateVpnServer).mockReturnValue({
+      mutateAsync: update,
+      isPending: false,
+    });
+    const user = userEvent.setup();
+    renderAt("srv1");
+
+    await user.click(screen.getByRole("button", { name: /edit server/i }));
+    await user.clear(screen.getByPlaceholderText("443"));
+    await user.click(screen.getByRole("button", { name: "Save Changes" }));
+
+    await waitFor(() => expect(update).toHaveBeenCalledTimes(1));
+    expect(update.mock.calls[0][0].stream_listen_port).toBeNull();
   });
 
   it("creates a server without an endpoint and omits it from the payload", async () => {
@@ -259,6 +325,9 @@ describe("VpnServerDetail (admin)", () => {
     expect(screen.getByPlaceholderText(/node-1\.us-east-1/)).toBeDisabled();
     expect(screen.getByPlaceholderText("e.g. 10.1.0.1/16")).toBeDisabled();
     expect(screen.getByPlaceholderText("51820")).toBeDisabled();
+    // The stream port is not topology — the backend never overwrites it on AMI
+    // re-registration — so it stays editable on a locked node.
+    expect(screen.getByPlaceholderText("443")).toBeEnabled();
     expect(screen.getByText(/Auto-provisioned \(AMI\)/)).toBeInTheDocument();
 
     await user.selectOptions(screen.getAllByRole("combobox")[1], "maintenance");
@@ -266,7 +335,11 @@ describe("VpnServerDetail (admin)", () => {
 
     await waitFor(() => expect(update).toHaveBeenCalledTimes(1));
     const payload = update.mock.calls[0][0];
-    expect(payload).toEqual({ id: "srv1", status: "maintenance" });
+    expect(payload).toEqual({
+      id: "srv1",
+      status: "maintenance",
+      stream_listen_port: 443,
+    });
     await waitFor(() => expect(refetch).toHaveBeenCalled());
   });
 

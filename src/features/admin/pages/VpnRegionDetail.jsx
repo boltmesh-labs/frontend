@@ -26,15 +26,11 @@ import { formatDate } from "@/utils/dateFormatter";
 
 const REGION_STATUS_VARIANTS = { active: "success", inactive: "secondary" };
 
-// The port is the stream rung's switch: set means on, blank means off. A new
-// region starts at 443 so the rung is offered out of the box; clearing the field
-// (or editing an existing region) turns it off.
-const mapRegionToForm = (region, isNew = false) => ({
+const mapRegionToForm = (region) => ({
   id: region?.id || "",
   name: region?.name || "",
   country_code: region?.country_code || "",
   is_active: region?.is_active ?? true,
-  stream_listen_port: region?.stream_listen_port ?? (isNew ? 443 : ""),
   created_at: region?.created_at || null,
   updated_at: region?.updated_at || null,
 });
@@ -45,9 +41,7 @@ const VpnRegionForm = ({ initialData, isNew, refetchData }) => {
   const { confirm, confirmDialog } = useConfirm();
 
   const [isEditing, setIsEditing] = useState(isNew);
-  const [formData, setFormData] = useState(() =>
-    mapRegionToForm(initialData, isNew),
-  );
+  const [formData, setFormData] = useState(() => mapRegionToForm(initialData));
 
   const createMutation = useCreateVpnRegion();
   const updateMutation = useUpdateVpnRegion();
@@ -72,12 +66,6 @@ const VpnRegionForm = ({ initialData, isNew, refetchData }) => {
       name: formData.name.trim(),
       country_code: formData.country_code.trim().toUpperCase(),
       is_active: formData.is_active,
-      // Blank means the stream rung is off; send null so the row clears rather
-      // than keeping a stale port.
-      stream_listen_port:
-        formData.stream_listen_port === ""
-          ? null
-          : Number(formData.stream_listen_port),
     };
 
     try {
@@ -273,31 +261,6 @@ const VpnRegionForm = ({ initialData, isNew, refetchData }) => {
                     }
                     className="pointer-switch"
                   />
-                </Col>
-              </Row>
-
-              <Row className="g-3 small">
-                <Col md={4}>
-                  <Form.Group className="mb-3">
-                    <Form.Label className="text-secondary fw-semibold">
-                      Stream Listen Port
-                    </Form.Label>
-                    <Form.Control
-                      type="number"
-                      name="stream_listen_port"
-                      className="font-monospace"
-                      value={formData.stream_listen_port}
-                      onChange={handleInputChange}
-                      disabled={!isEditing || saving}
-                      placeholder="e.g. 443"
-                      min={1}
-                      max={65535}
-                    />
-                    <Form.Text className="text-muted">
-                      Public TLS port for the obfuscated stream rung. Leave
-                      blank to disable it for this region.
-                    </Form.Text>
-                  </Form.Group>
                 </Col>
               </Row>
 

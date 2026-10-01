@@ -31,7 +31,6 @@ const region = {
   name: "Frankfurt",
   country_code: "de",
   is_active: true,
-  stream_listen_port: 443,
 };
 
 const renderAt = (id) =>
@@ -130,87 +129,6 @@ describe("VpnRegionDetail (admin)", () => {
       ),
     );
     await waitFor(() => expect(refetch).toHaveBeenCalled());
-  });
-
-  it("pre-fills the stream port for a new region and submits it", async () => {
-    const create = vi.fn().mockResolvedValue({ ...region, id: "r9" });
-    vi.mocked(useCreateVpnRegion).mockReturnValue({
-      mutateAsync: create,
-      isPending: false,
-    });
-    const user = userEvent.setup();
-    renderAt("new");
-
-    // The rung is on out of the box at 443, with no manual input needed.
-    expect(screen.getByPlaceholderText("e.g. 443")).toHaveValue(443);
-
-    await user.type(screen.getByPlaceholderText("e.g. us-east-1"), "FRA-02");
-    await user.type(screen.getByPlaceholderText("e.g. US East"), "Frankfurt 2");
-    await user.type(screen.getByPlaceholderText("e.g. US"), "DE");
-    await user.click(screen.getByRole("button", { name: /create region/i }));
-
-    await waitFor(() =>
-      expect(create).toHaveBeenCalledWith(
-        expect.objectContaining({ stream_listen_port: 443 }),
-      ),
-    );
-  });
-
-  it("submits an edited stream port", async () => {
-    const update = vi.fn().mockResolvedValue(region);
-    vi.mocked(useVpnRegionDetail).mockReturnValue({
-      data: region,
-      isLoading: false,
-      isError: false,
-      error: null,
-      refetch: vi.fn(),
-    });
-    vi.mocked(useUpdateVpnRegion).mockReturnValue({
-      mutateAsync: update,
-      isPending: false,
-    });
-    const user = userEvent.setup();
-    renderAt("r1");
-
-    await user.click(screen.getByRole("button", { name: /edit region/i }));
-    const port = screen.getByPlaceholderText("e.g. 443");
-    expect(port).toBeEnabled();
-    await user.clear(port);
-    await user.type(port, "8443");
-    await user.click(screen.getByRole("button", { name: "Save Changes" }));
-
-    await waitFor(() =>
-      expect(update).toHaveBeenCalledWith(
-        expect.objectContaining({ stream_listen_port: 8443 }),
-      ),
-    );
-  });
-
-  it("clears the port to disable the rung", async () => {
-    const update = vi.fn().mockResolvedValue(region);
-    vi.mocked(useVpnRegionDetail).mockReturnValue({
-      data: region,
-      isLoading: false,
-      isError: false,
-      error: null,
-      refetch: vi.fn(),
-    });
-    vi.mocked(useUpdateVpnRegion).mockReturnValue({
-      mutateAsync: update,
-      isPending: false,
-    });
-    const user = userEvent.setup();
-    renderAt("r1");
-
-    await user.click(screen.getByRole("button", { name: /edit region/i }));
-    await user.clear(screen.getByPlaceholderText("e.g. 443"));
-    await user.click(screen.getByRole("button", { name: "Save Changes" }));
-
-    await waitFor(() =>
-      expect(update).toHaveBeenCalledWith(
-        expect.objectContaining({ stream_listen_port: null }),
-      ),
-    );
   });
 
   it("deletes the region after confirmation", async () => {

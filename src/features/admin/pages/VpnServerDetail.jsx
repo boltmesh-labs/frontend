@@ -29,13 +29,17 @@ import { VPN_SERVER_STATUSES } from "@/constants/statuses";
 const DEFAULT_STATUS = "provisioning";
 const DEFAULT_OS = "rocky";
 
-const mapServerToForm = (server) => ({
+// The stream port is the rung's switch: set means this node serves, blank means
+// off. A new node starts at 443 (the server-row default) so the rung is offered
+// out of the box; clearing the field turns it off for this node.
+const mapServerToForm = (server, isNew = false) => ({
   name: server?.name || "",
   region_id: server?.region_id || "",
   public_ip: server?.public_ip || "",
   endpoint: server?.endpoint || "",
   tunnel_ip: server?.tunnel_ip || "",
   wg_port: server?.wg_port ?? "",
+  stream_listen_port: server?.stream_listen_port ?? (isNew ? 443 : ""),
   // Read-only display: client DNS is always the tunnel host address
   // (derived server-side), never an editable field.
   wg_public_key: server?.wg_public_key || "",
@@ -51,7 +55,9 @@ const VpnServerForm = ({ initialData, isNew, refetchData }) => {
   const { confirm, confirmDialog } = useConfirm();
 
   const [isEditing, setIsEditing] = useState(isNew);
-  const [formData, setFormData] = useState(() => mapServerToForm(initialData));
+  const [formData, setFormData] = useState(() =>
+    mapServerToForm(initialData, isNew),
+  );
   const [bootstrapCommand, setBootstrapCommand] = useState("");
 
   const {
@@ -145,6 +151,14 @@ const VpnServerForm = ({ initialData, isNew, refetchData }) => {
         payload.tunnel_ip = formData.tunnel_ip.trim();
       if (!Number.isNaN(parsedPort)) payload.wg_port = parsedPort;
     }
+
+    // The stream port is not topology: the backend never overwrites it on AMI
+    // re-registration, so it stays editable on a locked node. Blank clears it to
+    // null, which is how a node is turned off the rung.
+    const parsedStreamPort = parseInt(formData.stream_listen_port, 10);
+    payload.stream_listen_port = Number.isNaN(parsedStreamPort)
+      ? null
+      : parsedStreamPort;
 
     try {
       if (isNew) {
@@ -516,6 +530,35 @@ const VpnServerForm = ({ initialData, isNew, refetchData }) => {
                   </Col>
                 </Row>
               )}
+
+              <h6 className="fw-bold text-body border-bottom pb-3 mb-3 mt-4">
+                Stream Transport (TLS)
+              </h6>
+
+              <Row className="g-3 small">
+                <Col md={4}>
+                  <Form.Group className="mb-3">
+                    <Form.Label className="text-secondary fw-semibold">
+                      Stream Listen Port (TCP)
+                    </Form.Label>
+                    <Form.Control
+                      type="number"
+                      name="stream_listen_port"
+                      min={1}
+                      max={65535}
+                      className="font-monospace"
+                      value={formData.stream_listen_port}
+                      onChange={handleInputChange}
+                      disabled={!isEditing || saving}
+                      placeholder="443"
+                    />
+                    <Form.Text className="text-muted">
+                      Public TLS port for the obfuscated stream rung. Leave
+                      blank to disable it for this node.
+                    </Form.Text>
+                  </Form.Group>
+                </Col>
+              </Row>
 
               {!isNew && (
                 <>
