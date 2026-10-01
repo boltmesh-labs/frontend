@@ -150,15 +150,14 @@ const VpnServerForm = ({ initialData, isNew, refetchData }) => {
       else if (formData.tunnel_ip.trim())
         payload.tunnel_ip = formData.tunnel_ip.trim();
       if (!Number.isNaN(parsedPort)) payload.wg_port = parsedPort;
+      // The stream port is the rung's switch: a value means the node serves the
+      // ingress, blank clears it to null (off). It is live-bound like wg_port —
+      // the node reads it at registration — so it is locked on AMI nodes too.
+      const parsedStreamPort = parseInt(formData.stream_listen_port, 10);
+      payload.stream_listen_port = Number.isNaN(parsedStreamPort)
+        ? null
+        : parsedStreamPort;
     }
-
-    // The stream port is not topology: the backend never overwrites it on AMI
-    // re-registration, so it stays editable on a locked node. Blank clears it to
-    // null, which is how a node is turned off the rung.
-    const parsedStreamPort = parseInt(formData.stream_listen_port, 10);
-    payload.stream_listen_port = Number.isNaN(parsedStreamPort)
-      ? null
-      : parsedStreamPort;
 
     try {
       if (isNew) {
@@ -549,7 +548,7 @@ const VpnServerForm = ({ initialData, isNew, refetchData }) => {
                       className="font-monospace"
                       value={formData.stream_listen_port}
                       onChange={handleInputChange}
-                      disabled={!isEditing || saving}
+                      disabled={!isEditing || saving || isTopologyLocked}
                       placeholder="443"
                     />
                     <Form.Text className="text-muted">

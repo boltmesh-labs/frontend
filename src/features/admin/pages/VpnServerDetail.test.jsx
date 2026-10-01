@@ -325,9 +325,9 @@ describe("VpnServerDetail (admin)", () => {
     expect(screen.getByPlaceholderText(/node-1\.us-east-1/)).toBeDisabled();
     expect(screen.getByPlaceholderText("e.g. 10.1.0.1/16")).toBeDisabled();
     expect(screen.getByPlaceholderText("51820")).toBeDisabled();
-    // The stream port is not topology — the backend never overwrites it on AMI
-    // re-registration — so it stays editable on a locked node.
-    expect(screen.getByPlaceholderText("443")).toBeEnabled();
+    // The stream port is live-bound too — the node reads it at registration — so
+    // it is locked on an AMI node like the rest of the settings.
+    expect(screen.getByPlaceholderText("443")).toBeDisabled();
     expect(screen.getByText(/Auto-provisioned \(AMI\)/)).toBeInTheDocument();
 
     await user.selectOptions(screen.getAllByRole("combobox")[1], "maintenance");
@@ -335,11 +335,7 @@ describe("VpnServerDetail (admin)", () => {
 
     await waitFor(() => expect(update).toHaveBeenCalledTimes(1));
     const payload = update.mock.calls[0][0];
-    expect(payload).toEqual({
-      id: "srv1",
-      status: "maintenance",
-      stream_listen_port: 443,
-    });
+    expect(payload).toEqual({ id: "srv1", status: "maintenance" });
     await waitFor(() => expect(refetch).toHaveBeenCalled());
   });
 
