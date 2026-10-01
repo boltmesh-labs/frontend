@@ -33,6 +33,23 @@ const region = {
   is_active: true,
 };
 
+const awgProfile = {
+  mode: "awg",
+  params: {
+    jc: 5,
+    jmin: 20,
+    jmax: 900,
+    s1: 15,
+    s2: 25,
+    s3: 35,
+    s4: 45,
+    h1: [1000, 1100],
+    h2: [2000, 2100],
+    h3: [3000, 3100],
+    h4: [4000, 4100],
+  },
+};
+
 const renderAt = (id) =>
   render(
     <MemoryRouter initialEntries={[`/admin/vpn-regions/${id}`]}>
@@ -188,5 +205,126 @@ describe("VpnRegionDetail (admin)", () => {
       ).toBeInTheDocument(),
     );
     expect(del).not.toHaveBeenCalled();
+  });
+
+  it("sends a null profile when the region runs the native data plane", async () => {
+    const update = vi.fn().mockResolvedValue(region);
+    vi.mocked(useUpdateVpnRegion).mockReturnValue({
+      mutateAsync: update,
+      isPending: false,
+    });
+    vi.mocked(useVpnRegionDetail).mockReturnValue({
+      data: region,
+      isLoading: false,
+      isError: false,
+      error: null,
+      refetch: vi.fn(),
+    });
+    const user = userEvent.setup();
+    renderAt("r1");
+
+    await user.click(screen.getByRole("button", { name: /edit region/i }));
+    await user.click(screen.getByRole("button", { name: "Save Changes" }));
+
+    await waitFor(() => expect(update).toHaveBeenCalledTimes(1));
+    expect(update.mock.calls[0][0].obfuscation).toBeNull();
+  });
+
+  it("flattens a stored profile into the form and submits it unchanged", async () => {
+    const awgRegion = { ...region, obfuscation: awgProfile };
+    const update = vi.fn().mockResolvedValue(awgRegion);
+    vi.mocked(useUpdateVpnRegion).mockReturnValue({
+      mutateAsync: update,
+      isPending: false,
+    });
+    vi.mocked(useVpnRegionDetail).mockReturnValue({
+      data: awgRegion,
+      isLoading: false,
+      isError: false,
+      error: null,
+      refetch: vi.fn(),
+    });
+    const user = userEvent.setup();
+    renderAt("r1");
+
+    // A region already running AWG opens the section with its values in place.
+    expect(screen.getByLabelText("Junk Count (Jc)")).toHaveValue(5);
+    expect(screen.getByLabelText("Magic Header H1 low")).toHaveValue(1000);
+    expect(screen.getByLabelText("Magic Header H4 high")).toHaveValue(4100);
+
+    await user.click(screen.getByRole("button", { name: /edit region/i }));
+    await user.click(screen.getByRole("button", { name: "Save Changes" }));
+
+    await waitFor(() => expect(update).toHaveBeenCalledTimes(1));
+    expect(update.mock.calls[0][0].obfuscation).toEqual(awgProfile);
+  });
+
+  it("clears the profile when the data plane is switched back to native", async () => {
+    const awgRegion = { ...region, obfuscation: awgProfile };
+    const update = vi.fn().mockResolvedValue(region);
+    vi.mocked(useUpdateVpnRegion).mockReturnValue({
+      mutateAsync: update,
+      isPending: false,
+    });
+    vi.mocked(useVpnRegionDetail).mockReturnValue({
+      data: awgRegion,
+      isLoading: false,
+      isError: false,
+      error: null,
+      refetch: vi.fn(),
+    });
+    const user = userEvent.setup();
+    renderAt("r1");
+
+    await user.click(screen.getByRole("button", { name: /edit region/i }));
+    await user.selectOptions(screen.getByRole("combobox"), "");
+    await user.click(screen.getByRole("button", { name: "Save Changes" }));
+
+    await waitFor(() => expect(update).toHaveBeenCalledTimes(1));
+    expect(update.mock.calls[0][0].obfuscation).toBeNull();
+  });
+
+  it("generates a well-formed profile", async () => {
+    const update = vi.fn().mockResolvedValue(region);
+    vi.mocked(useUpdateVpnRegion).mockReturnValue({
+      mutateAsync: update,
+      isPending: false,
+    });
+    vi.mocked(useVpnRegionDetail).mockReturnValue({
+      data: region,
+      isLoading: false,
+      isError: false,
+      error: null,
+      refetch: vi.fn(),
+    });
+    const user = userEvent.setup();
+    renderAt("r1");
+
+    await user.click(screen.getByRole("button", { name: /edit region/i }));
+    await user.selectOptions(screen.getByRole("combobox"), "awg");
+    await user.click(
+      screen.getByRole("button", { name: /generate valid profile/i }),
+    );
+    await user.click(screen.getByRole("button", { name: "Save Changes" }));
+
+    await waitFor(() => expect(update).toHaveBeenCalledTimes(1));
+    const { params } = update.mock.calls[0][0].obfuscation;
+    expect(params.jc).toBeGreaterThanOrEqual(0);
+    expect(params.jc).toBeLessThanOrEqual(128);
+    expect(params.jmin).toBeLessThanOrEqual(params.jmax);
+    for (const name of ["s1", "s2", "s3", "s4"]) {
+      expect(params[name]).toBeGreaterThanOrEqual(0);
+      expect(params[name]).toBeLessThanOrEqual(1500);
+    }
+    const ranges = [params.h1, params.h2, params.h3, params.h4];
+    ranges.forEach(([lo, hi]) => expect(lo).toBeLessThanOrEqual(hi));
+    // Pairwise disjoint, which is the invariant the AmneziaWG device enforces.
+    for (let i = 0; i < ranges.length; i += 1) {
+      for (let j = i + 1; j < ranges.length; j += 1) {
+        const [aLo, aHi] = ranges[i];
+        const [bLo, bHi] = ranges[j];
+        expect(aLo > bHi || bLo > aHi).toBe(true);
+      }
+    }
   });
 });
