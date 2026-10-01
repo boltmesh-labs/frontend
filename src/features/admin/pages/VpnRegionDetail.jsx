@@ -31,6 +31,8 @@ const mapRegionToForm = (region) => ({
   name: region?.name || "",
   country_code: region?.country_code || "",
   is_active: region?.is_active ?? true,
+  stream_enabled: region?.stream_enabled ?? false,
+  stream_listen_port: region?.stream_listen_port ?? "",
   created_at: region?.created_at || null,
   updated_at: region?.updated_at || null,
 });
@@ -66,6 +68,12 @@ const VpnRegionForm = ({ initialData, isNew, refetchData }) => {
       name: formData.name.trim(),
       country_code: formData.country_code.trim().toUpperCase(),
       is_active: formData.is_active,
+      // The backend clears the port when the rung is off; sending null keeps
+      // the request explicit and the response in sync.
+      stream_enabled: formData.stream_enabled,
+      stream_listen_port: formData.stream_enabled
+        ? Number(formData.stream_listen_port)
+        : null,
     };
 
     try {
@@ -261,6 +269,48 @@ const VpnRegionForm = ({ initialData, isNew, refetchData }) => {
                     }
                     className="pointer-switch"
                   />
+                </Col>
+              </Row>
+
+              <Row className="g-3 small">
+                <Col md={8}>
+                  <Form.Check
+                    type="switch"
+                    id="region-stream-switch"
+                    name="stream_enabled"
+                    checked={formData.stream_enabled}
+                    onChange={handleInputChange}
+                    disabled={!isEditing || saving}
+                    label={
+                      <span className="fw-semibold text-body">
+                        Stream transport (TLS) — nodes in this region serve the
+                        obfuscated TLS rung
+                      </span>
+                    }
+                    className="pointer-switch"
+                  />
+                </Col>
+
+                <Col md={4}>
+                  <Form.Group className="mb-3">
+                    <Form.Label className="text-secondary fw-semibold">
+                      Stream Listen Port
+                    </Form.Label>
+                    <Form.Control
+                      type="number"
+                      name="stream_listen_port"
+                      className="font-monospace"
+                      value={formData.stream_listen_port}
+                      onChange={handleInputChange}
+                      disabled={
+                        !isEditing || saving || !formData.stream_enabled
+                      }
+                      placeholder="e.g. 443"
+                      min={1}
+                      max={65535}
+                      required={formData.stream_enabled}
+                    />
+                  </Form.Group>
                 </Col>
               </Row>
 

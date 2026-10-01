@@ -31,6 +31,8 @@ const region = {
   name: "Frankfurt",
   country_code: "de",
   is_active: true,
+  stream_enabled: true,
+  stream_listen_port: 443,
 };
 
 const renderAt = (id) =>
@@ -129,6 +131,71 @@ describe("VpnRegionDetail (admin)", () => {
       ),
     );
     await waitFor(() => expect(refetch).toHaveBeenCalled());
+  });
+
+  it("submits the stream policy and its port", async () => {
+    const update = vi.fn().mockResolvedValue(region);
+    vi.mocked(useVpnRegionDetail).mockReturnValue({
+      data: region,
+      isLoading: false,
+      isError: false,
+      error: null,
+      refetch: vi.fn(),
+    });
+    vi.mocked(useUpdateVpnRegion).mockReturnValue({
+      mutateAsync: update,
+      isPending: false,
+    });
+    const user = userEvent.setup();
+    renderAt("r1");
+
+    await user.click(screen.getByRole("button", { name: /edit region/i }));
+    const port = screen.getByPlaceholderText("e.g. 443");
+    expect(port).toBeEnabled();
+    await user.clear(port);
+    await user.type(port, "8443");
+    await user.click(screen.getByRole("button", { name: "Save Changes" }));
+
+    await waitFor(() =>
+      expect(update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          stream_enabled: true,
+          stream_listen_port: 8443,
+        }),
+      ),
+    );
+  });
+
+  it("clears the port when the stream rung is switched off", async () => {
+    const update = vi.fn().mockResolvedValue(region);
+    vi.mocked(useVpnRegionDetail).mockReturnValue({
+      data: region,
+      isLoading: false,
+      isError: false,
+      error: null,
+      refetch: vi.fn(),
+    });
+    vi.mocked(useUpdateVpnRegion).mockReturnValue({
+      mutateAsync: update,
+      isPending: false,
+    });
+    const user = userEvent.setup();
+    renderAt("r1");
+
+    await user.click(screen.getByRole("button", { name: /edit region/i }));
+    await user.click(
+      screen.getByRole("checkbox", { name: /stream transport/i }),
+    );
+    await user.click(screen.getByRole("button", { name: "Save Changes" }));
+
+    await waitFor(() =>
+      expect(update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          stream_enabled: false,
+          stream_listen_port: null,
+        }),
+      ),
+    );
   });
 
   it("deletes the region after confirmation", async () => {
