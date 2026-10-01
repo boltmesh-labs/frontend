@@ -151,8 +151,10 @@ const VpnServerForm = ({ initialData, isNew, refetchData }) => {
         payload.tunnel_ip = formData.tunnel_ip.trim();
       if (!Number.isNaN(parsedPort)) payload.wg_port = parsedPort;
       // The stream port is the rung's switch: a value means the node serves the
-      // ingress, blank clears it to null (off). It is live-bound like wg_port —
-      // the node reads it at registration — so it is locked on AMI nodes too.
+      // ingress, blank clears it to null (off). It is node-bound like wg_port —
+      // the node reads it at registration — so it is locked on AMI nodes and the
+      // API refuses a change to it (or the region/addresses) while the row is
+      // online: take the server to maintenance and restart the node to apply one.
       const parsedStreamPort = parseInt(formData.stream_listen_port, 10);
       payload.stream_listen_port = Number.isNaN(parsedStreamPort)
         ? null
