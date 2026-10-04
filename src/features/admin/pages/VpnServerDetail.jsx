@@ -8,6 +8,7 @@ import {
   Button,
   Spinner,
   Form,
+  Collapse,
 } from "react-bootstrap";
 import { toast } from "react-toastify";
 import { usePageTitle } from "@/hooks/usePageTitle";
@@ -29,9 +30,127 @@ import { VPN_SERVER_STATUSES } from "@/constants/statuses";
 const DEFAULT_STATUS = "provisioning";
 const DEFAULT_OS = "rocky";
 
-// The stream port is the rung's switch: set means this node serves, blank means
-// off. A new node starts at 443 (the server-row default) so the rung is offered
-// out of the box; clearing the field turns it off for this node.
+// The flat AWG parameter field names, in render order. Kept as data so the
+// section is one map instead of eleven near-identical JSX blocks.
+const AWG_PARAM_FIELDS = [
+  { label: "Junk Count (Jc)", name: "jc", max: 128 },
+  { label: "Junk Min (Jmin)", name: "jmin", max: 1500 },
+  { label: "Junk Max (Jmax)", name: "jmax", max: 1500 },
+  { label: "Init Padding S1", name: "s1", max: 1500 },
+  { label: "Init Padding S2", name: "s2", max: 1500 },
+  { label: "Init Padding S3", name: "s3", max: 1500 },
+  { label: "Init Padding S4", name: "s4", max: 1500 },
+];
+
+const AWG_HEADER_FIELDS = [1, 2, 3, 4].flatMap((index) => [
+  { label: `Magic Header H${index} low`, name: `h${index}_lo` },
+  { label: `Magic Header H${index} high`, name: `h${index}_hi` },
+]);
+
+const AWG_FORM_FIELDS = [...AWG_PARAM_FIELDS, ...AWG_HEADER_FIELDS];
+
+const toOptionalNumber = (value) =>
+  value === "" || value === null || value === undefined ? null : Number(value);
+
+// The server stores the parameter set flat (the mode is `awg_enabled`), and the
+// form edits it flat too, so the two halves of the mapping live together. Blank
+// numeric inputs are "not set" rather than 0.
+const mapAwgParamsToForm = (params) => {
+  const p = params || {};
+  return {
+    jc: p.jc ?? "",
+    jmin: p.jmin ?? "",
+    jmax: p.jmax ?? "",
+    s1: p.s1 ?? "",
+    s2: p.s2 ?? "",
+    s3: p.s3 ?? "",
+    s4: p.s4 ?? "",
+    h1_lo: p.h1?.[0] ?? "",
+    h1_hi: p.h1?.[1] ?? "",
+    h2_lo: p.h2?.[0] ?? "",
+    h2_hi: p.h2?.[1] ?? "",
+    h3_lo: p.h3?.[0] ?? "",
+    h3_hi: p.h3?.[1] ?? "",
+    h4_lo: p.h4?.[0] ?? "",
+    h4_hi: p.h4?.[1] ?? "",
+  };
+};
+
+// Null when the rung is off (the backend forbids params on a disabled rung);
+// undefined when every field is blank, which lets the backend generate one per
+// server on create and leaves the stored set untouched on edit.
+const buildAwgParams = (formData) => {
+  if (!formData.awg_enabled) return null;
+  if (
+    AWG_FORM_FIELDS.every(
+      (f) => formData[f.name] === "" || formData[f.name] == null,
+    )
+  ) {
+    return undefined;
+  }
+  return {
+    jc: toOptionalNumber(formData.jc),
+    jmin: toOptionalNumber(formData.jmin),
+    jmax: toOptionalNumber(formData.jmax),
+    s1: toOptionalNumber(formData.s1),
+    s2: toOptionalNumber(formData.s2),
+    s3: toOptionalNumber(formData.s3),
+    s4: toOptionalNumber(formData.s4),
+    h1: [toOptionalNumber(formData.h1_lo), toOptionalNumber(formData.h1_hi)],
+    h2: [toOptionalNumber(formData.h2_lo), toOptionalNumber(formData.h2_hi)],
+    h3: [toOptionalNumber(formData.h3_lo), toOptionalNumber(formData.h3_hi)],
+    h4: [toOptionalNumber(formData.h4_lo), toOptionalNumber(formData.h4_hi)],
+  };
+};
+
+const randomInt = (lo, hi) => lo + Math.floor(Math.random() * (hi - lo + 1));
+
+// A well-formed starting point, not a policy: which parameters actually evade a
+// given censor is an operator decision, so this only guarantees the shape the
+// AmneziaWG device requires — in-range junk and padding, and four
+// pairwise-disjoint magic-header ranges drawn well above the standard WireGuard
+// message types. Each range sits in its own slot, so it can never overlap a
+// neighbour.
+const generateAwgParams = () => {
+  const headerBase = 0x40000000;
+  const headerStep = 0x10000000;
+  const headerSpread = 0x00ffffff;
+  const headers = {};
+  for (let i = 1; i <= 4; i += 1) {
+    const lo = headerBase + i * headerStep;
+    headers[`h${i}_lo`] = lo;
+    headers[`h${i}_hi`] = lo + randomInt(0, headerSpread);
+  }
+  return {
+    jc: randomInt(3, 10),
+    jmin: randomInt(10, 50),
+    jmax: randomInt(600, 1000),
+    s1: randomInt(10, 100),
+    s2: randomInt(10, 100),
+    s3: randomInt(10, 100),
+    s4: randomInt(10, 100),
+    ...headers,
+  };
+};
+
+const AwgNumberField = ({ label, name, value, onChange, disabled, max }) => (
+  <Col md={3}>
+    <Form.Group className="mb-3" controlId={`awg-${name}`}>
+      <Form.Label className="text-secondary fw-semibold">{label}</Form.Label>
+      <Form.Control
+        type="number"
+        name={name}
+        className="font-monospace"
+        value={value}
+        onChange={onChange}
+        disabled={disabled}
+        min={0}
+        max={max}
+      />
+    </Form.Group>
+  </Col>
+);
+
 const mapServerToForm = (server, isNew = false) => ({
   name: server?.name || "",
   region_id: server?.region_id || "",
@@ -39,7 +158,12 @@ const mapServerToForm = (server, isNew = false) => ({
   endpoint: server?.endpoint || "",
   tunnel_ip: server?.tunnel_ip || "",
   wg_port: server?.wg_port ?? "",
-  stream_listen_port: server?.stream_listen_port ?? (isNew ? 443 : ""),
+  awg_enabled: server?.awg_enabled ?? true,
+  awg_port: server?.awg_port ?? "",
+  awg_tunnel_ip: server?.awg_tunnel_ip ?? "",
+  ...mapAwgParamsToForm(server?.awg_params),
+  tcp_enabled: server?.tcp_enabled ?? true,
+  tcp_port: server?.tcp_port ?? (isNew ? 443 : ""),
   // Read-only display: client DNS is always the tunnel host address
   // (derived server-side), never an editable field.
   wg_public_key: server?.wg_public_key || "",
@@ -59,6 +183,11 @@ const VpnServerForm = ({ initialData, isNew, refetchData }) => {
     mapServerToForm(initialData, isNew),
   );
   const [bootstrapCommand, setBootstrapCommand] = useState("");
+  // Open by default when the node already runs the obfuscated rung, so the live
+  // parameters are visible without a click.
+  const [showAwgParams, setShowAwgParams] = useState(
+    () => initialData?.awg_enabled === true,
+  );
 
   const {
     data: regionsData,
@@ -112,6 +241,11 @@ const VpnServerForm = ({ initialData, isNew, refetchData }) => {
     }));
   };
 
+  const handleGenerateAwgParams = () => {
+    setFormData((prev) => ({ ...prev, ...generateAwgParams() }));
+    setShowAwgParams(true);
+  };
+
   const handleSaveChanges = async (e) => {
     e.preventDefault();
 
@@ -138,7 +272,9 @@ const VpnServerForm = ({ initialData, isNew, refetchData }) => {
       }
     }
 
-    const parsedPort = parseInt(formData.wg_port, 10);
+    const parsedWgPort = parseInt(formData.wg_port, 10);
+    const parsedAwgPort = parseInt(formData.awg_port, 10);
+    const parsedTcpPort = parseInt(formData.tcp_port, 10);
 
     const payload = {
       status: formData.status || DEFAULT_STATUS,
@@ -158,13 +294,12 @@ const VpnServerForm = ({ initialData, isNew, refetchData }) => {
         typeof formData.endpoint === "string" ? formData.endpoint.trim() : "";
       if (endpoint) payload.endpoint = endpoint;
       else if (!isNew) payload.endpoint = null;
-      if (!Number.isNaN(parsedPort)) payload.wg_port = parsedPort;
-      // The stream port is the rung's switch: a value means the node serves the
-      // ingress, blank clears it to null (off).
-      const parsedStreamPort = parseInt(formData.stream_listen_port, 10);
-      payload.stream_listen_port = Number.isNaN(parsedStreamPort)
-        ? null
-        : parsedStreamPort;
+      // The three ports are Terraform-owned on an AMI row; on manual rows a blank
+      // one is omitted, so the backend fills it from Settings on create or keeps
+      // the stored value on edit.
+      if (!Number.isNaN(parsedWgPort)) payload.wg_port = parsedWgPort;
+      if (!Number.isNaN(parsedAwgPort)) payload.awg_port = parsedAwgPort;
+      if (!Number.isNaN(parsedTcpPort)) payload.tcp_port = parsedTcpPort;
     }
 
     // Backend-owned fields: the node adopts them from the registration response,
@@ -175,6 +310,17 @@ const VpnServerForm = ({ initialData, isNew, refetchData }) => {
       if (isNew) payload.tunnel_ip = formData.tunnel_ip.trim();
       else if (formData.tunnel_ip.trim())
         payload.tunnel_ip = formData.tunnel_ip.trim();
+
+      // The rung switches, plus the AWG parameters and overlay. A disabled rung
+      // carries nothing, which is the rule the backend enforces: null the params
+      // and the overlay with the switch.
+      payload.awg_enabled = formData.awg_enabled;
+      const awgParams = buildAwgParams(formData);
+      if (awgParams !== undefined) payload.awg_params = awgParams;
+      payload.awg_tunnel_ip = formData.awg_enabled
+        ? formData.awg_tunnel_ip.trim() || null
+        : null;
+      payload.tcp_enabled = formData.tcp_enabled;
     }
 
     try {
@@ -547,50 +693,192 @@ const VpnServerForm = ({ initialData, isNew, refetchData }) => {
               )}
 
               <h6 className="fw-bold text-body border-bottom pb-3 mb-3 mt-4">
+                AmneziaWG (Obfuscated)
+              </h6>
+
+              <Row className="g-3 small">
+                <Col md={12}>
+                  <Form.Check
+                    type="switch"
+                    id="awg-enabled-switch"
+                    name="awg_enabled"
+                    checked={formData.awg_enabled}
+                    onChange={handleInputChange}
+                    disabled={!isEditing || saving || configLocked}
+                    label={
+                      <span className="fw-semibold text-body">
+                        Serve the obfuscated rung
+                      </span>
+                    }
+                    className="pointer-switch"
+                  />
+                </Col>
+              </Row>
+
+              {formData.awg_enabled && (
+                <>
+                  <Row className="g-3 small mt-1">
+                    <Col md={4}>
+                      <Form.Group className="mb-3">
+                        <Form.Label className="text-secondary fw-semibold">
+                          Port (UDP)
+                        </Form.Label>
+                        <Form.Control
+                          type="number"
+                          name="awg_port"
+                          min={1}
+                          max={65535}
+                          className="font-monospace"
+                          value={formData.awg_port}
+                          onChange={handleInputChange}
+                          disabled={!isEditing || saving || infraLocked}
+                          placeholder="51821"
+                        />
+                      </Form.Group>
+                    </Col>
+                    <Col md={4}>
+                      <Form.Group className="mb-3">
+                        <Form.Label className="text-secondary fw-semibold">
+                          Tunnel Address
+                        </Form.Label>
+                        <Form.Control
+                          type="text"
+                          name="awg_tunnel_ip"
+                          className="font-monospace"
+                          value={formData.awg_tunnel_ip}
+                          onChange={handleInputChange}
+                          disabled={!isEditing || saving || configLocked}
+                          placeholder="e.g. 10.2.0.1/16"
+                          required
+                        />
+                        <Form.Text className="text-muted">
+                          A network of its own — the second device cannot share
+                          the stock overlay.
+                        </Form.Text>
+                      </Form.Group>
+                    </Col>
+                    <Col md={4} className="d-flex align-items-start pt-1">
+                      <Button
+                        type="button"
+                        variant="link"
+                        size="sm"
+                        className="text-decoration-none"
+                        onClick={() => setShowAwgParams((open) => !open)}
+                      >
+                        {showAwgParams ? "Hide parameters" : "Show parameters"}
+                      </Button>
+                    </Col>
+                  </Row>
+
+                  <Collapse in={showAwgParams}>
+                    <div>
+                      <Row className="g-3 small">
+                        {AWG_PARAM_FIELDS.map((field) => (
+                          <AwgNumberField
+                            key={field.name}
+                            {...field}
+                            value={formData[field.name]}
+                            onChange={handleInputChange}
+                            disabled={!isEditing || saving || configLocked}
+                          />
+                        ))}
+                      </Row>
+                      <Row className="g-3 small">
+                        {AWG_HEADER_FIELDS.map((field) => (
+                          <AwgNumberField
+                            key={field.name}
+                            {...field}
+                            value={formData[field.name]}
+                            onChange={handleInputChange}
+                            disabled={!isEditing || saving || configLocked}
+                          />
+                        ))}
+                      </Row>
+                      <div className="d-flex justify-content-between align-items-start gap-3">
+                        <Form.Text className="text-muted">
+                          Each magic header is a [low, high] range; the four
+                          ranges must not overlap. Padding and junk sizes are in
+                          bytes. Leave them blank on create to have one
+                          generated per server.
+                        </Form.Text>
+                        <Button
+                          type="button"
+                          variant="outline-secondary"
+                          size="sm"
+                          className="flex-shrink-0"
+                          onClick={handleGenerateAwgParams}
+                          disabled={!isEditing || saving || configLocked}
+                        >
+                          Generate
+                        </Button>
+                      </div>
+                    </div>
+                  </Collapse>
+                </>
+              )}
+
+              <h6 className="fw-bold text-body border-bottom pb-3 mb-3 mt-4">
                 Stream Transport (TLS)
               </h6>
 
               <Row className="g-3 small">
-                <Col md={4}>
-                  <Form.Group className="mb-3">
-                    <Form.Label className="text-secondary fw-semibold">
-                      Stream Listen Port (TCP)
-                    </Form.Label>
-                    <Form.Control
-                      type="number"
-                      name="stream_listen_port"
-                      min={1}
-                      max={65535}
-                      className="font-monospace"
-                      value={formData.stream_listen_port}
-                      onChange={handleInputChange}
-                      disabled={!isEditing || saving || infraLocked}
-                      placeholder="443"
-                    />
-                    <Form.Text className="text-muted">
-                      Public TLS port for the obfuscated stream rung. Leave
-                      blank to disable it for this node.
-                    </Form.Text>
-                  </Form.Group>
-                </Col>
-                <Col md={8}>
-                  <Form.Group className="mb-3">
-                    <Form.Label className="text-secondary fw-semibold">
-                      Stream rung needs a DNS endpoint
-                    </Form.Label>
-                    <Form.Text className="text-muted">
-                      This node&apos;s <strong>Endpoint</strong> is also the SNI
-                      its stream handshake presents. A DNS name here enables the
-                      stream rung; an address or a blank disables it. RFC
-                      6066&apos;s SNI extension carries a hostname, so a client
-                      sends no SNI at all for an IP address — a passively
-                      observable tell no browser produces. Name your nodes so
-                      the names themselves are plausible on the networks your
-                      users are on.
-                    </Form.Text>
-                  </Form.Group>
+                <Col md={12}>
+                  <Form.Check
+                    type="switch"
+                    id="tcp-enabled-switch"
+                    name="tcp_enabled"
+                    checked={formData.tcp_enabled}
+                    onChange={handleInputChange}
+                    disabled={!isEditing || saving || configLocked}
+                    label={
+                      <span className="fw-semibold text-body">
+                        Serve the stream rung
+                      </span>
+                    }
+                    className="pointer-switch"
+                  />
                 </Col>
               </Row>
+
+              {formData.tcp_enabled && (
+                <Row className="g-3 small mt-1">
+                  <Col md={4}>
+                    <Form.Group className="mb-3">
+                      <Form.Label className="text-secondary fw-semibold">
+                        Stream Listen Port (TCP)
+                      </Form.Label>
+                      <Form.Control
+                        type="number"
+                        name="tcp_port"
+                        min={1}
+                        max={65535}
+                        className="font-monospace"
+                        value={formData.tcp_port}
+                        onChange={handleInputChange}
+                        disabled={!isEditing || saving || infraLocked}
+                        placeholder="443"
+                      />
+                    </Form.Group>
+                  </Col>
+                  <Col md={8}>
+                    <Form.Group className="mb-3">
+                      <Form.Label className="text-secondary fw-semibold">
+                        Stream rung needs a DNS endpoint
+                      </Form.Label>
+                      <Form.Text className="text-muted">
+                        This node&apos;s <strong>Endpoint</strong> is also the
+                        SNI its stream handshake presents. A DNS name here
+                        enables the stream rung; an address or a blank disables
+                        it. RFC 6066&apos;s SNI extension carries a hostname, so
+                        a client sends no SNI at all for an IP address — a
+                        passively observable tell no browser produces. Name your
+                        nodes so the names themselves are plausible on the
+                        networks your users are on.
+                      </Form.Text>
+                    </Form.Group>
+                  </Col>
+                </Row>
+              )}
 
               {!isNew && (
                 <>

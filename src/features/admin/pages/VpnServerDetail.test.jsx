@@ -41,7 +41,12 @@ const server = {
   endpoint: "node-1.us-east-1.vpn.example.com",
   tunnel_ip: "10.1.0.1/16",
   wg_port: 51820,
-  stream_listen_port: 443,
+  awg_enabled: false,
+  awg_port: null,
+  awg_tunnel_ip: null,
+  awg_params: null,
+  tcp_enabled: true,
+  tcp_port: 443,
   wg_public_key: "c3VjaC1hLXZhbGlkLXdpcmVndWFyZC1wdWJsaWMta2V5",
   os: "ubuntu",
   status: "online",
@@ -127,6 +132,11 @@ describe("VpnServerDetail (admin)", () => {
       screen.getByPlaceholderText("e.g. 10.1.0.1/16"),
       "10.2.0.1/16",
     );
+    // The obfuscated rung is on by default, so it needs its own overlay.
+    await user.type(
+      screen.getByPlaceholderText("e.g. 10.2.0.1/16"),
+      "10.3.0.1/16",
+    );
     await user.click(screen.getByRole("button", { name: /create server/i }));
 
     await waitFor(() => expect(create).toHaveBeenCalled());
@@ -173,17 +183,22 @@ describe("VpnServerDetail (admin)", () => {
       screen.getByPlaceholderText("e.g. 10.1.0.1/16"),
       "10.2.0.1/16",
     );
+    // The obfuscated rung is on by default, so it needs its own overlay.
+    await user.type(
+      screen.getByPlaceholderText("e.g. 10.2.0.1/16"),
+      "10.3.0.1/16",
+    );
     await user.click(screen.getByRole("button", { name: /create server/i }));
 
     await waitFor(() => expect(create).toHaveBeenCalled());
-    expect(create.mock.calls[0][0].stream_listen_port).toBe(443);
+    expect(create.mock.calls[0][0].tcp_port).toBe(443);
   });
 
-  it("clears the stream port to null to disable the rung", async () => {
+  it("disables the stream rung with the switch", async () => {
     const manualServer = { ...server, status: "maintenance", is_manual: true };
     const update = vi
       .fn()
-      .mockResolvedValue({ ...manualServer, stream_listen_port: null });
+      .mockResolvedValue({ ...manualServer, tcp_enabled: false });
     vi.mocked(useVpnServerDetail).mockReturnValue({
       data: manualServer,
       isLoading: false,
@@ -199,11 +214,55 @@ describe("VpnServerDetail (admin)", () => {
     renderAt("srv1");
 
     await user.click(screen.getByRole("button", { name: /edit server/i }));
-    await user.clear(screen.getByPlaceholderText("443"));
+    await user.click(screen.getByLabelText(/serve the stream rung/i));
     await user.click(screen.getByRole("button", { name: "Save Changes" }));
 
     await waitFor(() => expect(update).toHaveBeenCalledTimes(1));
-    expect(update.mock.calls[0][0].stream_listen_port).toBeNull();
+    expect(update.mock.calls[0][0].tcp_enabled).toBe(false);
+  });
+
+  it("enables the obfuscated rung with generated parameters", async () => {
+    const manualServer = { ...server, status: "maintenance", is_manual: true };
+    const update = vi.fn().mockResolvedValue(manualServer);
+    vi.mocked(useVpnServerDetail).mockReturnValue({
+      data: manualServer,
+      isLoading: false,
+      isError: false,
+      error: null,
+      refetch: vi.fn(),
+    });
+    vi.mocked(useUpdateVpnServer).mockReturnValue({
+      mutateAsync: update,
+      isPending: false,
+    });
+    const user = userEvent.setup();
+    renderAt("srv1");
+
+    await user.click(screen.getByRole("button", { name: /edit server/i }));
+    await user.click(screen.getByLabelText(/serve the obfuscated rung/i));
+    await user.type(
+      screen.getByPlaceholderText("e.g. 10.2.0.1/16"),
+      "10.3.0.1/16",
+    );
+    await user.click(screen.getByRole("button", { name: /show parameters/i }));
+    await user.click(screen.getByRole("button", { name: /^generate$/i }));
+    await user.click(screen.getByRole("button", { name: "Save Changes" }));
+
+    await waitFor(() => expect(update).toHaveBeenCalledTimes(1));
+    const payload = update.mock.calls[0][0];
+    expect(payload.awg_enabled).toBe(true);
+    expect(payload.awg_tunnel_ip).toBe("10.3.0.1/16");
+    const params = payload.awg_params;
+    expect(params.jmin).toBeLessThanOrEqual(params.jmax);
+    // Pairwise disjoint, which is the invariant the AmneziaWG device enforces.
+    const ranges = [params.h1, params.h2, params.h3, params.h4];
+    for (let i = 0; i < ranges.length; i += 1) {
+      for (let j = i + 1; j < ranges.length; j += 1) {
+        const [aLo, aHi] = ranges[i];
+        const [bLo, bHi] = ranges[j];
+        expect(aLo > bHi || bLo > aHi).toBe(true);
+      }
+    }
   });
 
   it("creates a server without an endpoint and omits it from the payload", async () => {
@@ -234,6 +293,11 @@ describe("VpnServerDetail (admin)", () => {
     await user.type(
       screen.getByPlaceholderText("e.g. 10.1.0.1/16"),
       "10.2.0.1/16",
+    );
+    // The obfuscated rung is on by default, so it needs its own overlay.
+    await user.type(
+      screen.getByPlaceholderText("e.g. 10.2.0.1/16"),
+      "10.3.0.1/16",
     );
     // Endpoint left empty — optional, clients dial the public IP instead.
     await user.click(screen.getByRole("button", { name: /create server/i }));
@@ -342,6 +406,10 @@ describe("VpnServerDetail (admin)", () => {
       status: "maintenance",
       os: "ubuntu",
       tunnel_ip: "10.1.0.1/16",
+      awg_enabled: false,
+      awg_params: null,
+      awg_tunnel_ip: null,
+      tcp_enabled: true,
     });
     await waitFor(() => expect(refetch).toHaveBeenCalled());
   });
@@ -429,6 +497,10 @@ describe("VpnServerDetail (admin)", () => {
       status: "maintenance",
       os: "ubuntu",
       tunnel_ip: "10.2.0.1/16",
+      awg_enabled: false,
+      awg_params: null,
+      awg_tunnel_ip: null,
+      tcp_enabled: true,
     });
   });
 
@@ -475,6 +547,11 @@ describe("VpnServerDetail (admin)", () => {
     await user.type(
       screen.getByPlaceholderText("e.g. 10.1.0.1/16"),
       "10.2.0.1/16",
+    );
+    // The obfuscated rung is on by default, so it needs its own overlay.
+    await user.type(
+      screen.getByPlaceholderText("e.g. 10.2.0.1/16"),
+      "10.3.0.1/16",
     );
     // Submit programmatically to bypass the browser's native `required`
     // check on the empty public_ip input (same as the region test above).
