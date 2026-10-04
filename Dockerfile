@@ -50,7 +50,7 @@ RUN npm run build
 # base above. 1.29 was a mainline release and is now superseded upstream: the
 # tag still pulls, but no further patches are published for it, so it would sit
 # frozen with no security updates. Stable is 1.30; 1.31 is mainline.
-FROM docker.io/library/nginx:1.30-alpine AS prod
+FROM docker.io/library/nginx:1.31-alpine AS prod
 COPY deploy/nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /app/dist /usr/share/nginx/html
 EXPOSE 80
