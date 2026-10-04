@@ -74,15 +74,31 @@ const VpnServerForm = ({ initialData, isNew, refetchData }) => {
   const saving = createMutation.isPending || updateMutation.isPending;
   const deleting = deleteMutation.isPending;
 
-  // Origin-gated topology editing (mirrors the backend PATCH rule in
-  // app/admin/services/server.py): manual admin-created servers
-  // (is_manual) keep identity/topology fields editable in any status —
-  // manual registration is lookup-only. AMI auto-provisioned servers are
-  // node-authoritative (topology upserted on every boot), so those fields
-  // stay locked and only `status` remains editable. Unknown origin fails
-  // closed to the locked state.
+  // Two gates mirror the backend PATCH rule (VpnServerService.update_server):
+  //
+  // - Origin: on an AMI auto-provisioned row (is_manual false) the fields
+  //   Terraform owns — name, region, public IP, endpoint and the three ports —
+  //   are never editable; the backend cannot make them true and the next boot
+  //   would revert them. Unknown origin fails closed to the locked state.
+  // - Status: every config field is editable only while the server is
+  //   provisioning or maintenance, because a running node reads its
+  //   configuration once at registration. `status` is always editable.
+  //
+  // `os` and `tunnel_ip` are the exception on an AMI row: the node adopts them
+  // from the registration response, so the backend owns them and the status
+  // window alone governs them.
   const isManualServer = isNew || initialData?.is_manual === true;
-  const isTopologyLocked = !isNew && !isManualServer;
+  const isAmiServer = !isNew && !isManualServer;
+  const configWindowOpen =
+    isNew ||
+    [
+      VPN_SERVER_STATUSES.provisioning,
+      VPN_SERVER_STATUSES.maintenance,
+    ].includes(formData.status);
+  // Terraform-owned on an AMI row, and every field outside the status window.
+  const infraLocked = isAmiServer || !configWindowOpen;
+  // Backend-owned fields (os, tunnel_ip): the status window alone governs them.
+  const configLocked = !configWindowOpen;
   // Hard delete is a terminal action: the backend only deletes
   // `decommissioned` servers and blocks while peers still reference the row.
   const isDeletable =
@@ -104,7 +120,7 @@ const VpnServerForm = ({ initialData, isNew, refetchData }) => {
     const publicIp =
       typeof formData.public_ip === "string" ? formData.public_ip.trim() : "";
 
-    if (!isTopologyLocked) {
+    if (!infraLocked) {
       // HTML5 `required` cannot help while the region select is disabled during
       // load (disabled controls are exempt from constraint validation), and an
       // empty region_id would only earn a cryptic backend UUID-validation error.
@@ -128,7 +144,10 @@ const VpnServerForm = ({ initialData, isNew, refetchData }) => {
       status: formData.status || DEFAULT_STATUS,
     };
 
-    if (!isTopologyLocked) {
+    // Terraform-owned fields: sent on create and on manual edits inside the
+    // status window, never on an AMI-locked edit (the backend refuses them there
+    // and the next boot would revert them anyway).
+    if (!infraLocked) {
       payload.name = formData.name.trim();
       payload.region_id = regionId;
       payload.public_ip = publicIp;
@@ -139,26 +158,23 @@ const VpnServerForm = ({ initialData, isNew, refetchData }) => {
         typeof formData.endpoint === "string" ? formData.endpoint.trim() : "";
       if (endpoint) payload.endpoint = endpoint;
       else if (!isNew) payload.endpoint = null;
-      payload.os = formData.os || DEFAULT_OS;
-    }
-
-    // tunnel_ip/wg_port travel with the rest of the topology fields:
-    // sent on create and on manual edits, never on AMI-locked edits
-    // (an omitted wg_port falls back to the Settings default server-side).
-    if (!isTopologyLocked) {
-      if (isNew) payload.tunnel_ip = formData.tunnel_ip.trim();
-      else if (formData.tunnel_ip.trim())
-        payload.tunnel_ip = formData.tunnel_ip.trim();
       if (!Number.isNaN(parsedPort)) payload.wg_port = parsedPort;
       // The stream port is the rung's switch: a value means the node serves the
-      // ingress, blank clears it to null (off). It is node-bound like wg_port —
-      // the node reads it at registration — so it is locked on AMI nodes and the
-      // API refuses a change to it (or the region/addresses) while the row is
-      // online: take the server to maintenance and restart the node to apply one.
+      // ingress, blank clears it to null (off).
       const parsedStreamPort = parseInt(formData.stream_listen_port, 10);
       payload.stream_listen_port = Number.isNaN(parsedStreamPort)
         ? null
         : parsedStreamPort;
+    }
+
+    // Backend-owned fields: the node adopts them from the registration response,
+    // so they are editable on an AMI row too — the status window is the only
+    // gate. Sent whenever it is open.
+    if (!configLocked) {
+      payload.os = formData.os || DEFAULT_OS;
+      if (isNew) payload.tunnel_ip = formData.tunnel_ip.trim();
+      else if (formData.tunnel_ip.trim())
+        payload.tunnel_ip = formData.tunnel_ip.trim();
     }
 
     try {
@@ -292,8 +308,9 @@ const VpnServerForm = ({ initialData, isNew, refetchData }) => {
                       className="alert alert-warning py-2 mb-0 small"
                       role="note"
                     >
-                      Auto-provisioned (AMI): Managed by node. Only status is
-                      editable.
+                      Auto-provisioned (AMI): Terraform owns the name, region,
+                      addresses and ports. The OS and tunnel address are
+                      editable while the server is provisioning or maintenance.
                     </div>
                   )}
                 </div>
@@ -311,9 +328,9 @@ const VpnServerForm = ({ initialData, isNew, refetchData }) => {
                       className="font-monospace"
                       value={formData.name}
                       onChange={handleInputChange}
-                      disabled={!isEditing || saving || isTopologyLocked}
+                      disabled={!isEditing || saving || infraLocked}
                       placeholder="e.g. Us-East-01"
-                      required={!isTopologyLocked}
+                      required={!infraLocked}
                     />
                   </Form.Group>
                 </Col>
@@ -329,12 +346,9 @@ const VpnServerForm = ({ initialData, isNew, refetchData }) => {
                       value={formData.region_id}
                       onChange={handleInputChange}
                       disabled={
-                        !isEditing ||
-                        saving ||
-                        regionsLoading ||
-                        isTopologyLocked
+                        !isEditing || saving || regionsLoading || infraLocked
                       }
-                      required={!isTopologyLocked}
+                      required={!infraLocked}
                     >
                       <option value="">
                         {regionsLoading
@@ -421,7 +435,7 @@ const VpnServerForm = ({ initialData, isNew, refetchData }) => {
                       className="font-monospace"
                       value={formData.os}
                       onChange={handleInputChange}
-                      disabled={!isEditing || saving || isTopologyLocked}
+                      disabled={!isEditing || saving || configLocked}
                     >
                       <option value="rocky">Rocky Linux</option>
                       <option value="ubuntu">Ubuntu</option>
@@ -448,9 +462,9 @@ const VpnServerForm = ({ initialData, isNew, refetchData }) => {
                       className="font-monospace"
                       value={formData.public_ip}
                       onChange={handleInputChange}
-                      disabled={!isEditing || saving || isTopologyLocked}
+                      disabled={!isEditing || saving || infraLocked}
                       placeholder="e.g. 198.51.100.1"
-                      required={!isTopologyLocked}
+                      required={!infraLocked}
                     />
                   </Form.Group>
                 </Col>
@@ -466,7 +480,7 @@ const VpnServerForm = ({ initialData, isNew, refetchData }) => {
                       className="font-monospace"
                       value={formData.endpoint}
                       onChange={handleInputChange}
-                      disabled={!isEditing || saving || isTopologyLocked}
+                      disabled={!isEditing || saving || infraLocked}
                       placeholder="e.g. node-1.us-east-1.vpn.example.com (defaults to public IP)"
                     />
                     <Form.Text className="text-muted">
@@ -488,7 +502,7 @@ const VpnServerForm = ({ initialData, isNew, refetchData }) => {
                       className="font-monospace"
                       value={formData.wg_port}
                       onChange={handleInputChange}
-                      disabled={!isEditing || saving || isTopologyLocked}
+                      disabled={!isEditing || saving || infraLocked}
                       placeholder="51820"
                     />
                   </Form.Group>
@@ -507,7 +521,7 @@ const VpnServerForm = ({ initialData, isNew, refetchData }) => {
                       className="font-monospace"
                       value={formData.tunnel_ip}
                       onChange={handleInputChange}
-                      disabled={!isEditing || saving || isTopologyLocked}
+                      disabled={!isEditing || saving || configLocked}
                       placeholder="e.g. 10.1.0.1/16"
                       required={isNew}
                     />
@@ -550,7 +564,7 @@ const VpnServerForm = ({ initialData, isNew, refetchData }) => {
                       className="font-monospace"
                       value={formData.stream_listen_port}
                       onChange={handleInputChange}
-                      disabled={!isEditing || saving || isTopologyLocked}
+                      disabled={!isEditing || saving || infraLocked}
                       placeholder="443"
                     />
                     <Form.Text className="text-muted">

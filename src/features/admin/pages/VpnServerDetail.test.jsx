@@ -180,7 +180,7 @@ describe("VpnServerDetail (admin)", () => {
   });
 
   it("clears the stream port to null to disable the rung", async () => {
-    const manualServer = { ...server, status: "online", is_manual: true };
+    const manualServer = { ...server, status: "maintenance", is_manual: true };
     const update = vi
       .fn()
       .mockResolvedValue({ ...manualServer, stream_listen_port: null });
@@ -298,7 +298,7 @@ describe("VpnServerDetail (admin)", () => {
     await waitFor(() => expect(refetch).toHaveBeenCalled());
   });
 
-  it("locks topology fields on AMI auto-provisioned servers and sends a status-only payload", async () => {
+  it("locks Terraform-owned fields on an AMI server and edits the backend-owned config in the window", async () => {
     const amiServer = { ...server, status: "online", is_manual: false };
     const update = vi
       .fn()
@@ -335,18 +335,25 @@ describe("VpnServerDetail (admin)", () => {
 
     await waitFor(() => expect(update).toHaveBeenCalledTimes(1));
     const payload = update.mock.calls[0][0];
-    expect(payload).toEqual({ id: "srv1", status: "maintenance" });
+    // Terraform-owned fields are never sent; the backend-owned config is, since
+    // the write leaves the server in maintenance.
+    expect(payload).toEqual({
+      id: "srv1",
+      status: "maintenance",
+      os: "ubuntu",
+      tunnel_ip: "10.1.0.1/16",
+    });
     await waitFor(() => expect(refetch).toHaveBeenCalled());
   });
 
-  it("keeps topology editable on manual servers even after the node is online", async () => {
-    const manualServer = { ...server, status: "online", is_manual: true };
+  it("locks config on a manual server while online and sends a status-only payload", async () => {
+    const onlineServer = { ...server, status: "online", is_manual: true };
     const update = vi
       .fn()
-      .mockResolvedValue({ ...manualServer, name: "Us-East-01b" });
+      .mockResolvedValue({ ...onlineServer, status: "maintenance" });
     const refetch = vi.fn();
     vi.mocked(useVpnServerDetail).mockReturnValue({
-      data: manualServer,
+      data: onlineServer,
       isLoading: false,
       isError: false,
       error: null,
@@ -360,25 +367,69 @@ describe("VpnServerDetail (admin)", () => {
     renderAt("srv1");
 
     await user.click(screen.getByRole("button", { name: /edit server/i }));
-    const nameInput = screen.getByPlaceholderText("e.g. Us-East-01");
-    expect(nameInput).toBeEnabled();
+    // The status window is closed: a running node reads its config once, at
+    // registration, so every field but status is locked.
+    expect(screen.getByPlaceholderText("e.g. Us-East-01")).toBeDisabled();
+    expect(screen.getByPlaceholderText("e.g. 10.1.0.1/16")).toBeDisabled();
+    expect(screen.getByPlaceholderText("51820")).toBeDisabled();
+
+    // Draining and editing in one save opens the window: the backend keys on
+    // the status the write leaves behind.
+    await user.selectOptions(screen.getAllByRole("combobox")[1], "maintenance");
+    expect(screen.getByPlaceholderText("e.g. Us-East-01")).toBeEnabled();
     expect(screen.getByPlaceholderText("e.g. 10.1.0.1/16")).toBeEnabled();
-    await user.clear(nameInput);
-    await user.type(nameInput, "Us-East-02");
     await user.click(screen.getByRole("button", { name: "Save Changes" }));
 
-    await waitFor(() =>
-      expect(update).toHaveBeenCalledWith(
-        expect.objectContaining({
-          id: "srv1",
-          name: "Us-East-02",
-          endpoint: "node-1.us-east-1.vpn.example.com",
-          tunnel_ip: "10.1.0.1/16",
-          wg_port: 51820,
-        }),
-      ),
+    await waitFor(() => expect(update).toHaveBeenCalledTimes(1));
+    expect(update.mock.calls[0][0]).toEqual(
+      expect.objectContaining({
+        id: "srv1",
+        status: "maintenance",
+        name: "Us-East-01",
+        tunnel_ip: "10.1.0.1/16",
+      }),
     );
     await waitFor(() => expect(refetch).toHaveBeenCalled());
+  });
+
+  it("edits the backend-owned config on an AMI server in maintenance", async () => {
+    const amiServer = { ...server, status: "maintenance", is_manual: false };
+    const update = vi
+      .fn()
+      .mockResolvedValue({ ...amiServer, tunnel_ip: "10.2.0.1/16" });
+    vi.mocked(useVpnServerDetail).mockReturnValue({
+      data: amiServer,
+      isLoading: false,
+      isError: false,
+      error: null,
+      refetch: vi.fn(),
+    });
+    vi.mocked(useUpdateVpnServer).mockReturnValue({
+      mutateAsync: update,
+      isPending: false,
+    });
+    const user = userEvent.setup();
+    renderAt("srv1");
+
+    await user.click(screen.getByRole("button", { name: /edit server/i }));
+    // Terraform owns the name/region/addresses/ports: still locked on an AMI row.
+    expect(screen.getByPlaceholderText("e.g. Us-East-01")).toBeDisabled();
+    expect(screen.getByPlaceholderText("e.g. 198.51.100.1")).toBeDisabled();
+    expect(screen.getByPlaceholderText("51820")).toBeDisabled();
+    // The backend owns the OS and the tunnel address: editable in the window.
+    const tunnel = screen.getByPlaceholderText("e.g. 10.1.0.1/16");
+    expect(tunnel).toBeEnabled();
+    await user.clear(tunnel);
+    await user.type(tunnel, "10.2.0.1/16");
+    await user.click(screen.getByRole("button", { name: "Save Changes" }));
+
+    await waitFor(() => expect(update).toHaveBeenCalledTimes(1));
+    expect(update.mock.calls[0][0]).toEqual({
+      id: "srv1",
+      status: "maintenance",
+      os: "ubuntu",
+      tunnel_ip: "10.2.0.1/16",
+    });
   });
 
   it("blocks submission with a clear message instead of sending an empty region_id", async () => {
@@ -436,7 +487,7 @@ describe("VpnServerDetail (admin)", () => {
   });
 
   it("sends null endpoint when clearing it on a manual server edit", async () => {
-    const manualServer = { ...server, status: "online", is_manual: true };
+    const manualServer = { ...server, status: "maintenance", is_manual: true };
     const update = vi
       .fn()
       .mockResolvedValue({ ...manualServer, endpoint: null });
