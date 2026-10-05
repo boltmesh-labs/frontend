@@ -23,6 +23,10 @@ const device = {
   name: "phone-1",
   platform: "android",
   is_active: true,
+  is_connected: true,
+  last_seen_at: "2026-03-01T00:00:00Z",
+  tx_bytes: 1024,
+  rx_bytes: 2048,
   created_at: "2026-01-01T00:00:00Z",
   updated_at: "2026-02-01T00:00:00Z",
   user_id: "u1",
@@ -33,16 +37,12 @@ const device = {
       public_key: "pk=",
       assigned_ip: "10.7.0.2",
       server_id: "srv1",
-      is_connected: false,
-      tx_bytes: 1024,
-      rx_bytes: 2048,
     },
     {
       id: "peer2",
       public_key: null,
       assigned_ip: null,
       server_id: null,
-      is_connected: true,
     },
   ],
 };
@@ -86,6 +86,9 @@ describe("VpnDeviceDetail (admin)", () => {
       screen.getByRole("button", { name: "Deactivate device" }),
     ).toBeInTheDocument();
     expect(screen.getAllByText(/associated peers/i).length).toBeGreaterThan(0);
+    // Telemetry now lives on the device summary, not per peer row.
+    expect(screen.getByText("Connected")).toBeInTheDocument();
+    expect(screen.getByText("1 KB / 2 KB")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "peer1" })).toHaveAttribute(
       "href",
       "/admin/vpn-devices/peer/peer1",

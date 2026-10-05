@@ -11,11 +11,8 @@ vi.mock("@/features/admin/hooks/useVpnPeers", () => ({
 
 const peer = {
   id: "peer1",
-  is_connected: true,
   assigned_ip: "10.7.0.2",
   public_key: "peer-pubkey=",
-  tx_bytes: 1024,
-  rx_bytes: 2048,
   device_id: "d1",
   server_id: "srv1",
 };
@@ -34,7 +31,7 @@ describe("VpnPeerDetail (admin)", () => {
     vi.clearAllMocks();
   });
 
-  it("renders connection state, traffic and linked device details", async () => {
+  it("renders the session binding and linked device details", async () => {
     vi.mocked(useVpnPeerDetail).mockReturnValue({
       data: peer,
       isLoading: false,
@@ -45,8 +42,6 @@ describe("VpnPeerDetail (admin)", () => {
     renderPage();
 
     expect(screen.getByText("VPN Peer")).toBeInTheDocument();
-    expect(screen.getByText("Connected")).toBeInTheDocument();
-    expect(screen.getByText("1 KB / 2 KB")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "d1" })).toHaveAttribute(
       "href",
       "/admin/vpn-devices/d1",

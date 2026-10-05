@@ -18,9 +18,8 @@ import { COMPANY_NAME } from "@/utils/config";
 import { resolveActivePlan } from "../utils/activePlan";
 
 const DeviceMobileCard = ({ device, onRevoke, disabled }) => {
-  const primaryPeer = device.peers?.[0];
-  const isConnected = primaryPeer?.is_connected ?? false;
-  const lastSeen = primaryPeer?.last_seen_at;
+  const isConnected = device.is_connected;
+  const lastSeen = device.last_seen_at;
 
   return (
     <MobileRecordCard
@@ -44,8 +43,8 @@ const DeviceMobileCard = ({ device, onRevoke, disabled }) => {
         },
         {
           label: "Tx / Rx",
-          value: `${formatBytes(primaryPeer?.tx_bytes ?? 0)} / ${formatBytes(
-            primaryPeer?.rx_bytes ?? 0,
+          value: `${formatBytes(device.tx_bytes)} / ${formatBytes(
+            device.rx_bytes,
           )}`,
         },
       ]}
@@ -181,11 +180,10 @@ const DeviceList = () => {
                 </thead>
                 <tbody>
                   {devices.map((device) => {
-                    const primaryPeer = device.peers?.[0];
-                    const isConnected = primaryPeer?.is_connected ?? false;
-                    const lastSeen = primaryPeer?.last_seen_at;
-                    const txBytes = primaryPeer?.tx_bytes;
-                    const rxBytes = primaryPeer?.rx_bytes;
+                    const isConnected = device.is_connected;
+                    const lastSeen = device.last_seen_at;
+                    const txBytes = device.tx_bytes;
+                    const rxBytes = device.rx_bytes;
 
                     return (
                       <tr key={device.id}>

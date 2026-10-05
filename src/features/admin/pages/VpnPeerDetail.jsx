@@ -5,7 +5,6 @@ import { useNavigate, useParams } from "react-router-dom";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { useVpnPeerDetail } from "@/features/admin/hooks/useVpnPeers";
 import { formatDate } from "@/utils/dateFormatter";
-import { formatBytes } from "@/utils/byteFormatter";
 import { COMPANY_NAME } from "@/utils/config";
 
 import { CopyableField } from "@/components/CopyableField";
@@ -38,9 +37,6 @@ const VpnPeerDetail = () => {
   const summaryItems = useMemo(() => {
     if (!peer) return [];
 
-    const formattedTx = formatBytes(peer.tx_bytes ?? 0);
-    const formattedRx = formatBytes(peer.rx_bytes ?? 0);
-
     return [
       {
         label: "Assigned IP Address",
@@ -49,30 +45,6 @@ const VpnPeerDetail = () => {
       {
         label: "Server ID",
         value: peer.server_id || "N/A",
-      },
-      {
-        label: "Connected",
-        value: (
-          <span className="d-inline-flex align-items-center gap-2">
-            <span
-              className={`rounded-circle ${peer.is_connected ? "bg-success" : "bg-danger"}`}
-              style={{ width: "8px", height: "8px" }}
-              aria-hidden="true"
-            />
-            <span className="small">
-              {peer.is_connected ? "Connected" : "Disconnected"}
-            </span>
-          </span>
-        ),
-        className: "text-muted",
-      },
-      {
-        label: "Tx / Rx",
-        value: `${formattedTx} / ${formattedRx}`,
-      },
-      {
-        label: "Last Active",
-        value: peer.last_seen_at ? formatDate(peer.last_seen_at) : "N/A",
       },
       {
         label: "Date Created",

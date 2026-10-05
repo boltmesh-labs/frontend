@@ -70,6 +70,29 @@ describe("DeviceList device-slot meter", () => {
     expect(screen.queryByText(/allows up to/)).not.toBeInTheDocument();
   });
 
+  it("reads telemetry off the device, not its peers", async () => {
+    vi.mocked(useUserDevices).mockReturnValue({
+      data: [
+        {
+          id: "d1",
+          name: "phone-1",
+          platform: "android",
+          is_connected: true,
+          last_seen_at: "2026-03-01T00:00:00Z",
+          tx_bytes: 1024,
+          rx_bytes: 2048,
+          peers: [],
+        },
+      ],
+      isLoading: false,
+      isError: false,
+    });
+    renderDeviceList();
+
+    expect(await screen.findAllByText("Connected")).not.toHaveLength(0);
+    expect(screen.getAllByText("1 KB / 2 KB").length).toBeGreaterThan(0);
+  });
+
   it("points users at the client app instead of a create action", async () => {
     renderDeviceList();
 

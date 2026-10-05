@@ -27,10 +27,7 @@ const PEER_TABLE_COLUMNS = [
   { header: "Public Key" },
   { header: "IP Address" },
   { header: "Server" },
-  { header: "Connected" },
-  { header: "Last Active" },
   { header: "Created" },
-  { header: "Tx / Rx" },
 ];
 
 const PeerRow = React.memo(({ peer }) => {
@@ -96,23 +93,7 @@ const PeerRow = React.memo(({ peer }) => {
           <span className="font-monospace text-muted">—</span>
         )}
       </td>
-      <td className="text-muted">
-        <span className="d-inline-flex align-items-center gap-2">
-          <span
-            className={`rounded-circle ${peer.is_connected ? "bg-success" : "bg-danger"}`}
-            style={{ width: "8px", height: "8px" }}
-            aria-hidden="true"
-          />
-          <span className="small">
-            {peer.is_connected ? "Connected" : "Disconnected"}
-          </span>
-        </span>
-      </td>
-      <td className="text-muted">{formatDate(peer.last_seen_at)}</td>
       <td className="text-muted">{formatDate(peer.created_at)}</td>
-      <td className="text-muted">
-        {formatBytes(peer.tx_bytes)} / {formatBytes(peer.rx_bytes)}
-      </td>
     </tr>
   );
 });
@@ -175,15 +156,36 @@ const VpnDeviceDetail = () => {
         value: (device.platform || "N/A").toUpperCase(),
       },
       {
+        label: "Connection",
+        value: (
+          <span className="d-inline-flex align-items-center gap-2">
+            <span
+              className={`rounded-circle ${
+                device.is_connected ? "bg-success" : "bg-danger"
+              }`}
+              style={{ width: "8px", height: "8px" }}
+              aria-hidden="true"
+            />
+            <span className="small">
+              {device.is_connected ? "Connected" : "Disconnected"}
+            </span>
+          </span>
+        ),
+      },
+      {
+        label: "Tx / Rx",
+        value: `${formatBytes(device.tx_bytes)} / ${formatBytes(device.rx_bytes)}`,
+      },
+      {
         label: "Provisioned",
         value: formatDate(device.created_at),
         className: "text-muted",
       },
-      ...(device.last_active_at
+      ...(device.last_seen_at
         ? [
             {
               label: "Last Active",
-              value: formatDate(device.last_active_at),
+              value: formatDate(device.last_seen_at),
               className: "text-muted",
             },
           ]
