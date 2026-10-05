@@ -56,7 +56,7 @@ export const openAdminList = async (page, route) => {
 };
 
 /**
- * The node-registration audit log is not a sidebar entry — it hangs off the
+ * The VpnServer registration audit log is not a sidebar entry — it hangs off the
  * VPN server list, so reaching it takes two clicks.
  */
 export const openAdminAuditLog = async (page) => {

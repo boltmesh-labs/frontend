@@ -320,7 +320,7 @@ test("a failed device toggle rolls the row back", async ({
   ).toBeVisible();
 });
 
-test("the node registration audit log renders its failure states", async ({
+test("the VpnServer registration audit log renders its failure states", async ({
   adminPage: page,
 }) => {
   await mockAdminLanding(page);
@@ -329,12 +329,12 @@ test("the node registration audit log renders its failure states", async ({
     body: { data: [], total_count: 0 },
   });
   await mockJson(page, {
-    path: "/admin/audit/node-registration-logs",
+    path: "/admin/audit/server-registration-logs",
     body: {
       data: [
         {
           id: "audit-1",
-          server_name: "node-1",
+          server_name: "server-1",
           status: "TUNNEL_ADDRESS_OVERLAP",
           auth_method: "BOOTSTRAP_SECRET",
           ip_address: "10.0.0.4",
@@ -349,7 +349,7 @@ test("the node registration audit log renders its failure states", async ({
   await openAdminList(page, "/admin/vpn-servers");
   await page.getByRole("button", { name: "Audit Logs" }).click();
   await expect(
-    page.getByRole("heading", { name: "Node Registration Audit" }),
+    page.getByRole("heading", { name: "VpnServer Registration Audit" }),
   ).toBeVisible();
 
   // Operators rely on these two values verbatim to diagnose a join failure.

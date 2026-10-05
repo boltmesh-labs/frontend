@@ -3,7 +3,7 @@ import { Badge, Container } from "react-bootstrap";
 import { useTableQuery } from "@/hooks/useTableQuery";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { getPaginationTotals } from "@/utils/pagination";
-import { useVpnNodeAudit } from "@/features/admin/hooks/useVpnNodeAudit";
+import { useVpnServerRegistrationAudit } from "@/features/admin/hooks/useVpnServerRegistrationAudit";
 import { DataTable } from "@/components/DataTable";
 import { StatusAlert } from "@/components/StatusAlert";
 import { DefaultPagination } from "@/components/DefaultPagination";
@@ -11,8 +11,8 @@ import { TableFiltersBar } from "@/components/TableFiltersBar";
 import { PageHeader } from "../components/ListHeader";
 import { formatDate } from "@/utils/dateFormatter";
 import {
-  NODE_REGISTRATION_STATUSES,
-  NODE_REGISTRATION_AUTH_METHODS,
+  VPNSERVER_REGISTRATION_STATUSES,
+  VPNSERVER_REGISTRATION_AUTH_METHODS,
 } from "@/constants/statuses";
 
 const TABLE_COLUMNS = [
@@ -26,36 +26,42 @@ const TABLE_COLUMNS = [
 
 const STATUS_OPTIONS = [
   { label: "All Statuses", value: "" },
-  { label: "Success", value: NODE_REGISTRATION_STATUSES.SUCCESS },
-  { label: "Invalid Secret", value: NODE_REGISTRATION_STATUSES.INVALID_SECRET },
+  { label: "Success", value: VPNSERVER_REGISTRATION_STATUSES.SUCCESS },
+  {
+    label: "Invalid Secret",
+    value: VPNSERVER_REGISTRATION_STATUSES.INVALID_SECRET,
+  },
   {
     label: "IID Verification Failed",
-    value: NODE_REGISTRATION_STATUSES.IID_VERIFICATION_FAILED,
+    value: VPNSERVER_REGISTRATION_STATUSES.IID_VERIFICATION_FAILED,
   },
-  { label: "Expired", value: NODE_REGISTRATION_STATUSES.EXPIRED },
+  { label: "Expired", value: VPNSERVER_REGISTRATION_STATUSES.EXPIRED },
   {
     label: "Region Conflict",
-    value: NODE_REGISTRATION_STATUSES.REGION_CONFLICT,
+    value: VPNSERVER_REGISTRATION_STATUSES.REGION_CONFLICT,
   },
   {
     label: "Tunnel Address Overlap",
-    value: NODE_REGISTRATION_STATUSES.TUNNEL_ADDRESS_OVERLAP,
+    value: VPNSERVER_REGISTRATION_STATUSES.TUNNEL_ADDRESS_OVERLAP,
   },
   {
     label: "Region Not Found",
-    value: NODE_REGISTRATION_STATUSES.REGION_NOT_FOUND,
+    value: VPNSERVER_REGISTRATION_STATUSES.REGION_NOT_FOUND,
   },
-  { label: "Internal Error", value: NODE_REGISTRATION_STATUSES.INTERNAL_ERROR },
+  {
+    label: "Internal Error",
+    value: VPNSERVER_REGISTRATION_STATUSES.INTERNAL_ERROR,
+  },
 ];
 
 const AUTH_METHOD_OPTIONS = [
   { label: "All Methods", value: "" },
-  { label: "AWS IID", value: NODE_REGISTRATION_AUTH_METHODS.AWS_IID },
+  { label: "AWS IID", value: VPNSERVER_REGISTRATION_AUTH_METHODS.AWS_IID },
   {
     label: "Bootstrap Secret",
-    value: NODE_REGISTRATION_AUTH_METHODS.BOOTSTRAP_SECRET,
+    value: VPNSERVER_REGISTRATION_AUTH_METHODS.BOOTSTRAP_SECRET,
   },
-  { label: "Failed", value: NODE_REGISTRATION_AUTH_METHODS.FAILED },
+  { label: "Failed", value: VPNSERVER_REGISTRATION_AUTH_METHODS.FAILED },
 ];
 
 const FILTERS = [
@@ -73,12 +79,12 @@ const FILTERS = [
 
 const getStatusVariant = (status) => {
   switch (status) {
-    case NODE_REGISTRATION_STATUSES.SUCCESS:
+    case VPNSERVER_REGISTRATION_STATUSES.SUCCESS:
       return "success";
-    case NODE_REGISTRATION_STATUSES.INVALID_SECRET:
-    case NODE_REGISTRATION_STATUSES.EXPIRED:
+    case VPNSERVER_REGISTRATION_STATUSES.INVALID_SECRET:
+    case VPNSERVER_REGISTRATION_STATUSES.EXPIRED:
       return "warning";
-    case NODE_REGISTRATION_STATUSES.IID_VERIFICATION_FAILED:
+    case VPNSERVER_REGISTRATION_STATUSES.IID_VERIFICATION_FAILED:
       return "danger";
     default:
       return "secondary";
@@ -87,16 +93,16 @@ const getStatusVariant = (status) => {
 
 const getAuthMethodVariant = (method) => {
   switch (method) {
-    case NODE_REGISTRATION_AUTH_METHODS.AWS_IID:
+    case VPNSERVER_REGISTRATION_AUTH_METHODS.AWS_IID:
       return "info";
-    case NODE_REGISTRATION_AUTH_METHODS.BOOTSTRAP_SECRET:
+    case VPNSERVER_REGISTRATION_AUTH_METHODS.BOOTSTRAP_SECRET:
       return "primary";
     default:
       return "secondary";
   }
 };
 
-const VpnNodeAuditRow = React.memo(({ audit }) => {
+const VpnServerRegistrationAuditRow = React.memo(({ audit }) => {
   return (
     <tr className="align-middle">
       <td className="font-monospace text-body fw-bold">
@@ -132,9 +138,9 @@ const VpnNodeAuditRow = React.memo(({ audit }) => {
   );
 });
 
-VpnNodeAuditRow.displayName = "VpnNodeAuditRow";
+VpnServerRegistrationAuditRow.displayName = "VpnServerRegistrationAuditRow";
 
-const VpnNodeAuditList = () => {
+const VpnServerRegistrationAuditList = () => {
   const {
     currentPage,
     setCurrentPage,
@@ -147,23 +153,24 @@ const VpnNodeAuditList = () => {
     filterConfigs,
   } = useTableQuery({ filters: FILTERS, pageSize: 20, debounceMs: 350 });
 
-  const { data, isLoading, isError, error, refetch } = useVpnNodeAudit(params);
+  const { data, isLoading, isError, error, refetch } =
+    useVpnServerRegistrationAudit(params);
 
   const auditsList = data?.data || [];
   const { totalCount, totalPages } = getPaginationTotals(data, pageSize);
 
   const renderRow = useCallback(
-    (audit) => <VpnNodeAuditRow key={audit.id} audit={audit} />,
+    (audit) => <VpnServerRegistrationAuditRow key={audit.id} audit={audit} />,
     [],
   );
 
-  usePageTitle("Node Registration Audit");
+  usePageTitle("VpnServer Registration Audit");
 
   return (
     <Container className="py-5">
       <PageHeader
-        title="Node Registration Audit"
-        description="Audit trail for node registration attempts, including successes, failures, and authentication methods."
+        title="VpnServer Registration Audit"
+        description="Audit trail for VpnServer registration attempts, including successes, failures, and authentication methods."
       />
 
       {isError && (
@@ -201,4 +208,4 @@ const VpnNodeAuditList = () => {
   );
 };
 
-export default VpnNodeAuditList;
+export default VpnServerRegistrationAuditList;

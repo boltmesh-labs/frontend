@@ -34,9 +34,9 @@ export const adminKeys = {
     ...(params !== undefined ? [params] : []),
   ],
   vpnPeerDetail: (id) => [...adminKeys.all, "vpn-peers", "detail", id],
-  vpnNodeAudit: (params) => [
+  vpnServerRegistrationAudit: (params) => [
     ...adminKeys.all,
-    "node-registration-logs",
+    "server-registration-logs",
     ...(params !== undefined ? [params] : []),
   ],
   plans: (params) => [

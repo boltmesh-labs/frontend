@@ -183,7 +183,7 @@ const VpnServerForm = ({ initialData, isNew, refetchData }) => {
     mapServerToForm(initialData, isNew),
   );
   const [bootstrapCommand, setBootstrapCommand] = useState("");
-  // Open by default when the node already runs the obfuscated rung, so the live
+  // Open by default when the server already runs the obfuscated rung, so the live
   // parameters are visible without a click.
   const [showAwgParams, setShowAwgParams] = useState(
     () => initialData?.awg_enabled === true,
@@ -210,10 +210,10 @@ const VpnServerForm = ({ initialData, isNew, refetchData }) => {
   //   are never editable; the backend cannot make them true and the next boot
   //   would revert them. Unknown origin fails closed to the locked state.
   // - Status: every config field is editable only while the server is
-  //   provisioning or maintenance, because a running node reads its
+  //   provisioning or maintenance, because a running server reads its
   //   configuration once at registration. `status` is always editable.
   //
-  // `os` and `tunnel_ip` are the exception on an AMI row: the node adopts them
+  // `os` and `tunnel_ip` are the exception on an AMI row: the server adopts them
   // from the registration response, so the backend owns them and the status
   // window alone governs them.
   const isManualServer = isNew || initialData?.is_manual === true;
@@ -302,7 +302,7 @@ const VpnServerForm = ({ initialData, isNew, refetchData }) => {
       if (!Number.isNaN(parsedTcpPort)) payload.tcp_port = parsedTcpPort;
     }
 
-    // Backend-owned fields: the node adopts them from the registration response,
+    // Backend-owned fields: the server adopts them from the registration response,
     // so they are editable on an AMI row too — the status window is the only
     // gate. Sent whenever it is open.
     if (!configLocked) {
@@ -428,9 +428,7 @@ const VpnServerForm = ({ initialData, isNew, refetchData }) => {
     <Container className="py-5">
       {confirmDialog}
       <DetailHeader
-        title={
-          isNew ? "Create VPN Server" : initialData?.name || "VPN Server Node"
-        }
+        title={isNew ? "Create VPN Server" : initialData?.name || "VPN Server"}
         id={isNew ? "NEW_SERVER" : initialData?.id}
         actions={renderHeaderActions()}
       />
@@ -627,7 +625,7 @@ const VpnServerForm = ({ initialData, isNew, refetchData }) => {
                       value={formData.endpoint}
                       onChange={handleInputChange}
                       disabled={!isEditing || saving || infraLocked}
-                      placeholder="e.g. node-1.us-east-1.vpn.example.com (defaults to public IP)"
+                      placeholder="e.g. server-1.us-east-1.vpn.example.com (defaults to public IP)"
                     />
                     <Form.Text className="text-muted">
                       Leave empty to have clients dial the public IP.
@@ -866,13 +864,13 @@ const VpnServerForm = ({ initialData, isNew, refetchData }) => {
                         Stream rung needs a DNS endpoint
                       </Form.Label>
                       <Form.Text className="text-muted">
-                        This node&apos;s <strong>Endpoint</strong> is also the
+                        This server&apos;s <strong>Endpoint</strong> is also the
                         SNI its stream handshake presents. A DNS name here
                         enables the stream rung; an address or a blank disables
                         it. RFC 6066&apos;s SNI extension carries a hostname, so
                         a client sends no SNI at all for an IP address — a
                         passively observable tell no browser produces. Name your
-                        nodes so the names themselves are plausible on the
+                        servers so the names themselves are plausible on the
                         networks your users are on.
                       </Form.Text>
                     </Form.Group>
@@ -929,15 +927,15 @@ const VpnServerForm = ({ initialData, isNew, refetchData }) => {
           <h5 className="fw-bold text-body mb-2">Bootstrap Command</h5>
           <p className="text-secondary mb-3">
             Run this command on the new VPN server to install and connect the
-            node agent.
+            server agent.
           </p>
           <CopyableField
-            label="Node Bootstrap Command"
+            label="VpnServer Bootstrap Command"
             value={bootstrapCommand}
             toastLabel="Bootstrap command"
           />
           <p className="text-warning small mb-0 mt-3">
-            Keep this command private: it embeds the node bootstrap secret and
+            Keep this command private: it embeds the server bootstrap secret and
             will not be shown again.
           </p>
         </Card>

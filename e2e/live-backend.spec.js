@@ -308,8 +308,8 @@ test("a real backend serves the admin management lists", async ({ page }) => {
     },
     {
       path: "/admin/vpn-servers/audit",
-      apiPath: "/admin/audit/node-registration-logs",
-      heading: "Node Registration Audit",
+      apiPath: "/admin/audit/server-registration-logs",
+      heading: "VpnServer Registration Audit",
     },
   ];
 

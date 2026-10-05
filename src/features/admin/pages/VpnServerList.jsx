@@ -217,7 +217,7 @@ const VpnServerList = () => {
     [handleToggleActive, handleOpenDetails, processingId],
   );
 
-  usePageTitle("VPN Server Nodes");
+  usePageTitle("VPN Servers");
 
   return (
     <Container className="py-5">

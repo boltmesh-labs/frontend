@@ -38,7 +38,7 @@ const server = {
   name: "Us-East-01",
   region_id: "r1",
   public_ip: "198.51.100.1",
-  endpoint: "node-1.us-east-1.vpn.example.com",
+  endpoint: "server-1.us-east-1.vpn.example.com",
   tunnel_ip: "10.1.0.1/16",
   wg_port: 51820,
   awg_enabled: false,
@@ -121,7 +121,7 @@ describe("VpnServerDetail (admin)", () => {
       screen.getByRole("option", { name: /Frankfurt/ }),
     );
     await user.type(
-      screen.getByPlaceholderText(/node-1\.us-east-1/),
+      screen.getByPlaceholderText(/server-1\.us-east-1/),
       "eu-west-02.vpn.example.com",
     );
     await user.type(
@@ -353,7 +353,7 @@ describe("VpnServerDetail (admin)", () => {
         expect.objectContaining({
           id: "srv1",
           name: "Us-East-02",
-          endpoint: "node-1.us-east-1.vpn.example.com",
+          endpoint: "server-1.us-east-1.vpn.example.com",
           tunnel_ip: "10.1.0.1/16",
           wg_port: 51820,
         }),
@@ -369,7 +369,7 @@ describe("VpnServerDetail (admin)", () => {
       .mockResolvedValue({ ...amiServer, status: "maintenance" });
     const refetch = vi.fn();
     vi.mocked(useVpnServerDetail).mockReturnValue({
-      data: amiServer, // AMI auto-provisioned — node-authoritative topology
+      data: amiServer, // AMI auto-provisioned — server-authoritative topology
       isLoading: false,
       isError: false,
       error: null,
@@ -386,11 +386,11 @@ describe("VpnServerDetail (admin)", () => {
     // All topology fields are disabled; only status stays editable.
     expect(screen.getByPlaceholderText("e.g. Us-East-01")).toBeDisabled();
     expect(screen.getByPlaceholderText("e.g. 198.51.100.1")).toBeDisabled();
-    expect(screen.getByPlaceholderText(/node-1\.us-east-1/)).toBeDisabled();
+    expect(screen.getByPlaceholderText(/server-1\.us-east-1/)).toBeDisabled();
     expect(screen.getByPlaceholderText("e.g. 10.1.0.1/16")).toBeDisabled();
     expect(screen.getByPlaceholderText("51820")).toBeDisabled();
-    // The stream port is live-bound too — the node reads it at registration — so
-    // it is locked on an AMI node like the rest of the settings.
+    // The stream port is live-bound too — the server reads it at registration — so
+    // it is locked on an AMI server like the rest of the settings.
     expect(screen.getByPlaceholderText("443")).toBeDisabled();
     expect(screen.getByText(/Auto-provisioned \(AMI\)/)).toBeInTheDocument();
 
@@ -435,7 +435,7 @@ describe("VpnServerDetail (admin)", () => {
     renderAt("srv1");
 
     await user.click(screen.getByRole("button", { name: /edit server/i }));
-    // The status window is closed: a running node reads its config once, at
+    // The status window is closed: a running server reads its config once, at
     // registration, so every field but status is locked.
     expect(screen.getByPlaceholderText("e.g. Us-East-01")).toBeDisabled();
     expect(screen.getByPlaceholderText("e.g. 10.1.0.1/16")).toBeDisabled();
@@ -541,7 +541,7 @@ describe("VpnServerDetail (admin)", () => {
       screen.getByRole("option", { name: /Frankfurt/ }),
     );
     await user.type(
-      screen.getByPlaceholderText(/node-1\.us-east-1/),
+      screen.getByPlaceholderText(/server-1\.us-east-1/),
       "eu-west-02.vpn.example.com",
     );
     await user.type(
@@ -584,7 +584,7 @@ describe("VpnServerDetail (admin)", () => {
     renderAt("srv1");
 
     await user.click(screen.getByRole("button", { name: /edit server/i }));
-    await user.clear(screen.getByPlaceholderText(/node-1\.us-east-1/));
+    await user.clear(screen.getByPlaceholderText(/server-1\.us-east-1/));
     await user.click(screen.getByRole("button", { name: "Save Changes" }));
 
     await waitFor(() => expect(update).toHaveBeenCalledTimes(1));

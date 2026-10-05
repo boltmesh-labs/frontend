@@ -33,9 +33,9 @@ const mockAdminLanding = (page) =>
  * Every admin list driven by `useTableQuery`. `pageSize` is per page because
  * `useTableQuery` takes it as an option and the region and audit lists ask for
  * 20 rows instead of the 10 the rest share. `apiPath` is the API collection
- * and `route` the URL it hangs off — they diverge for the node-registration
+ * and `route` the URL it hangs off — they diverge for the server-registration
  * audit log, which is browsable at /admin/vpn-servers/audit but served from
- * /admin/audit/node-registration-logs. Plans are deliberately absent: they are
+ * /admin/audit/server-registration-logs. Plans are deliberately absent: they are
  * the one admin list with no search, filters or pagination.
  */
 const ADMIN_LISTS = [
@@ -87,8 +87,8 @@ const ADMIN_LISTS = [
   },
   {
     route: "/admin/vpn-servers/audit",
-    apiPath: "/admin/audit/node-registration-logs",
-    heading: "Node Registration Audit",
+    apiPath: "/admin/audit/server-registration-logs",
+    heading: "VpnServer Registration Audit",
     pageSize: 20,
   },
 ];
@@ -185,7 +185,7 @@ const FILTER_CASES = [
   },
   {
     route: "/admin/vpn-servers/audit",
-    apiPath: "/admin/audit/node-registration-logs",
+    apiPath: "/admin/audit/server-registration-logs",
     filter: "Filter by registration status",
     value: "TUNNEL_ADDRESS_OVERLAP",
     expected: { status: "TUNNEL_ADDRESS_OVERLAP" },

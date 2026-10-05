@@ -1,11 +1,11 @@
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { useVpnNodeAudit } from "@/features/admin/hooks/useVpnNodeAudit";
+import { useVpnServerRegistrationAudit } from "@/features/admin/hooks/useVpnServerRegistrationAudit";
 import VpnServerAuditList from "./VpnServerAuditList";
 
-vi.mock("@/features/admin/hooks/useVpnNodeAudit", () => ({
-  useVpnNodeAudit: vi.fn(),
+vi.mock("@/features/admin/hooks/useVpnServerRegistrationAudit", () => ({
+  useVpnServerRegistrationAudit: vi.fn(),
 }));
 
 const logs = [
@@ -23,7 +23,7 @@ const logs = [
 describe("VpnServerAuditList (admin)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(useVpnNodeAudit).mockReturnValue({
+    vi.mocked(useVpnServerRegistrationAudit).mockReturnValue({
       data: { data: logs, total_count: 1 },
       isLoading: false,
       isError: false,
@@ -43,7 +43,7 @@ describe("VpnServerAuditList (admin)", () => {
   });
 
   it("renders the empty state when no audit events are returned", () => {
-    vi.mocked(useVpnNodeAudit).mockReturnValue({
+    vi.mocked(useVpnServerRegistrationAudit).mockReturnValue({
       data: { data: [], total_count: 0 },
       isLoading: false,
       isError: false,

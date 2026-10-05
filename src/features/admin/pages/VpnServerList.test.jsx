@@ -20,7 +20,7 @@ const servers = [
     name: "edge-01",
     status: "online",
     public_ip: "198.51.100.1",
-    endpoint: "node-1.us-east-1.vpn.example.com",
+    endpoint: "server-1.us-east-1.vpn.example.com",
     tunnel_ip: "10.1.0.1/16",
     wg_port: 51820,
     wg_public_key: "c3VjaC1hLXZhbGlkLXdpcmVndWFyZC1wdWJsaWMta2V5",
@@ -75,7 +75,7 @@ describe("VpnServerList (admin)", () => {
     ).toHaveAttribute("href", "/admin/vpn-regions/fra");
     expect(screen.getByText("198.51.100.1")).toBeInTheDocument();
     expect(
-      screen.getByText("node-1.us-east-1.vpn.example.com"),
+      screen.getByText("server-1.us-east-1.vpn.example.com"),
     ).toBeInTheDocument();
 
     const auditLink = screen.getByText("📋 Audit Logs").closest("a");
