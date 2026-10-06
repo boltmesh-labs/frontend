@@ -27,7 +27,6 @@ const Login = () => {
     rememberMe: false,
   });
   const [showPassword, setShowPassword] = useState(false);
-  const [loginSubmitted, setLoginSubmitted] = useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -72,7 +71,6 @@ const Login = () => {
       },
       {
         onSuccess: ({ access_token }) => {
-          setLoginSubmitted(true);
           setAccessToken(access_token);
           navigate(getDestinationPath(), { replace: true });
         },
@@ -80,7 +78,7 @@ const Login = () => {
     );
   };
 
-  if (accessToken && !loginSubmitted) {
+  if (accessToken) {
     return <Navigate to="/dashboard" replace />;
   }
 
