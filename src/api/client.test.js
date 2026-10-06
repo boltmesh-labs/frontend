@@ -27,10 +27,12 @@ const makeScenario = ({
   retryCount = 1,
   refreshFail = false,
   refreshData,
+  raceRefreshes = 0,
 } = {}) => {
   const refreshCalls = [];
   const calls = {};
   const seen = [];
+  let raced = 0;
 
   const adapter = async (config) => {
     await delay();
@@ -48,6 +50,16 @@ const makeScenario = ({
 
     if (url.includes("/auth/refresh-token")) {
       refreshCalls.push(config);
+      if (raced < raceRefreshes) {
+        raced += 1;
+        throw makeError(
+          responseOf(401, config, {
+            detail:
+              "Refresh token was already rotated by a concurrent request.",
+            code: "TOKEN_ROTATION_RACE",
+          }),
+        );
+      }
       if (refreshFail) {
         throw makeError(responseOf(401, config, { detail: "expired refresh" }));
       }
@@ -150,6 +162,55 @@ describe("ApiClient interceptor and token refresh flow", () => {
     expect(refreshCalls.length).toBe(1);
   });
 
+  it("shares one refresh between a token-level caller and an in-flight 401", async () => {
+    const { refreshCalls } = install(client, makeScenario());
+
+    const [token, res] = await Promise.all([
+      client.refresh(),
+      client.api.get("/protected"),
+    ]);
+
+    expect(token).toBe(REFRESHED_TOKEN);
+    expect(res.data).toEqual({ ok: true });
+    expect(refreshCalls.length).toBe(1);
+  });
+
+  it("retries after a concurrent-rotation 401 instead of logging out", async () => {
+    const { calls, refreshCalls } = install(
+      client,
+      makeScenario({ raceRefreshes: 1 }),
+    );
+    const onRefreshed = vi.fn();
+    client.onTokenRefreshed(onRefreshed);
+
+    const res = await client.api.get("/protected");
+
+    expect(res.data).toEqual({ ok: true });
+    expect(calls["/protected"]).toBe(2);
+    expect(refreshCalls.length).toBe(2);
+    expect(client.accessToken).toBe(REFRESHED_TOKEN);
+    expect(onRefreshed).not.toHaveBeenCalledWith(null);
+  });
+
+  it("gives up and clears auth when the rotation race never resolves", async () => {
+    const { refreshCalls } = install(
+      client,
+      makeScenario({ raceRefreshes: Number.POSITIVE_INFINITY }),
+    );
+    const onRefreshed = vi.fn();
+    client.onTokenRefreshed(onRefreshed);
+
+    await expect(client.api.get("/protected")).rejects.toMatchObject({
+      response: { status: 401 },
+    });
+
+    // Initial attempt plus RACE_RETRY_ATTEMPTS retries.
+    expect(refreshCalls.length).toBe(3);
+    expect(client.accessToken).toBeNull();
+    expect(client.isRefreshing).toBe(false);
+    expect(onRefreshed).toHaveBeenCalledWith(null);
+  });
+
   it("does not loop on a 401 from the authApi refresh endpoint itself", async () => {
     const { refreshCalls } = install(
       client,
@@ -180,7 +241,7 @@ describe("ApiClient interceptor and token refresh flow", () => {
     expect(client.accessToken).toBeNull();
   });
 
-  it("clears auth state and cancels pending queue when clearAuth is invoked", async () => {
+  it("clears auth state when clearAuth is invoked", async () => {
     client.setToken("initial-token");
     client.clearAuth();
 

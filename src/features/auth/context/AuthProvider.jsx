@@ -86,20 +86,21 @@ export const AuthProvider = ({ children }) => {
     });
   }, []);
 
-  // Initial boot-up: perform silent refresh. Boot must run exactly once per
-  // page load: the guard stops StrictMode's double-mounted effect from firing
-  // two concurrent refreshes (same pattern as processedRef in OAuthCallback),
-  // where a racing second call could clear a just-established session when
-  // refresh cookies rotate.
+  // Initial boot-up: perform silent refresh. The call goes through
+  // apiClient.refresh(), so boot shares any refresh already in flight (the
+  // interceptor after a 401, OAuthCallback) instead of racing it with a
+  // second rotation of the same cookie. The ref still runs boot exactly once
+  // per page load, keeping StrictMode's double-mounted effect from applying
+  // the result twice.
   const bootstrappedRef = useRef(false);
 
   useEffect(() => {
     if (bootstrappedRef.current) return;
     bootstrappedRef.current = true;
 
-    apiClient.authApi
-      .post("/auth/refresh-token")
-      .then(({ data }) => updateAuthState(data.access_token))
+    apiClient
+      .refresh()
+      .then((token) => updateAuthState(token))
       .catch(() => updateAuthState(null))
       .finally(() => setLoading(false));
   }, [updateAuthState]);

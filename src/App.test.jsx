@@ -7,7 +7,7 @@ import App from "./App";
 vi.mock("@/api/client", () => ({
   apiClient: {
     api: { get: vi.fn(), post: vi.fn(), patch: vi.fn(), delete: vi.fn() },
-    authApi: { post: vi.fn() },
+    refresh: vi.fn(),
     setToken: vi.fn(),
     clearAuth: vi.fn(),
     onTokenRefreshed: vi.fn(() => vi.fn()),
@@ -27,7 +27,7 @@ describe("App", () => {
     vi.clearAllMocks();
     apiClient.onTokenRefreshed.mockImplementation(() => vi.fn());
     // No persisted session: the boot refresh fails for every test here.
-    apiClient.authApi.post.mockRejectedValue(new Error("no session"));
+    apiClient.refresh.mockRejectedValue(new Error("no session"));
   });
 
   it("boots the shell and lands guests on the login page from the index route", async () => {

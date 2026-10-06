@@ -7,14 +7,14 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import OAuthCallback from "./OAuthCallback";
 
 const setAccessTokenMock = vi.hoisted(() => vi.fn());
-const refreshPostMock = vi.hoisted(() => vi.fn());
+const refreshMock = vi.hoisted(() => vi.fn());
 
 vi.mock("@/features/auth/context/AuthContext", () => ({
   useAuth: () => ({ setAccessToken: setAccessTokenMock }),
 }));
 
 vi.mock("@/api/client", () => ({
-  apiClient: { authApi: { post: (...args) => refreshPostMock(...args) } },
+  apiClient: { refresh: (...args) => refreshMock(...args) },
 }));
 
 const renderCallback = (route) =>
@@ -37,8 +37,8 @@ const renderCallback = (route) =>
 describe("OAuthCallback", () => {
   beforeEach(() => {
     setAccessTokenMock.mockClear();
-    refreshPostMock.mockReset();
-    refreshPostMock.mockRejectedValue(new Error("no session"));
+    refreshMock.mockReset();
+    refreshMock.mockRejectedValue(new Error("no session"));
     window.history.replaceState(null, "", "/auth/callback");
   });
 
@@ -48,9 +48,7 @@ describe("OAuthCallback", () => {
       "",
       "/auth/callback#token=frag-token-123",
     );
-    refreshPostMock.mockResolvedValueOnce({
-      data: { access_token: "silent-token-123" },
-    });
+    refreshMock.mockResolvedValueOnce("silent-token-123");
     sessionStorage.setItem("oauth_redirect_from", "/subscriptions");
 
     renderCallback("/auth/callback");
@@ -64,9 +62,7 @@ describe("OAuthCallback", () => {
   });
 
   it("defaults to /dashboard when no redirect origin was stored", async () => {
-    refreshPostMock.mockResolvedValueOnce({
-      data: { access_token: "silent-token-456" },
-    });
+    refreshMock.mockResolvedValueOnce("silent-token-456");
 
     renderCallback("/auth/callback");
 
@@ -80,9 +76,7 @@ describe("OAuthCallback", () => {
       "",
       "/auth/callback#access_token=alias-token",
     );
-    refreshPostMock.mockResolvedValueOnce({
-      data: { access_token: "silent-token-alias" },
-    });
+    refreshMock.mockResolvedValueOnce("silent-token-alias");
 
     renderCallback("/auth/callback");
 
@@ -141,20 +135,18 @@ describe("OAuthCallback", () => {
   });
 
   it("uses silent refresh on the bare callback redirect", async () => {
-    refreshPostMock.mockResolvedValueOnce({
-      data: { access_token: "silent-token-789" },
-    });
+    refreshMock.mockResolvedValueOnce("silent-token-789");
     sessionStorage.setItem("oauth_redirect_from", "/dashboard");
 
     renderCallback("/auth/callback");
 
     expect(await screen.findByText("dashboard-reached")).toBeInTheDocument();
-    expect(refreshPostMock).toHaveBeenCalledWith("/auth/refresh-token");
+    expect(refreshMock).toHaveBeenCalled();
     expect(setAccessTokenMock).toHaveBeenCalledWith("silent-token-789");
   });
 
   it("shows an error when silent refresh has no session", async () => {
-    refreshPostMock.mockRejectedValueOnce(new Error("no cookie"));
+    refreshMock.mockRejectedValueOnce(new Error("no cookie"));
 
     renderCallback("/auth/callback");
 

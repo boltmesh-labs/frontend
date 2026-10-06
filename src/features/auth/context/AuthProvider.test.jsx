@@ -8,7 +8,7 @@ import { useAuth } from "./AuthContext";
 vi.mock("@/api/client", () => ({
   apiClient: {
     api: { post: vi.fn() },
-    authApi: { post: vi.fn() },
+    refresh: vi.fn(),
     setToken: vi.fn(),
     clearAuth: vi.fn(),
     onTokenRefreshed: vi.fn(() => vi.fn()),
@@ -45,21 +45,21 @@ describe("AuthProvider", () => {
   });
 
   it("boots via silent refresh and parses the JWT identity", async () => {
-    apiClient.authApi.post.mockResolvedValue({
-      data: { access_token: makeToken({ sub: "u1", role: "admin" }) },
-    });
+    apiClient.refresh.mockResolvedValue(
+      makeToken({ sub: "u1", role: "admin" }),
+    );
 
     const { getContext } = renderWithProvider();
 
     await waitFor(() => expect(getContext().loading).toBe(false));
-    expect(apiClient.authApi.post).toHaveBeenCalledWith("/auth/refresh-token");
+    expect(apiClient.refresh).toHaveBeenCalled();
     expect(getContext().accessToken).toBeTypeOf("string");
     expect(getContext().user).toEqual({ id: "u1", role: "admin" });
     expect(apiClient.setToken).toHaveBeenCalled();
   });
 
   it("clears auth when the silent refresh fails", async () => {
-    apiClient.authApi.post.mockRejectedValue(new Error("offline"));
+    apiClient.refresh.mockRejectedValue(new Error("offline"));
 
     const { getContext } = renderWithProvider();
 
@@ -70,9 +70,7 @@ describe("AuthProvider", () => {
   });
 
   it("keeps the session tokenless when the JWT cannot be parsed", async () => {
-    apiClient.authApi.post.mockResolvedValue({
-      data: { access_token: ".%%%.sig" },
-    });
+    apiClient.refresh.mockResolvedValue(".%%%.sig");
 
     const { getContext } = renderWithProvider();
 
@@ -82,7 +80,9 @@ describe("AuthProvider", () => {
   });
 
   it("clears local state after a successful logout", async () => {
-    apiClient.authApi.post.mockResolvedValueOnce({ data: {} });
+    apiClient.refresh.mockResolvedValueOnce(
+      makeToken({ sub: "u1", role: "user" }),
+    );
     apiClient.api.post.mockResolvedValueOnce({ data: {} });
 
     const { getContext } = renderWithProvider();
@@ -98,9 +98,9 @@ describe("AuthProvider", () => {
   });
 
   it("keeps the local session when logout fails", async () => {
-    apiClient.authApi.post.mockResolvedValueOnce({
-      data: { access_token: makeToken({ sub: "u1", role: "user" }) },
-    });
+    apiClient.refresh.mockResolvedValueOnce(
+      makeToken({ sub: "u1", role: "user" }),
+    );
     apiClient.api.post.mockRejectedValueOnce(new Error("network down"));
 
     const { getContext } = renderWithProvider();
@@ -116,9 +116,7 @@ describe("AuthProvider", () => {
   });
 
   it("updateUser merges profile changes into the current identity", async () => {
-    apiClient.authApi.post.mockResolvedValue({
-      data: { access_token: makeToken({ sub: "u1", role: "user" }) },
-    });
+    apiClient.refresh.mockResolvedValue(makeToken({ sub: "u1", role: "user" }));
 
     const { getContext } = renderWithProvider();
     await waitFor(() => expect(getContext().loading).toBe(false));
@@ -138,7 +136,7 @@ describe("AuthProvider", () => {
       listener = fn;
       return vi.fn();
     });
-    apiClient.authApi.post.mockRejectedValue(new Error("no session"));
+    apiClient.refresh.mockRejectedValue(new Error("no session"));
 
     const { view, getContext } = renderWithProvider();
     await waitFor(() => expect(getContext().loading).toBe(false));

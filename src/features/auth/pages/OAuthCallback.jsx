@@ -71,12 +71,12 @@ const OAuthCallback = () => {
       };
 
       try {
-        const { data } = await apiClient.authApi.post("/auth/refresh-token");
-        if (!data?.access_token) {
-          setError("Authentication failed. No access token was received.");
-          return;
-        }
-        finish(data.access_token);
+        // apiClient.refresh() shares the boot refresh if one is still in
+        // flight, so this never starts a competing rotation of the same
+        // cookie, and a concurrent-rotation 401 is retried rather than
+        // reported as a failed sign-in.
+        const token = await apiClient.refresh();
+        finish(token);
       } catch {
         setError("Authentication failed. No access token was received.");
       }

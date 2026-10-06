@@ -5,11 +5,24 @@ import { API_BASE_URL } from "@/utils/config";
 // One timeout shared by both axios instances so auth and API calls can't drift.
 const REQUEST_TIMEOUT_MS = 10000;
 
+// 401 TOKEN_ROTATION_RACE means a concurrent client rotated the refresh cookie
+// first. The backend deliberately preserves the cookie for this code (see
+// exception_handlers.py), so the session is still alive and only the winner's
+// Set-Cookie has yet to reach the cookie jar. Retrying immediately would
+// resubmit the same stale cookie and earn the same 401, hence the delay.
+// Attempts are bounded so a session that is genuinely dead still terminates.
+const RACE_RETRY_DELAY_MS = 200;
+const RACE_RETRY_ATTEMPTS = 2;
+
+const isRotationRace = (error) =>
+  error?.response?.status === 401 &&
+  error.response.data?.code === "TOKEN_ROTATION_RACE";
+
 export class ApiClient {
   constructor(baseURL = API_BASE_URL) {
     this.accessToken = null;
     this.isRefreshing = false;
-    this.failedQueue = [];
+    this.refreshPromise = null;
     this.listeners = new Set();
 
     this.authApi = axios.create({
@@ -45,14 +58,52 @@ export class ApiClient {
   clearAuth() {
     this.setToken(null);
     this.isRefreshing = false;
-    this._processQueue(new axios.AxiosError("Auth cleared", "ERR_CANCELED"));
   }
 
-  _processQueue(error, token = null) {
-    this.failedQueue.forEach(({ resolve, reject }) =>
-      error ? reject(error) : resolve(token),
-    );
-    this.failedQueue = [];
+  // Single entry point for every refresh in the app (401 interceptor,
+  // AuthProvider boot, OAuthCallback). Concurrent callers share the in-flight
+  // request instead of each presenting the same cookie, which is what provokes
+  // a rotation race in the first place. A failed refresh is terminal: every
+  // caller awaiting the shared promise rejects with it and auth is cleared.
+  refresh() {
+    if (!this.refreshPromise) {
+      this.isRefreshing = true;
+      this.refreshPromise = this._postRefresh()
+        .then((token) => {
+          this.setToken(token);
+          return token;
+        })
+        .catch((error) => {
+          this.clearAuth();
+          throw error;
+        })
+        .finally(() => {
+          this.isRefreshing = false;
+          this.refreshPromise = null;
+        });
+    }
+    return this.refreshPromise;
+  }
+
+  async _postRefresh() {
+    for (let attempt = 0; ; attempt++) {
+      try {
+        const { data } = await this.authApi.post("/auth/refresh-token");
+        if (!data?.access_token) {
+          throw new Error("Refresh response did not include an access token.");
+        }
+        return data.access_token;
+      } catch (error) {
+        // Another client won the rotation: the cookie it just set is still
+        // valid, so give it a beat to land and present that one instead.
+        if (!isRotationRace(error) || attempt >= RACE_RETRY_ATTEMPTS) {
+          throw error;
+        }
+        await new Promise((resolve) =>
+          setTimeout(resolve, RACE_RETRY_DELAY_MS),
+        );
+      }
+    }
   }
 
   _initInterceptors() {
@@ -86,35 +137,13 @@ export class ApiClient {
         // held in memory, which is how a valid cookie session silently
         // restores itself after a full page reload (see client.test.js).
         // Login/refresh calls go through this.authApi, which has no
-        // interceptors and therefore never re-enters this flow.
+        // interceptors and therefore never re-enters this flow. A concurrent
+        // rotation reported by the backend is retried inside refresh() rather
+        // than being taken as a dead session.
 
-        if (this.isRefreshing) {
-          return new Promise((resolve, reject) => {
-            this.failedQueue.push({ resolve, reject });
-          }).then((token) => {
-            originalRequest.headers.set("Authorization", `Bearer ${token}`);
-            return this.api(originalRequest);
-          });
-        }
-
-        this.isRefreshing = true;
-
-        try {
-          const { data } = await this.authApi.post("/auth/refresh-token");
-          const newToken = data.access_token;
-
-          this.setToken(newToken);
-          this._processQueue(null, newToken);
-
-          originalRequest.headers.set("Authorization", `Bearer ${newToken}`);
-          return this.api(originalRequest);
-        } catch (refreshErr) {
-          this._processQueue(refreshErr);
-          this.clearAuth();
-          return Promise.reject(refreshErr);
-        } finally {
-          this.isRefreshing = false;
-        }
+        const token = await this.refresh();
+        originalRequest.headers.set("Authorization", `Bearer ${token}`);
+        return this.api(originalRequest);
       },
     );
   }
