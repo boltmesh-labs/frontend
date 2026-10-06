@@ -241,6 +241,97 @@ describe("ApiClient interceptor and token refresh flow", () => {
     expect(client.accessToken).toBeNull();
   });
 
+  // Refresh failures that carry no session verdict (network layer, 5xx) must
+  // leave the in-memory token alone so a later request can retry the refresh.
+  const makeTransientRefreshFailure = (failure) => {
+    const scenario = makeScenario();
+    const delegate = scenario.adapter;
+    scenario.adapter = async (config) => {
+      if (config.url.includes("/auth/refresh-token")) throw failure(config);
+      return delegate(config);
+    };
+    return scenario;
+  };
+
+  const expectAuthSurvives = async (scenario) => {
+    install(client, scenario);
+    client.setToken("existing-token");
+    const onRefreshed = vi.fn();
+    client.onTokenRefreshed(onRefreshed);
+
+    await expect(client.api.get("/protected")).rejects.toBeTruthy();
+
+    expect(client.accessToken).toBe("existing-token");
+    expect(onRefreshed).not.toHaveBeenCalledWith(null);
+    expect(client.isRefreshing).toBe(false);
+  };
+
+  it("keeps auth when the refresh request fails at the network layer", async () => {
+    await expectAuthSurvives(
+      makeTransientRefreshFailure(
+        () => new AxiosError("Network Error", AxiosError.ERR_NETWORK),
+      ),
+    );
+  });
+
+  it("keeps auth when the refresh endpoint answers with a 5xx", async () => {
+    await expectAuthSurvives(
+      makeTransientRefreshFailure((config) =>
+        makeError(responseOf(503, config, {})),
+      ),
+    );
+  });
+
+  it("refreshes successfully again once the transient failure clears", async () => {
+    let offline = true;
+    const refreshCalls = [];
+    install(client, {
+      adapter: async (config) => {
+        if (config.url.includes("/auth/refresh-token")) {
+          refreshCalls.push(config);
+          if (offline) {
+            throw new AxiosError("Network Error", AxiosError.ERR_NETWORK);
+          }
+          return responseOf(200, config, { access_token: REFRESHED_TOKEN });
+        }
+        if (config.url.includes("/protected")) {
+          const auth = getAuthHeader(config.headers);
+          if (auth !== `Bearer ${REFRESHED_TOKEN}`) {
+            throw makeError(responseOf(401, config, {}));
+          }
+          return responseOf(200, config, { ok: true });
+        }
+        throw makeError(responseOf(404, config, {}));
+      },
+    });
+    client.setToken("existing-token");
+
+    // The stale bearer still gets a 401, the refresh dies on the network, and
+    // the caller sees the failure — but the session token is left in place.
+    await expect(client.api.get("/protected")).rejects.toBeTruthy();
+    expect(client.accessToken).toBe("existing-token");
+    expect(refreshCalls.length).toBe(1);
+
+    // Network back: the next 401 retries the refresh and completes normally.
+    offline = false;
+    const res = await client.api.get("/protected");
+
+    expect(res.data).toEqual({ ok: true });
+    expect(refreshCalls.length).toBe(2);
+    expect(client.accessToken).toBe(REFRESHED_TOKEN);
+  });
+
+  it("still clears auth when the backend reports a dead session", async () => {
+    install(client, makeScenario({ refreshFail: true }));
+    client.setToken("existing-token");
+
+    await expect(client.api.get("/protected")).rejects.toMatchObject({
+      response: { status: 401 },
+    });
+
+    expect(client.accessToken).toBeNull();
+  });
+
   it("clears auth state when clearAuth is invoked", async () => {
     client.setToken("initial-token");
     client.clearAuth();

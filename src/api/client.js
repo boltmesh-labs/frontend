@@ -18,6 +18,15 @@ const isRotationRace = (error) =>
   error?.response?.status === 401 &&
   error.response.data?.code === "TOKEN_ROTATION_RACE";
 
+// The backend reserves 401 on this endpoint for a session that is genuinely
+// dead, and clears the refresh cookie with it (except on the soft-retry cases
+// already retried above). Everything else that can go wrong here — a network
+// blip, a timeout, a 5xx, the 30/min refresh rate limit, the CSRF origin
+// check — says nothing about the session, so the in-memory token has to
+// survive it: dropping it bounces the user to the login screen while a
+// perfectly good refresh cookie is still sitting in the jar.
+const isSessionDead = (error) => error?.response?.status === 401;
+
 export class ApiClient {
   constructor(baseURL = API_BASE_URL) {
     this.accessToken = null;
@@ -63,8 +72,9 @@ export class ApiClient {
   // Single entry point for every refresh in the app (401 interceptor,
   // AuthProvider boot, OAuthCallback). Concurrent callers share the in-flight
   // request instead of each presenting the same cookie, which is what provokes
-  // a rotation race in the first place. A failed refresh is terminal: every
-  // caller awaiting the shared promise rejects with it and auth is cleared.
+  // a rotation race in the first place. Every caller awaiting the shared
+  // promise rejects with it, but auth is only cleared when the backend
+  // reported a dead session (401) — a transient failure stays retryable.
   refresh() {
     if (!this.refreshPromise) {
       this.isRefreshing = true;
@@ -74,7 +84,9 @@ export class ApiClient {
           return token;
         })
         .catch((error) => {
-          this.clearAuth();
+          if (isSessionDead(error)) {
+            this.clearAuth();
+          }
           throw error;
         })
         .finally(() => {
