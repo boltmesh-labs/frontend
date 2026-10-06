@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Alert, Card, Col, Form, Nav, Row, Tab } from "react-bootstrap";
 import { PageLoader } from "@/components/PageLoader";
 import { StatusAlert } from "@/components/StatusAlert";
@@ -346,11 +346,6 @@ const AccountSettings = () => {
     error,
     refetch,
   } = useDashboardProfile();
-
-  useEffect(() => {
-    if (isError)
-      toast.error("Failed to load profile settings. Please refresh.");
-  }, [isError]);
 
   if (isLoading) {
     return (

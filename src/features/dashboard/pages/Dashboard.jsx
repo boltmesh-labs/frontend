@@ -171,12 +171,6 @@ const Dashboard = () => {
   } = useDashboardProfile();
   const [resendLoading, setResendLoading] = useState(false);
 
-  useEffect(() => {
-    if (isError) {
-      toast.error("Unable to load profile. Please refresh.");
-    }
-  }, [isError]);
-
   const resendMutation = useResendActivation();
 
   const handleResendActivation = async () => {

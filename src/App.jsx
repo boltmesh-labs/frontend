@@ -2,8 +2,9 @@ import React, { Suspense, useState } from "react";
 import { Button, Container } from "react-bootstrap";
 import { BrowserRouter, Link, Navigate, useRoutes } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { createQueryClient } from "@/api/queryClient";
 
 import { AuthProvider } from "@/features/auth/context/AuthProvider";
 import ErrorBoundary from "@/components/ErrorBoundary";
@@ -127,20 +128,6 @@ const VpnRegionDetail = React.lazy(
 const VpnServerAuditList = React.lazy(
   () => import("@/features/admin/pages/VpnServerAuditList"),
 );
-
-// Factory instead of a module-level singleton: tests that render <App/> get
-// a fresh cache and can never leak query state into one another.
-const createQueryClient = () =>
-  new QueryClient({
-    defaultOptions: {
-      queries: {
-        staleTime: 1000 * 60 * 5,
-        gcTime: 1000 * 60 * 10,
-        retry: 1,
-        refetchOnWindowFocus: false,
-      },
-    },
-  });
 
 const NotFound = () => (
   <Container className="d-flex flex-column align-items-center justify-content-center text-center py-5">

@@ -1,8 +1,9 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { apiClient } from "@/api/client";
+import { createQueryClient } from "@/api/queryClient";
 import { toast } from "react-toastify";
 import {
   useCancelInvoice,
@@ -45,9 +46,7 @@ vi.mock("react-toastify", () => ({
 }));
 
 const wrapper = ({ children }) => (
-  <QueryClientProvider
-    client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}
-  >
+  <QueryClientProvider client={createQueryClient({ retry: false })}>
     {children}
   </QueryClientProvider>
 );
@@ -64,6 +63,44 @@ describe("useDashboard hooks", () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(result.current.data).toEqual({ username: "amy" });
     expect(apiClient.api.get).toHaveBeenCalledWith("/users");
+  });
+
+  it("toasts an error when the dashboard profile fails to load", async () => {
+    apiClient.api.get.mockRejectedValue(new Error("Network error"));
+    const { result } = renderHook(() => useDashboardProfile(), { wrapper });
+
+    await waitFor(() => expect(result.current.isError).toBe(true));
+    expect(toast.error).toHaveBeenCalledWith(
+      "Unable to load profile. Please refresh.",
+    );
+  });
+
+  it("does not re-toast on re-render while the profile stays errored", async () => {
+    apiClient.api.get.mockRejectedValue(new Error("Network error"));
+    // A stable client is required here: the default wrapper builds a new one on
+    // every render, which would reset the cache and mask the re-render behavior.
+    const queryClient = createQueryClient({ retry: false });
+    const { result, rerender } = renderHook(() => useDashboardProfile(), {
+      wrapper: ({ children }) => (
+        <QueryClientProvider client={queryClient}>
+          {children}
+        </QueryClientProvider>
+      ),
+    });
+
+    await waitFor(() => expect(result.current.isError).toBe(true));
+    expect(toast.error).toHaveBeenCalledTimes(1);
+
+    rerender();
+    expect(toast.error).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not toast for failing queries that do not opt in via meta", async () => {
+    apiClient.api.get.mockRejectedValue(new Error("Network error"));
+    const { result } = renderHook(() => useUserSubscriptions(), { wrapper });
+
+    await waitFor(() => expect(result.current.isError).toBe(true));
+    expect(toast.error).not.toHaveBeenCalled();
   });
 
   it("loads subscriptions as a bare array from envelope or raw payloads", async () => {

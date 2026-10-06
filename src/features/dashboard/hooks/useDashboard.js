@@ -17,6 +17,7 @@ export const useDashboardProfile = () => {
     // webhooks settle invoices without a frontend mutation), so never serve
     // the cached profile as fresh: always refetch on mount.
     staleTime: 0,
+    meta: { errorToast: "Unable to load profile. Please refresh." },
   });
 };
 
