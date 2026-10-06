@@ -341,4 +341,45 @@ describe("ApiClient interceptor and token refresh flow", () => {
     expect(client.accessToken).toBeNull();
     expect(client.isRefreshing).toBe(false);
   });
+
+  it("notifies refresh-state listeners for the in-flight window", async () => {
+    install(client, makeScenario());
+    const onStateChange = vi.fn();
+    client.onRefreshStateChange(onStateChange);
+
+    const pending = client.refresh();
+
+    expect(onStateChange).toHaveBeenCalledWith(true);
+    expect(client.isRefreshing).toBe(true);
+
+    await pending;
+
+    expect(onStateChange).toHaveBeenLastCalledWith(false);
+    expect(client.isRefreshing).toBe(false);
+  });
+
+  it("does not notify refresh-state listeners on an unchanged value", () => {
+    const onStateChange = vi.fn();
+    client.onRefreshStateChange(onStateChange);
+
+    // Not refreshing: clearAuth's false is a no-op, not a transition.
+    client.clearAuth();
+
+    expect(onStateChange).not.toHaveBeenCalled();
+  });
+
+  it("notifies once when clearAuth interrupts an in-flight refresh", async () => {
+    install(client, makeScenario());
+    const onStateChange = vi.fn();
+    client.onRefreshStateChange(onStateChange);
+
+    const pending = client.refresh();
+    client.clearAuth();
+    await pending;
+
+    // true from refresh(), then a single false from clearAuth(); the
+    // refresh's later finally lands on the same value and stays silent.
+    expect(onStateChange.mock.calls).toEqual([[true], [false]]);
+    expect(client.isRefreshing).toBe(false);
+  });
 });

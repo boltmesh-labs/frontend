@@ -4,7 +4,12 @@ import { MemoryRouter, Route, Routes, useNavigate } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { AuthContext } from "@/features/auth/context/AuthContext";
+import { useIsRefreshing } from "@/hooks/useIsRefreshing";
 import MainLayout from "./MainLayout";
+
+vi.mock("@/hooks/useIsRefreshing", () => ({
+  useIsRefreshing: vi.fn(() => false),
+}));
 
 const NextPageLink = () => {
   const navigate = useNavigate();
@@ -37,6 +42,7 @@ describe("MainLayout", () => {
   beforeEach(() => {
     localStorage.clear();
     document.documentElement.removeAttribute("data-bs-theme");
+    useIsRefreshing.mockReturnValue(false);
   });
 
   it("resets scroll and moves focus to main content after navigation", async () => {
@@ -153,5 +159,23 @@ describe("MainLayout", () => {
     );
     expect(screen.getByRole("button", { name: /logout/i })).toBeInTheDocument();
     expect(screen.queryByText("Login page")).not.toBeInTheDocument();
+  });
+
+  it("shows a session-refresh indicator while a token refresh is in flight", async () => {
+    useIsRefreshing.mockReturnValue(true);
+
+    await renderLayout();
+
+    expect(
+      screen.getByRole("status", { name: "Refreshing session" }),
+    ).toBeInTheDocument();
+  });
+
+  it("hides the session-refresh indicator when no refresh is running", async () => {
+    await renderLayout();
+
+    expect(
+      screen.queryByRole("status", { name: "Refreshing session" }),
+    ).not.toBeInTheDocument();
   });
 });

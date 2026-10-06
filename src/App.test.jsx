@@ -9,10 +9,12 @@ vi.mock("@/api/client", () => ({
   isSessionDead: (error) => error?.response?.status === 401,
   apiClient: {
     api: { get: vi.fn(), post: vi.fn(), patch: vi.fn(), delete: vi.fn() },
+    isRefreshing: false,
     refresh: vi.fn(),
     setToken: vi.fn(),
     clearAuth: vi.fn(),
     onTokenRefreshed: vi.fn(() => vi.fn()),
+    onRefreshStateChange: vi.fn(() => vi.fn()),
   },
 }));
 
@@ -28,6 +30,7 @@ describe("App", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     apiClient.onTokenRefreshed.mockImplementation(() => vi.fn());
+    apiClient.onRefreshStateChange.mockImplementation(() => vi.fn());
     // No persisted session: a dead session (401) fails the boot
     // refresh immediately for every test here — a transient
     // error would be retried with real backoff timers.

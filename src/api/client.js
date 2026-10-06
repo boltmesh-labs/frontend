@@ -33,6 +33,7 @@ export class ApiClient {
     this.isRefreshing = false;
     this.refreshPromise = null;
     this.listeners = new Set();
+    this.refreshListeners = new Set();
 
     this.authApi = axios.create({
       baseURL,
@@ -68,9 +69,34 @@ export class ApiClient {
     return () => this.listeners.delete(cb);
   }
 
+  // Refresh-state changes are broadcast separately from token changes: a
+  // loading indicator cares about the in-flight window, not the resulting
+  // token, so mixing the two into `listeners` would make every spinner react
+  // to every token write (and every legacy token listener react to spins).
+  onRefreshStateChange(cb) {
+    this.refreshListeners.add(cb);
+    return () => this.refreshListeners.delete(cb);
+  }
+
+  // Single writer for `isRefreshing` so listeners observe every real
+  // transition and none of the no-ops: clearAuth() and refresh()'s finally
+  // can both land on false for the same refresh, and an unchanged value must
+  // not re-notify (mirrors the setToken guard above).
+  _setRefreshing(value) {
+    if (this.isRefreshing === value) return;
+    this.isRefreshing = value;
+    this.refreshListeners.forEach((cb) => {
+      try {
+        cb(value);
+      } catch (err) {
+        console.error("Refresh state listener error:", err);
+      }
+    });
+  }
+
   clearAuth() {
     this.setToken(null);
-    this.isRefreshing = false;
+    this._setRefreshing(false);
   }
 
   // Single entry point for every refresh in the app (401 interceptor,
@@ -81,7 +107,7 @@ export class ApiClient {
   // reported a dead session (401) — a transient failure stays retryable.
   refresh() {
     if (!this.refreshPromise) {
-      this.isRefreshing = true;
+      this._setRefreshing(true);
       this.refreshPromise = this._postRefresh()
         .then((token) => {
           this.setToken(token);
@@ -94,7 +120,7 @@ export class ApiClient {
           throw error;
         })
         .finally(() => {
-          this.isRefreshing = false;
+          this._setRefreshing(false);
           this.refreshPromise = null;
         });
     }

@@ -7,6 +7,7 @@ import {
   Nav,
   Navbar,
   Row,
+  Spinner,
 } from "react-bootstrap";
 import { FaMoon, FaSignOutAlt, FaSun } from "react-icons/fa";
 import {
@@ -24,6 +25,7 @@ import {
 } from "react-router-dom";
 
 import { useAuth } from "@/features/auth/context/AuthContext";
+import { useIsRefreshing } from "@/hooks/useIsRefreshing";
 import { COMPANY_NAME } from "@/utils/config";
 import { USER_ROLES } from "@/constants/roles";
 
@@ -32,6 +34,7 @@ const isTheme = (value) => value === "light" || value === "dark";
 
 const MainLayout = () => {
   const { accessToken, logout, user } = useAuth();
+  const isRefreshing = useIsRefreshing();
   const navigate = useNavigate();
   const location = useLocation();
   const hasMountedRef = useRef(false);
@@ -105,6 +108,16 @@ const MainLayout = () => {
           <Navbar.Toggle aria-controls="navbar-nav" />
           <Navbar.Collapse id="navbar-nav">
             <Nav className="ms-auto align-items-lg-center gap-2">
+              {isRefreshing && (
+                <Spinner
+                  animation="border"
+                  size="sm"
+                  variant="light"
+                  role="status"
+                  aria-label="Refreshing session"
+                />
+              )}
+
               <Button
                 type="button"
                 variant="outline-secondary"
