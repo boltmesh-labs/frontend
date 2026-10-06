@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { apiClient } from "@/api/client";
+import { apiClient, isSessionDead } from "@/api/client";
 import { AuthContext } from "./AuthContext";
 
 // Decodes JWT claims for UX only (identity display, role-gated navigation).
@@ -30,6 +30,17 @@ const parseUser = (token) => {
     return null;
   }
 };
+
+// Boot refresh policy: only a 401 means the session is dead
+// (see isSessionDead). Transient failures are retried with a short
+// backoff while the route guards keep showing their loaders.
+const BOOT_RETRY_ATTEMPTS = 2;
+const BOOT_RETRY_DELAY_MS = 500;
+
+// The timeout id is intentionally not tracked for cleanup: StrictMode's
+// double-mount would clear the pending retry and leave the boot gate
+// closed forever in dev.
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export const AuthProvider = ({ children }) => {
   // `setAccessTokenState`, not `setAccessToken`: the latter is this provider's
@@ -84,22 +95,46 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   // Initial boot-up: perform silent refresh. The call goes through
-  // apiClient.refresh(), so boot shares any refresh already in flight (the
-  // interceptor after a 401, OAuthCallback) instead of racing it with a
-  // second rotation of the same cookie. The ref still runs boot exactly once
-  // per page load, keeping StrictMode's double-mounted effect from applying
-  // the result twice.
+  // apiClient.refresh(), so boot shares any refresh already in flight
+  // (the interceptor after a 401, OAuthCallback) instead of racing it
+  // with a second rotation of the same cookie. The ref still runs boot
+  // exactly once per page load, keeping StrictMode's double-mounted
+  // effect from applying the result twice.
+  //
+  // Failure policy mirrors apiClient's: only a 401 means the session
+  // is dead. A transient failure (network blip, 5xx, the refresh rate
+  // limit) says nothing about the session, so boot retries the shared
+  // refresh while the route guards keep showing their loaders —
+  // dropping to /login here would bounce the user while the refresh
+  // cookie is still valid, and any query that 401s afterwards would
+  // silently re-authenticate them on the login page.
+  //
+  // No cleanup/cancellation: StrictMode's double-mount reuses the same
+  // fiber, so discarding the result in a cleanup would leave the boot
+  // gate closed forever in dev.
   const bootstrappedRef = useRef(false);
 
   useEffect(() => {
     if (bootstrappedRef.current) return;
     bootstrappedRef.current = true;
 
-    apiClient
-      .refresh()
-      .then((token) => updateAuthState(token))
-      .catch(() => updateAuthState(null))
-      .finally(() => setLoading(false));
+    const boot = async () => {
+      for (let attempt = 0; ; attempt++) {
+        try {
+          const token = await apiClient.refresh();
+          updateAuthState(token);
+          return;
+        } catch (error) {
+          if (isSessionDead(error) || attempt >= BOOT_RETRY_ATTEMPTS) {
+            updateAuthState(null);
+            return;
+          }
+          await sleep(BOOT_RETRY_DELAY_MS);
+        }
+      }
+    };
+
+    boot().finally(() => setLoading(false));
   }, [updateAuthState]);
 
   const value = useMemo(

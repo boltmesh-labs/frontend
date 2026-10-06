@@ -25,7 +25,7 @@ const isRotationRace = (error) =>
 // check — says nothing about the session, so the in-memory token has to
 // survive it: dropping it bounces the user to the login screen while a
 // perfectly good refresh cookie is still sitting in the jar.
-const isSessionDead = (error) => error?.response?.status === 401;
+export const isSessionDead = (error) => error?.response?.status === 401;
 
 export class ApiClient {
   constructor(baseURL = API_BASE_URL) {

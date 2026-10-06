@@ -5,6 +5,8 @@ import { apiClient } from "@/api/client";
 import App from "./App";
 
 vi.mock("@/api/client", () => ({
+  // Real predicate so AuthProvider's boot policy runs as shipped.
+  isSessionDead: (error) => error?.response?.status === 401,
   apiClient: {
     api: { get: vi.fn(), post: vi.fn(), patch: vi.fn(), delete: vi.fn() },
     refresh: vi.fn(),
@@ -26,8 +28,10 @@ describe("App", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     apiClient.onTokenRefreshed.mockImplementation(() => vi.fn());
-    // No persisted session: the boot refresh fails for every test here.
-    apiClient.refresh.mockRejectedValue(new Error("no session"));
+    // No persisted session: a dead session (401) fails the boot
+    // refresh immediately for every test here — a transient
+    // error would be retried with real backoff timers.
+    apiClient.refresh.mockRejectedValue({ response: { status: 401 } });
   });
 
   it("boots the shell and lands guests on the login page from the index route", async () => {
