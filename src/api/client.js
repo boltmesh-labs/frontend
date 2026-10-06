@@ -49,6 +49,10 @@ export class ApiClient {
   }
 
   setToken(token) {
+    // Re-applying the same token (redundant boot refresh, repeated clearAuth)
+    // must not re-notify: listeners re-derive state from the token, so a no-op
+    // change would only trigger redundant work downstream.
+    if (this.accessToken === token) return;
     this.accessToken = token;
     this.listeners.forEach((cb) => {
       try {

@@ -46,18 +46,15 @@ export const AuthProvider = ({ children }) => {
     setUser(parseUser(token));
   }, []);
 
-  // Update both apiClient and local React state
-  const updateAuthState = useCallback(
-    (token) => {
-      if (token) {
-        apiClient.setToken(token); // Triggers listener -> applyTokenState
-      } else {
-        apiClient.clearAuth();
-      }
-      applyTokenState(token);
-    },
-    [applyTokenState],
-  );
+  // Sync apiClient only; the onTokenRefreshed listener above is the single
+  // path that applies token changes to React state.
+  const updateAuthState = useCallback((token) => {
+    if (token) {
+      apiClient.setToken(token);
+    } else {
+      apiClient.clearAuth();
+    }
+  }, []);
 
   // Subscribe to automatic token updates originating from ApiClient
   useEffect(() => {

@@ -5,13 +5,22 @@ import { apiClient } from "@/api/client";
 import { AuthProvider } from "./AuthProvider";
 import { useAuth } from "./AuthContext";
 
+// State syncs exclusively through the onTokenRefreshed listener, so the mock
+// routes setToken/clearAuth through the registered callback.
+const hoisted = vi.hoisted(() => ({ listener: null }));
+
 vi.mock("@/api/client", () => ({
   apiClient: {
     api: { post: vi.fn() },
     refresh: vi.fn(),
-    setToken: vi.fn(),
-    clearAuth: vi.fn(),
-    onTokenRefreshed: vi.fn(() => vi.fn()),
+    setToken: vi.fn((token) => hoisted.listener?.(token)),
+    clearAuth: vi.fn(() => hoisted.listener?.(null)),
+    onTokenRefreshed: vi.fn((cb) => {
+      hoisted.listener = cb;
+      return () => {
+        hoisted.listener = null;
+      };
+    }),
   },
 }));
 
@@ -40,8 +49,6 @@ const renderWithProvider = () => {
 describe("AuthProvider", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    // onTokenRefreshed must keep returning an unsubscribe fn after clearing.
-    apiClient.onTokenRefreshed.mockImplementation(() => vi.fn());
   });
 
   it("boots via silent refresh and parses the JWT identity", async () => {

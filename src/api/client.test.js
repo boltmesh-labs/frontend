@@ -197,6 +197,7 @@ describe("ApiClient interceptor and token refresh flow", () => {
       client,
       makeScenario({ raceRefreshes: Number.POSITIVE_INFINITY }),
     );
+    client.setToken("existing-token");
     const onRefreshed = vi.fn();
     client.onTokenRefreshed(onRefreshed);
 
@@ -227,6 +228,7 @@ describe("ApiClient interceptor and token refresh flow", () => {
 
   it("notifies listeners with null and rejects all queued requests when refresh fails", async () => {
     install(client, makeScenario({ refreshFail: true, retryCount: 2 }));
+    client.setToken("existing-token");
     const onRefreshed = vi.fn();
     client.onTokenRefreshed(onRefreshed);
 
