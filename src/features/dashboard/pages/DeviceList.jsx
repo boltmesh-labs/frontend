@@ -182,8 +182,6 @@ const DeviceList = () => {
                   {devices.map((device) => {
                     const isConnected = device.is_connected;
                     const lastSeen = device.last_seen_at;
-                    const txBytes = device.tx_bytes;
-                    const rxBytes = device.rx_bytes;
 
                     return (
                       <tr key={device.id}>
@@ -213,8 +211,8 @@ const DeviceList = () => {
                           </div>
                         </td>
                         <td className="text-muted small">
-                          {formatBytes(txBytes ?? 0)} /{" "}
-                          {formatBytes(rxBytes ?? 0)}
+                          {formatBytes(device.tx_bytes)} /{" "}
+                          {formatBytes(device.rx_bytes)}
                         </td>
                         <td className="text-end pe-4">
                           <Button
