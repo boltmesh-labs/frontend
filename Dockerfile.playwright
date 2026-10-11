@@ -17,7 +17,7 @@
 #
 # No port is published: the config's webServer runs Vite on 127.0.0.1:5173
 # inside this container and Playwright connects to it from the same process.
-FROM mcr.microsoft.com/playwright:v1.63.0-noble
+FROM mcr.microsoft.com/playwright:v1.64.0-noble
 
 WORKDIR /app
 
