@@ -7,11 +7,6 @@ const liveFrontendUrl = new URL(
 const apiHostname = liveApiUrl ? new URL(liveApiUrl).hostname : "";
 const frontendHostname = liveFrontendUrl.hostname;
 const localHosts = new Set(["localhost", "127.0.0.1", "::1"]);
-// Hosts that must never receive writes, whatever E2E_WRITE_ENVIRONMENT claims.
-// Empty because boltmesh.mooo.com / api.boltmesh.mooo.com are the *staging*
-// deployment. Add production hostnames here as they appear: the
-// E2E_WRITE_ENVIRONMENT value is a claim about the environment, and this set is
-// the independent check that the URLs actually point somewhere safe.
 const blockedWriteHosts = new Set(
   (process.env.E2E_BLOCKED_WRITE_HOSTS || "")
     .split(",")

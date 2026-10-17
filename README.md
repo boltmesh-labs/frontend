@@ -120,8 +120,8 @@ E2E_USERNAME=e2e-user \
 E2E_PASSWORD='E2ePassword123' \
 E2E_ADMIN_USERNAME=e2e-admin \
 E2E_ADMIN_PASSWORD='E2eAdminPassword123' \
-E2E_BASE_URL=https://boltmesh.mooo.com \
-E2E_API_URL=https://api.boltmesh.mooo.com/v1 \
+E2E_BASE_URL=https://example.com \
+E2E_API_URL=https://api.example.com/v1 \
 npm run test:e2e:live
 ```
 

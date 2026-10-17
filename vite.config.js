@@ -11,7 +11,7 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 5173,
-    allowedHosts: ["boltmesh.mooo.com", "localhost"],
+    allowedHosts: ["localhost"],
   },
   resolve: {
     alias: {
