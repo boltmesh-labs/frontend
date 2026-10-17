@@ -3,7 +3,7 @@ import { Alert, Button, Form } from "react-bootstrap";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "@/features/auth/context/AuthContext";
 
-import logo from "@/assets/logo2.png";
+import logo from "@/assets/logo192.png";
 import { AuthContainer } from "@/features/auth/components/AuthContainer";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { useRegister } from "@/features/auth/hooks/useAuthMutations";

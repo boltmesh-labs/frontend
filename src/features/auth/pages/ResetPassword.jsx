@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Alert, Button, Form } from "react-bootstrap";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 
-import logo from "@/assets/logo2.png";
+import logo from "@/assets/logo192.png";
 import { AuthContainer } from "@/features/auth/components/AuthContainer";
 import { useResetPassword } from "@/features/auth/hooks/useAuthMutations";
 import { useForm } from "@/hooks/useForm";

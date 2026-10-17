@@ -1,7 +1,7 @@
 import { Alert, Button, Form } from "react-bootstrap";
 import { Link } from "react-router-dom";
 
-import logo from "@/assets/logo2.png";
+import logo from "@/assets/logo192.png";
 import { AuthContainer } from "@/features/auth/components/AuthContainer";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { useForgotPassword } from "@/features/auth/hooks/useAuthMutations";
