@@ -43,7 +43,7 @@ The deployable output is `dist/`.
 
 ## Container image
 
-`Dockerfile` has three stages. `prod` is the default and is what any public deployment should run: it compiles the bundle and serves it from nginx using `deploy/nginx.conf`, which already sets the SPA fallback, the cache policy and the security headers below.
+`Containerfile` has three stages. `prod` is the default and is what any public deployment should run: it compiles the bundle and serves it from nginx using `deploy/nginx.conf`, which already sets the SPA fallback, the cache policy and the security headers below.
 
 ```bash
 podman build --target prod \

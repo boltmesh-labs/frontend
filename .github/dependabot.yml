@@ -34,30 +34,30 @@ updates:
           - "minor"
           - "patch"
 
-  # The Dockerfile pins its base images by tag; `docker` is the ecosystem that
+  # The Containerfile pins its base images by tag; `docker` is the ecosystem that
   # tracks those, and it is the only thing that will move them.
   #
   # `node` is ignored on the odd-numbered release lines because Dependabot has no
   # notion of Node's LTS schedule and steps majors one at a time, so it always
   # lands on the newest line rather than the best one. Node alternates LTS
   # (even) and Current (odd); the Current lines have no LTS backing and would
-  # mean re-pinning again at the next rollover. The Dockerfile tracks 24
+  # mean re-pinning again at the next rollover. The Containerfile tracks 24
   # ("Krypton"). Docker's `versions` uses Bundler syntax, hence `~>`.
   #
   # MAINTENANCE: drop a line here once that release gains LTS backing, or when
-  # the Dockerfile moves off 24 to a newer LTS line. 26 is expected to become LTS
-  # in October 2026; at that point drop `~> 26` and bump the Dockerfile to 26.
+  # the Containerfile moves off 24 to a newer LTS line. 26 is expected to become LTS
+  # in October 2026; at that point drop `~> 26` and bump the Containerfile to 26.
   #
   # `nginx` is ignored on the mainline line for the same reason, and with the
   # same even/odd split: nginx alternates stable (even) and mainline (odd), and
-  # the Dockerfile tracks stable. Left on a mainline line it is not merely
+  # the Containerfile tracks stable. Left on a mainline line it is not merely
   # "outdated" — upstream stops publishing patches for it, so the tag keeps
-  # pulling while frozen with no security updates. The Dockerfile tracks 1.30;
+  # pulling while frozen with no security updates. The Containerfile tracks 1.30;
   # 1.31 is mainline. 1.29 was mainline and is the line this repo just left, so
   # it is deliberately not ignored here: Dependabot only proposes upgrades, and
   # a stale ignore for an abandoned line could never fire anyway.
   #
-  # MAINTENANCE: add `~> 33` when nginx 33 ships, and move the Dockerfile to
+  # MAINTENANCE: add `~> 33` when nginx 33 ships, and move the Containerfile to
   # the next stable line (32) when 30 is retired upstream. Note that stable
   # always trails mainline by one, so mainline 1.33 means stable 1.32 exists.
   - package-ecosystem: "docker"

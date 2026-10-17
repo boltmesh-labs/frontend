@@ -168,7 +168,7 @@ jobs:
   #     - name: Build and Push Frontend Image
   #       uses: docker/build-push-action@v7
   #       with:
-  #         file: Dockerfile
+  #         file: Containerfile
   #         push: ${{ github.event_name == 'push' }}
   #         build-args: |
   #           VITE_API_URL=${{ vars.VITE_API_URL }}
