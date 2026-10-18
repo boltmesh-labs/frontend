@@ -42,8 +42,9 @@ Enhancement suggestions are tracked as GitHub issues. When creating an enhanceme
 
 ## Local Hooks
 
-Install the git hook once after cloning. It runs the checks CI does not, so a
-violation is caught before you push:
+Install the git hook once after cloning. CI keeps only lint/format and the
+security scan, so the hooks and the manual gate below are what catch a violation
+before you push:
 
 ```bash
 npm ci                         # the eslint/prettier hooks use the local install
@@ -57,6 +58,31 @@ that install. To run everything else, skip them by id:
 ```bash
 SKIP=eslint,prettier pre-commit run --all-files
 ```
+
+## Full validation gate
+
+The tests and end-to-end tiers that used to run in CI are now manual. Run them
+before pushing:
+
+```bash
+npm ci
+npm run lint
+npm run format:check
+npm test                       # Vitest
+npm run test:coverage          # optional: the 80% line/branch thresholds
+npm run test:e2e:mocked        # needs `npx playwright install --with-deps chromium`
+npm run test:e2e:production    # production-bundle smoke test
+npm run test:e2e:cross-browser # needs chromium, firefox and webkit
+```
+
+The production-bundle assertions are manual too: build with `VITE_API_URL`,
+`VITE_APP_COMPANY_NAME` and `VITE_APP_SUPPORT_EMAIL` set, then `grep` `dist/` for
+each value and assert that no `%VITE_*%` placeholder survived.
+
+Every tier also runs in the pinned Playwright container (see
+[Running Tests in Containers](#running-tests-in-containers)), which is the
+closest local reproduction of a browser-dependent failure. Nothing on GitHub
+re-runs these suites.
 
 ## Style Guides
 
@@ -97,7 +123,7 @@ npm test
 
 ### Running Tests in Containers
 
-Every tier also runs against the browser builds CI uses, via `compose.yaml`:
+Every tier also runs against a pinned browser build, via `compose.yaml`:
 
 ```bash
 podman compose build

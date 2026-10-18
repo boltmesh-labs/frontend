@@ -1,7 +1,7 @@
 # compose.yaml
 # Every test tier in package.json, as a container. All of them run the suite
-# from the same image CI uses, so a failure here is a real failure rather than
-# a local-environment artefact.
+# from one pinned image, so a failure here is a real failure rather than a
+# local-environment artefact.
 #
 #   podman compose build
 #   podman compose run --rm e2e-mocked    # one tier; reports into ./artifacts

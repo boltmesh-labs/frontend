@@ -1,5 +1,10 @@
 name: "Frontend CI/CD"
 
+# Security and the locked lint/format gate only. The heavy checks (Vitest, the
+# mocked and production Playwright suites, and the production-bundle assertions)
+# are a manual local gate documented in CONTRIBUTING.md: downloading Playwright
+# browsers cost gigabytes per run and the failure artifacts shared the account's
+# Actions storage allowance with everything else. Nothing here re-runs them.
 on:
   push:
     branches:
@@ -17,11 +22,10 @@ permissions:
   security-events: write
 
 jobs:
-  # The hooks in `.pre-commit-config.yaml` are the repo's documented local gate
-  # and are mostly not re-checked in CI. `validate` runs ESLint and Prettier
-  # through the locked `npm run` scripts, and `security` runs `gitleaks`;
-  # everything else in that file is covered by running the hooks locally, as
-  # documented in CONTRIBUTING.md.
+  # The hooks in `.pre-commit-config.yaml` are the repo's documented local gate.
+  # `validate` still re-checks ESLint and Prettier through the locked `npm run`
+  # scripts, because they are cheap and catch a bypassed hook; the tests and
+  # end-to-end suites below are manual. `security` runs `gitleaks` and Trivy.
   validate:
     runs-on: ubuntu-latest
     steps:
@@ -55,41 +59,6 @@ jobs:
 
       - name: Format Check
         run: npm run format:check
-
-      - name: Run Tests
-        run: npm run test
-
-      - name: Install Playwright browser
-        run: npx playwright install --with-deps chromium
-
-      - name: Run mocked End-to-End Tests
-        run: npm run test:e2e:mocked
-
-      - name: Run production bundle smoke test
-        run: npm run test:e2e:production
-
-      - name: Upload Playwright failure artifacts
-        if: ${{ failure() }}
-        uses: actions/upload-artifact@v7
-        with:
-          name: playwright-artifacts
-          path: |
-            playwright-report/
-            test-results/
-          if-no-files-found: ignore
-          retention-days: 7
-
-      - name: Build and verify production environment
-        env:
-          VITE_API_URL: https://api.ci.example/v1
-          VITE_APP_COMPANY_NAME: CI BoltMesh
-          VITE_APP_SUPPORT_EMAIL: ci-support@example.com
-        run: |
-          npm run build
-          grep -RqsF "$VITE_API_URL" dist
-          grep -RqsF "$VITE_APP_COMPANY_NAME" dist
-          grep -RqsF "$VITE_APP_SUPPORT_EMAIL" dist
-          ! grep -RqsF '%VITE_APP_COMPANY_NAME%' dist
 
   security:
     name: "Security Scan"

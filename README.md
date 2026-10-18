@@ -104,13 +104,13 @@ npm run test:e2e:cross-browser
 npm run test:e2e:ui
 ```
 
-The mocked suite uses the Vite development server. The live command automatically loads `.env.e2e` when it exists. With `E2E_BASE_URL` set, Playwright tests the already-running frontend at that URL and does not start Vite. The deployed frontend must already target the production API; `E2E_API_URL` records that expected API for the test configuration but does not rebuild or reconfigure the deployed bundle. In this mode, `VITE_API_URL` is not needed. The production smoke command builds the app and serves it through `vite preview`. Cross-browser coverage runs on a schedule and requires Chromium, Firefox, and WebKit:
+The mocked suite uses the Vite development server. The live command automatically loads `.env.e2e` when it exists. With `E2E_BASE_URL` set, Playwright tests the already-running frontend at that URL and does not start Vite. The deployed frontend must already target the production API; `E2E_API_URL` records that expected API for the test configuration but does not rebuild or reconfigure the deployed bundle. In this mode, `VITE_API_URL` is not needed. The production smoke command builds the app and serves it through `vite preview`. Cross-browser coverage is manual and requires Chromium, Firefox, and WebKit:
 
 ```bash
 npx playwright install --with-deps chromium firefox webkit
 ```
 
-The main CI job runs mocked tests with two workers against an explicit API URL. The live suite is opt-in and runs separately with one worker when a seeded backend is available.
+The mocked suite is run manually, with two workers against an explicit API URL. The live suite is opt-in and runs separately with one worker when a seeded backend is available. Nothing here runs in GitHub Actions.
 
 An opt-in real-backend test is available when a seeded test account and API are available:
 
@@ -141,7 +141,7 @@ budget, so the suite reserves that budget instead of throttling its own cleanup 
 ### Running the suites in containers
 
 The same tiers run in containers via `Dockerfile.playwright` and `compose.yaml`, so a failure reproduces
-against the same browser builds CI uses instead of whatever is installed locally. `Dockerfile.playwright`
+against the pinned browser builds instead of whatever is installed locally. `Dockerfile.playwright`
 pins its Playwright image tag to the `@playwright/test` version in `package.json`; bump both together, or
 the container fails looking for browser builds the runner expects but the image does not have.
 

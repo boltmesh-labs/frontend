@@ -11,9 +11,10 @@
 # them. A major PR is the signal to bump those ranges by hand.
 #
 # Every Dependabot PR opens against `main` and therefore runs the `validate`
-# job in `.github/workflows/default.yml`. Note that this repo has no
-# `dependency-review` job, so these PRs do not depend on the dependency
-# graph being enabled.
+# (lint/format) and `security` jobs in `.github/workflows/default.yml`. Note
+# that this repo has no `dependency-review` job, so these PRs do not depend on
+# the dependency graph being enabled. The test and Playwright suites are manual,
+# so a dependency bump still needs a local `npm test` / `npm run test:e2e:mocked`.
 version: 2
 updates:
   - package-ecosystem: "npm"
