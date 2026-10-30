@@ -52,6 +52,9 @@ RUN npm run build
 # frozen with no security updates. Stable is 1.30; 1.31 is mainline.
 FROM docker.io/library/nginx:1.30-alpine AS prod
 COPY deploy/nginx.conf /etc/nginx/conf.d/default.conf
+# Included from every response block in nginx.conf; the headers live in one file
+# so a change cannot reach only some of them.
+COPY deploy/security-headers.conf /etc/nginx/security-headers.conf
 COPY --from=build /app/dist /usr/share/nginx/html
 EXPOSE 80
 
