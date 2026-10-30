@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { apiClient } from "@/api/client";
+import { COMPANY_NAME } from "@/utils/config";
 import App from "./App";
 
 vi.mock("@/api/client", () => ({
@@ -42,7 +43,7 @@ describe("App", () => {
     expect(heading).toBeInTheDocument();
     // The public layout chrome (navbar brand + footer) wraps every route.
     expect(
-      screen.getByRole("link", { name: "BoltMesh VPN" }),
+      screen.getByRole("link", { name: COMPANY_NAME }),
     ).toBeInTheDocument();
     expect(screen.getByRole("contentinfo")).toBeInTheDocument();
   });

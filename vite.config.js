@@ -60,6 +60,12 @@ export default defineConfig({
     globals: false,
     setupFiles: ["./src/test/setup.js"],
     include: ["src/**/*.test.{js,jsx}"],
+    // The 5s default assumes an idle machine. These tests drive real jsdom
+    // forms, so a typing-heavy one takes ~1s alone and several times that
+    // once every worker is busy — enough to blow the default and fail a test
+    // that is not actually stuck. Headroom, not a budget: a hung test still
+    // fails, just later.
+    testTimeout: 15000,
     coverage: {
       provider: "v8",
       reporter: ["text", "html", "lcov"],
