@@ -5,7 +5,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { AuthContext } from "@/features/auth/context/AuthContext";
 import { useIsRefreshing } from "@/hooks/useIsRefreshing";
-import { COMPANY_NAME } from "@/utils/config";
 import MainLayout from "./MainLayout";
 
 vi.mock("@/hooks/useIsRefreshing", () => ({
@@ -59,8 +58,10 @@ describe("MainLayout", () => {
   it("shows the login CTA for guests and applies the default theme", async () => {
     await renderLayout();
 
+    // `.env.test` pins the brand name, so this literal is stable across
+    // machines even when a developer's `.env` sets something else.
     expect(
-      screen.getByRole("link", { name: COMPANY_NAME }),
+      screen.getByRole("link", { name: "BoltMesh VPN" }),
     ).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: "Skip to content" }),

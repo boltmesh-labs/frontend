@@ -2,7 +2,6 @@ import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { apiClient } from "@/api/client";
-import { COMPANY_NAME } from "@/utils/config";
 import App from "./App";
 
 vi.mock("@/api/client", () => ({
@@ -42,8 +41,9 @@ describe("App", () => {
     const heading = await renderAppAt("/", "Sign In");
     expect(heading).toBeInTheDocument();
     // The public layout chrome (navbar brand + footer) wraps every route.
+    // The literal is safe because `.env.test` pins VITE_APP_COMPANY_NAME.
     expect(
-      screen.getByRole("link", { name: COMPANY_NAME }),
+      screen.getByRole("link", { name: "BoltMesh VPN" }),
     ).toBeInTheDocument();
     expect(screen.getByRole("contentinfo")).toBeInTheDocument();
   });
