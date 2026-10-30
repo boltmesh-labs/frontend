@@ -12,6 +12,7 @@ import {
   useResendActivation,
 } from "@/features/dashboard/hooks/useDashboard";
 import { DashboardContainer } from "@/features/dashboard/components/DashboardContainer";
+import { ClientDownload } from "@/features/dashboard/components/ClientDownload";
 import { COMPANY_NAME } from "@/utils/config";
 
 const ActivationWarning = ({ onResend, isLoading }) => (
@@ -372,16 +373,7 @@ const Dashboard = () => {
           </div>
 
           <div className="border-top my-4"></div>
-          <div className="small text-end">
-            <a
-              href="https://github.com/boltmesh-labs/client"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-primary text-decoration-none fw-medium"
-            >
-              Download BoltMesh Client
-            </a>
-          </div>
+          <ClientDownload />
         </>
       )}
     </DashboardContainer>

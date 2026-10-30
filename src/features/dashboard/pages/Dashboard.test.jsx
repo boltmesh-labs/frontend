@@ -14,6 +14,12 @@ vi.mock("@/features/dashboard/hooks/useDashboard", () => ({
   useResendActivation: vi.fn(),
 }));
 
+// The download control owns its own query; the page test covers the profile
+// flow, so stub it rather than threading a QueryClient through every render.
+vi.mock("@/features/dashboard/components/ClientDownload", () => ({
+  ClientDownload: () => null,
+}));
+
 const renderPage = () =>
   render(
     <MemoryRouter>
