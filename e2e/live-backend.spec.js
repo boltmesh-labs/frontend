@@ -438,9 +438,9 @@ test("real user detail pages load records returned by the backend", async ({
         apiPath,
         heading: pageUnderTest.heading,
       });
-      await expect(
-        page.getByText(record.id, { exact: true }).first(),
-      ).toBeVisible();
+      // User detail pages render the record id as ``UUID: <id>``, while the
+      // admin headers render it standalone; a substring match covers both.
+      await expect(page.getByText(record.id).first()).toBeVisible();
       await expect(page.locator(".alert-danger")).toHaveCount(0);
     });
   }

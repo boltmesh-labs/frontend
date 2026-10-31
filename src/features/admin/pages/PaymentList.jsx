@@ -103,7 +103,7 @@ const PaymentRow = React.memo(({ pay, onCopyTxId }) => {
       </td>
       <td>
         <PaymentStatusBadge status={pay.status} />
-        Confirmations: {pay.confirmations ?? 0}
+        {pay.confirmations != null && <>Confirmations: {pay.confirmations}</>}
       </td>
       <td className="text-muted">{formatDate(pay.created_at)}</td>
     </tr>
