@@ -16,7 +16,6 @@ const payment = {
   status: "succeeded",
   amount: 0.001,
   fee: 0.00001,
-  confirmations: 3,
   external_tx_id: "tx-hash-123",
   invoice_id: "inv1",
   created_at: "2026-01-01T00:00:00Z",
@@ -43,7 +42,7 @@ describe("PaymentDetail (admin)", () => {
     vi.clearAllMocks();
   });
 
-  it("renders settlement summary with confirmations, fee and linked cards", () => {
+  it("renders settlement summary with network fee and linked cards", () => {
     vi.mocked(usePaymentDetail).mockReturnValue({
       data: payment,
       isLoading: false,
@@ -62,8 +61,7 @@ describe("PaymentDetail (admin)", () => {
 
     expect(screen.getByText("Payment")).toBeInTheDocument();
     expect(screen.getByText("Settlement Status")).toBeInTheDocument();
-    expect(screen.getByText("3 confirmations")).toBeInTheDocument();
-    expect(screen.getAllByText(/processing fee/i).length).toBeGreaterThan(0);
+    expect(screen.getByText(/network fee/i)).toBeInTheDocument();
     expect(screen.getByText("tx-hash-123")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "inv1" })).toHaveAttribute(
       "href",
@@ -77,7 +75,7 @@ describe("PaymentDetail (admin)", () => {
       data: {
         ...payment,
         external_tx_id: null,
-        confirmations: null,
+        fee: 0,
         invoice: {
           payment_method: "monero",
           currency: "USD",
@@ -99,7 +97,7 @@ describe("PaymentDetail (admin)", () => {
     renderPage();
 
     expect(screen.queryByText("tx-hash-123")).not.toBeInTheDocument();
-    expect(screen.queryByText(/confirmations/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/network fee/i)).not.toBeInTheDocument();
     // AccountOwnerCard still renders via the fallback user context.
     expect(screen.getByText("User Profile")).toBeInTheDocument();
   });

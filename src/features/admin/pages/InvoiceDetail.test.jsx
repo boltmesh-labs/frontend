@@ -53,7 +53,6 @@ const invoice = {
       status: "failed",
       external_tx_id: null,
       amount: 10,
-      confirmations: 2,
       fee: 0.1,
       created_at: "2026-01-02T00:00:00Z",
     },
@@ -107,7 +106,6 @@ describe("InvoiceDetail (admin)", () => {
       "href",
       "/admin/subscriptions/s1",
     );
-    expect(screen.getByText("2 confirmations")).toBeInTheDocument();
 
     // Pending invoices expose the cancel action behind confirmation.
     await user.click(screen.getByRole("button", { name: "Cancel Invoice" }));

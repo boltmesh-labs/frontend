@@ -147,21 +147,12 @@ const InvoiceDetail = () => {
           <div className="d-flex flex-column gap-1 align-items-start">
             <PaymentStatusBadge status={payment.status} />
 
-            {typeof payment.confirmations === "number" && (
-              <span
-                className="text-muted font-monospace"
-                style={{ fontSize: "0.75rem" }}
-              >
-                {payment.confirmations} confirmations
-              </span>
-            )}
-
             {payment.fee > 0 && (
               <span
                 className="text-muted font-monospace"
                 style={{ fontSize: "0.75rem" }}
               >
-                Fee: {formatCurrencyAmount(payment.fee, currency)}
+                Network fee: {formatCurrencyAmount(payment.fee, currency)}
               </span>
             )}
           </div>
@@ -186,13 +177,10 @@ const InvoiceDetail = () => {
             value: <PaymentStatusBadge status={payment.status} />,
           },
           { label: "Date", value: formatDate(payment.created_at) },
-          ...(typeof payment.confirmations === "number"
-            ? [{ label: "Confirmations", value: payment.confirmations }]
-            : []),
           ...(payment.fee > 0
             ? [
                 {
-                  label: "Fee",
+                  label: "Network fee",
                   value: formatCurrencyAmount(payment.fee, currency),
                 },
               ]

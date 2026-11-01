@@ -39,7 +39,6 @@ const PaymentDetail = () => {
     navigate(-1);
   }, [navigate]);
 
-  const rawConfirmations = payment?.confirmations;
   const currency = payment?.invoice?.currency || "USD";
 
   const userContext = ownerUser || {
@@ -66,16 +65,12 @@ const PaymentDetail = () => {
         label: "Gross Amount",
         value: formatCurrencyAmount(payment.amount ?? 0, currency),
       },
-      {
-        label: "Processing Fee",
-        value: formatCurrencyAmount(payment.fee ?? 0, currency),
-      },
     ];
 
-    if (rawConfirmations != null) {
+    if (payment.fee > 0) {
       items.push({
-        label: "Network Confirmations",
-        value: `${rawConfirmations} ${rawConfirmations === 1 ? "confirmation" : "confirmations"}`,
+        label: "Network fee",
+        value: formatCurrencyAmount(payment.fee, currency),
       });
     }
 
@@ -86,7 +81,7 @@ const PaymentDetail = () => {
     });
 
     return items;
-  }, [payment, currency, rawConfirmations]);
+  }, [payment, currency]);
 
   return (
     <DetailShell

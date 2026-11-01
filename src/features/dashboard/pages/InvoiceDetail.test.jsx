@@ -48,7 +48,6 @@ const invoice = {
       status: "processing",
       external_tx_id: "tx-1",
       amount: 10,
-      confirmations: 1,
       fee: 0,
       created_at: "2026-01-02T00:00:00Z",
     },

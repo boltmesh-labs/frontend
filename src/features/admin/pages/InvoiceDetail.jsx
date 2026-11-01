@@ -52,21 +52,12 @@ const PaymentRow = React.memo(({ payment, invoiceCurrency }) => {
       <td>
         <div className="d-flex flex-column gap-1 align-items-start">
           <PaymentStatusBadge status={payment.status} />
-          {typeof payment.confirmations === "number" && (
-            <span
-              className="text-muted font-monospace"
-              style={{ fontSize: "0.75rem" }}
-            >
-              {payment.confirmations}{" "}
-              {payment.confirmations === 1 ? "confirmation" : "confirmations"}
-            </span>
-          )}
           {payment.fee > 0 && (
             <span
               className="text-muted font-monospace"
               style={{ fontSize: "0.75rem" }}
             >
-              Fee: {formatCurrencyAmount(payment.fee, currency)}
+              Network fee: {formatCurrencyAmount(payment.fee, currency)}
             </span>
           )}
         </div>
